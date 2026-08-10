@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(python:*)",
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(dir:*)",
+      "Bash(python3:*)",
+      "Skill(document-skills:pptx)",
+      "WebSearch",
+      "Bash(find:*)",
+      "Bash(py:*)",
+      "Bash(for p in \".venv\\\\Scripts\\\\python.exe\" \"venv\\\\Scripts\\\\python.exe\" \"env\\\\Scripts\\\\python.exe\")",
+      "Bash(do [ -f \"$p\" ])",
+      "Bash(echo:*)",
+      "Bash(\"$p\" -c \"import langchain; print\\(''$p langchain'', langchain.__version__\\)\")",
+      "Bash(done)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build)",
+      "Bash(npx --no-install tsc --noEmit -p tsconfig.json)",
+      "Bash(npx --no-install tsc --noEmit)",
+      "Bash(npx vite build:*)",
+      "Bash(wc:*)",
+      "Bash(del \"C:\\\\Users\\\\HP\\\\PycharmProjects\\\\Industrial_Time_Series_Agent\\\\agent_app\\\\agents\\\\analysis_chart_extractors.py\")",
+      "Bash(node -e:*)",
+      "Bash(npm run lint)"
+    ]
+  }
+}

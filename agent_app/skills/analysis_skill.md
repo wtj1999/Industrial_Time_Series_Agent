@@ -1,0 +1,46 @@
+# Analysis Skill
+
+> 工业时序数据的**描述性与诊断性分析**:趋势 / 分布 / 关系 / 稳定性 / 变点 / SPC / 组间差异。**不预测未来、不做 ML 异常检测**。
+
+`task_type=analysis`
+
+## 何时命中
+
+用户问数据**质量 / 分布 / 趋势 / 关系 / 周期 / 平稳性 / 变点 / 稳定性 / SPC / 组间差异 / 统计极值(3σ、IQR、Z-score)**,且不需要训练检测器或预测未来。
+
+## 何时不命中
+
+| 用户意图 | 路由到 |
+|---|---|
+| 用 IForest / LOF / PyOD 检测;训练并保存模型 | `anomaly_detection` |
+| 找异常时段 / 时序异常区间 | `anomaly_detection` |
+| 预测未来 / 后面会怎样 | `prediction` |
+| 解释某次异常(已有检测语境) | `anomaly_detection` |
+| 持续监控、阈值告警 | `monitoring`(缺则 `anomaly_detection`) |
+
+**模糊判据**:开放探索("看看数据有什么问题")→ `analysis`;明确提"算法名 / 训练保存 / 算 ROC"→ `anomaly_detection`。
+
+## 可用工具(28 个,按问题类型,单次选 2-4 个)
+
+| 类型 | 工具 |
+|---|---|
+| 数据质量 | `analyze_missing_values` / `analyze_duplicates` / `analyze_constant_or_low_variance_columns` |
+| 描述统计 | `analyze_basic_statistics` / `analyze_distribution_shape` / `analyze_histogram` |
+| 趋势 | `analyze_linear_trend` / `analyze_mann_kendall_trend` / `analyze_rolling_trend` |
+| 关系 | `analyze_correlation_matrix` / `analyze_cross_correlation` / `analyze_mutual_information` |
+| 时序分解 | `analyze_autocorrelation` / `analyze_seasonality` / `decompose_time_series` / `analyze_stationarity` |
+| 变点 | `detect_mean_change_points` / `detect_variance_change` / `detect_cusum_change` |
+| 统计极值 | `detect_univariate_outliers` / `detect_multivariate_outliers` / `analyze_extreme_values` |
+| 稳定性 / SPC | `analyze_stability` / `analyze_process_capability`(需 USL/LSL) / `analyze_control_chart` |
+| 分组对比 | `compare_group_statistics` / `compare_group_distributions` / `compare_two_groups`(需 group_column) |
+
+## 输入 / 输出
+
+- **输入**:`target_columns` + `feature_columns`;`time_column` / `group_column` / `usl` / `lsl` 等由 LLM 从 schema 推断或用户给出
+- **输出**:自然语言报告 + 结构化指标 + 图表(直方图、趋势线、控制图、热力图等)
+
+## 限制
+
+- **不做**:预测(→ prediction)、ML 异常检测(→ anomaly_detection)、参数优化
+- USL / LSL、采样频率等无法从数据推断的参数必须由用户提供,否则对应工具跳过
+- 工具未返回的指标一律不得编造

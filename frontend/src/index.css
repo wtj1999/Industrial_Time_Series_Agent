@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -20%, rgba(51, 102, 255, 0.08), transparent),
+      linear-gradient(180deg, #f6f7f9 0%, #ffffff 100%);
+    background-attachment: fixed;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 117, 145, 0.28);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 117, 145, 0.5);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /* Glass surface used for cards and the composer */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-steel-200/70;
+  }
+
+  .surface {
+    @apply bg-white border border-steel-200/80 shadow-card rounded-xl;
+  }
+
+  /* Markdown body styling for assistant messages */
+  .md-body {
+    @apply text-sm leading-7 text-steel-800;
+  }
+  .md-body > :first-child {
+    margin-top: 0;
+  }
+  .md-body > :last-child {
+    margin-bottom: 0;
+  }
+  .md-body h1,
+  .md-body h2,
+  .md-body h3 {
+    @apply font-semibold text-steel-900 mt-5 mb-2;
+  }
+  .md-body h1 {
+    @apply text-base;
+  }
+  .md-body h2 {
+    @apply text-[0.95rem];
+  }
+  .md-body h3 {
+    @apply text-sm;
+  }
+  .md-body p {
+    @apply my-2;
+  }
+  .md-body ul {
+    @apply list-disc pl-5 my-2 space-y-1;
+  }
+  .md-body ol {
+    @apply list-decimal pl-5 my-2 space-y-1;
+  }
+  .md-body li {
+    @apply leading-6;
+  }
+  .md-body a {
+    @apply text-brand-600 underline underline-offset-2 hover:text-brand-700;
+  }
+  .md-body strong {
+    @apply font-semibold text-steel-900;
+  }
+  .md-body blockquote {
+    @apply border-l-2 border-brand-300 bg-brand-50/50 pl-3 py-1 my-3 text-steel-600 rounded-r;
+  }
+  .md-body code {
+    @apply font-mono text-[0.85em] px-1.5 py-0.5 rounded bg-steel-100 text-brand-700;
+  }
+  .md-body pre {
+    @apply bg-steel-900 text-steel-100 rounded-lg p-3 my-3 overflow-x-auto text-[0.8rem] leading-6;
+  }
+  .md-body pre code {
+    @apply bg-transparent text-inherit p-0;
+  }
+  .md-body table {
+    @apply w-full text-xs border-collapse my-3;
+  }
+  .md-body th,
+  .md-body td {
+    @apply border border-steel-200 px-2 py-1.5 text-left;
+  }
+  .md-body th {
+    @apply bg-steel-50 font-semibold text-steel-700;
+  }
+  .md-body tr:nth-child(even) td {
+    @apply bg-steel-50/40;
+  }
+  .md-body hr {
+    @apply border-steel-200 my-4;
+  }
+}
+
+/* highlight.js minimal token colors (matches our dark pre blocks) */
+.hljs {
+  color: #d5dae3;
+  background: transparent;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in {
+  color: #8eb6ff;
+}
+.hljs-string,
+.hljs-attr {
+  color: #b8e0a8;
+}
+.hljs-number,
+.hljs-literal {
+  color: #f0a35e;
+}
+.hljs-comment {
+  color: #647591;
+  font-style: italic;
+}
+.hljs-title,
+.hljs-section,
+.hljs-name {
+  color: #d9e6ff;
+}

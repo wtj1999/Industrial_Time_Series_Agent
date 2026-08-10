@@ -1,0 +1,32 @@
+{
+  "users": {
+    "wtj1999": {
+      "username": "wtj1999",
+      "password_salt": "606fda38578fc8b37c7f2284c9d623f5",
+      "password_hash": "0f76385645d5b643bc7d6c253b64fd7b2a34b5a9618574969e0cceb8038712b1",
+      "user_id": "user_16f7972310df2d490978ac61805fed23",
+      "created_at": "2026-08-03T12:34:35.388380+00:00"
+    },
+    "test": {
+      "username": "test",
+      "password_salt": "f0b5fd1b15dffefddece2c6aed806a0c",
+      "password_hash": "3300c4299cd1b5b29cd006b5382bbc34e0393b1d5658fbc69615f066379cd354",
+      "user_id": "user_f1ec255bad7e6c24d1084756fc90acc9",
+      "created_at": "2026-08-04T02:02:27.633768+00:00"
+    },
+    "liuqi": {
+      "username": "LIUQI",
+      "password_salt": "3fcf66bcb33015b46bcdb20b0f93af01",
+      "password_hash": "8a4e915aaaf07e427b6d0e5f6e03e4703a33a25fef1fd04903b34049d6446678",
+      "user_id": "user_77a454093c1542c4929613cb49ef8389",
+      "created_at": "2026-08-04T02:03:08.214478+00:00"
+    },
+    "yj2024070202": {
+      "username": "YJ2024070202",
+      "password_salt": "023e3846a83cb677c6550a09bed5b025",
+      "password_hash": "c03b5cf036145096bfca806b3b26f5f438f002f145eb7834d2cf860df025e0f0",
+      "user_id": "user_c31fd1c34b6a56fb1e84e5d900f28c06",
+      "created_at": "2026-08-04T08:29:23.841138+00:00"
+    }
+  }
+}
