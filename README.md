@@ -84,49 +84,21 @@
 系统采用经典的 **五层架构**，每一层职责清晰、可独立演进：
 
 ```mermaid
-flowchart TB
+flowchart LR
     classDef inp  fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.5px
     classDef und  fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:1.5px
     classDef orc  fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:1.5px
     classDef task fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:1.5px
     classDef mem  fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:1.5px
 
-    subgraph L1["📥 输入层"]
-        direction LR
-        UQ[用户查询]:::inp
-        CSV[CSV / Parquet]:::inp
-        HIST[历史上下文]:::inp
-    end
-
-    subgraph L2["🧠 理解层"]
-        direction LR
-        PA[Profile · 数据画像]:::und
-        IR[Intent Router · 意图识别]:::und
-        PS[Parser · 参数抽取]:::und
-    end
-
-    subgraph L3["🔄 编排层"]
-        direction LR
-        OG[LangGraph · 状态图编排]:::orc
-        HITL[Human-in-the-Loop · 中断]:::orc
-    end
-
-    subgraph L4["⚙️ 任务层"]
-        direction LR
-        PRE[Prediction · 预测]:::task
-        ANO[Anomaly · 异常检测]:::task
-        ANA[Analysis · 统计分析]:::task
-        RPT[Report · 报告生成]:::task
-    end
-
-    subgraph L5["💾 记忆层"]
-        direction LR
-        SS[SessionState]:::mem
-        PROF[CSV 画像缓存]:::mem
-        PMEM[参数记忆]:::mem
-    end
+    L1["📥 输入层<br/>查询 · CSV · 历史"]:::inp
+    L2["🧠 理解层<br/>画像 · 路由 · 解析"]:::und
+    L3["🔄 编排层<br/>状态图 · 中断"]:::orc
+    L4["⚙️ 任务层<br/>预测 · 异常 · 分析"]:::task
 
     L1 ==> L2 ==> L3 ==> L4
+
+    L5["💾 记忆层 · 状态 · 画像 · 参数"]:::mem
     L4 -. 读写 .-> L5
     L5 -. 复用 .-> L2
 ```
