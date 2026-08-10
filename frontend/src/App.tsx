@@ -1,5 +1,9 @@
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AuthPage } from '@/components/auth/AuthPage';
+import { ChatRoute } from '@/components/chat/ChatRoute';
+import { MyDataView } from '@/components/views/MyDataView';
+import { MyModelsView } from '@/components/views/MyModelsView';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { SessionProvider } from '@/context/SessionContext';
 import { Spinner } from '@/components/ui/Spinner';
@@ -17,11 +21,16 @@ export default function App() {
  *
  *  - `initializing` → splash spinner (avoid flashing the AuthPage while
  *    we validate the stored session via GET /api/auth/me).
- *  - `user == null` → AuthPage (login / register).
- *  - otherwise → SessionProvider + AppLayout (the full app).
+ *  - `user == null` → /login (AuthPage); any other path redirects there.
+ *  - otherwise → SessionProvider + protected routes under AppLayout.
  *
- * SessionProvider is intentionally mounted AFTER auth resolves so the
- * session id is fresh per login and isn't created for anonymous users.
+ * URL structure (driven by react-router):
+ *   /login             — auth page
+ *   /                  — redirect → /chat
+ *   /chat              — fresh / active chat (no specific session id)
+ *   /chat/:sessionId   — open a past session
+ *   /datasets          — my datasets
+ *   /models            — my models
  */
 function Root() {
   const { user, initializing } = useAuth();
@@ -35,12 +44,40 @@ function Root() {
   }
 
   if (!user) {
-    return <AuthPage />;
+    return (
+      <Routes>
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
 
   return (
     <SessionProvider>
-      <AppLayout />
+      <Routes>
+        {/* Logged-in users hitting /login bounce to the workspace. */}
+        <Route path="/login" element={<Navigate to="/chat" replace />} />
+        <Route path="/" element={<AppLayout />}>
+          <Route index element={<Navigate to="/chat" replace />} />
+          <Route path="chat" element={<ChatRoute />} />
+          <Route path="chat/:sessionId" element={<ChatRoute />} />
+          <Route path="datasets" element={<DataRoute />} />
+          <Route path="models" element={<ModelsRoute />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/chat" replace />} />
+      </Routes>
     </SessionProvider>
   );
+}
+
+/** Thin wrapper that injects an `onBack` going back to /chat.
+ *  Keeps MyDataView/MyModelsView free of any router coupling. */
+function DataRoute() {
+  const navigate = useNavigate();
+  return <MyDataView onBack={() => navigate('/chat')} />;
+}
+
+function ModelsRoute() {
+  const navigate = useNavigate();
+  return <MyModelsView onBack={() => navigate('/chat')} />;
 }

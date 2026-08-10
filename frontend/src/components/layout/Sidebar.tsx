@@ -15,11 +15,11 @@ import {
   TrendingUp,
   User as UserIcon,
 } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '@/context/SessionContext';
 import { useAuth } from '@/context/AuthContext';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import type { AppView } from './AppLayout';
 import { cn } from '@/utils/cn';
 import { formatRelative, shortId, stageLabel, taskLabel } from '@/utils/format';
 
@@ -52,8 +52,13 @@ const EXAMPLES: ExamplePrompt[] = [
   },
 ];
 
+/** Top-level view the main panel is currently rendering. Derived from the
+ *  URL so the sidebar highlight always matches react-router. */
+type AppView = 'chat' | 'datasets' | 'models';
+
 interface NavEntry {
   view: AppView;
+  path: string;
   icon: typeof Database;
   label: string;
   hint: string;
@@ -62,12 +67,14 @@ interface NavEntry {
 const NAV_ENTRIES: NavEntry[] = [
   {
     view: 'datasets',
+    path: '/datasets',
     icon: Database,
     label: '我的数据',
     hint: '已上传的数据文件',
   },
   {
     view: 'models',
+    path: '/models',
     icon: Boxes,
     label: '我的模型',
     hint: '训练保存的检测模型',
@@ -76,13 +83,11 @@ const NAV_ENTRIES: NavEntry[] = [
 
 export function Sidebar({
   onPickExample,
-  currentView,
-  onNavigate,
 }: {
   onPickExample: (prompt: string) => void;
-  currentView: AppView;
-  onNavigate: (view: AppView) => void;
 }) {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const {
     sessionInfo,
     sessionId,
@@ -91,7 +96,6 @@ export function Sidebar({
     streaming,
     sessions,
     sessionsLoading,
-    loadSession,
     removeSession,
     refreshSessions,
   } = useSession();
@@ -99,17 +103,38 @@ export function Sidebar({
 
   const turns = items.filter((i) => i.kind === 'message').length;
 
+  // Derive which top-level view is active from the URL. Falling back to
+  // 'chat' keeps the highlight sensible for any /chat[/:id] path.
+  const currentView: AppView = pathname.startsWith('/datasets')
+    ? 'datasets'
+    : pathname.startsWith('/models')
+      ? 'models'
+      : 'chat';
+
+  // Open a past thread by navigating to /chat/:sessionId — ChatRoute's
+  // useEffect picks up the change and calls loadSession. We no longer
+  // touch SessionContext directly from the sidebar.
   const handleOpenSession = (targetId: string) => {
     if (streaming) return;
-    void loadSession(targetId);
-    onNavigate('chat');
+    navigate(`/chat/${targetId}`);
   };
 
   const handleDeleteSession = (e: React.MouseEvent, targetId: string) => {
-    // Stop propagation so the row click doesn't also trigger loadSession.
+    // Stop propagation so the row click doesn't also navigate into it.
     e.stopPropagation();
     if (streaming) return;
+    // If we're deleting the thread currently open in the URL, navigate to
+    // a fresh /chat first so ChatRoute's effect doesn't try to reload a
+    // session id the backend just deleted.
+    if (pathname === `/chat/${targetId}`) {
+      navigate('/chat', { replace: true });
+    }
     void removeSession(targetId);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
   };
 
   return (
@@ -121,7 +146,7 @@ export function Sidebar({
           className="w-full"
           onClick={() => {
             initNewSession();
-            onNavigate('chat');
+            navigate('/chat', { replace: true });
           }}
           disabled={streaming}
         >
@@ -185,7 +210,7 @@ export function Sidebar({
                 <button
                   key={entry.view}
                   type="button"
-                  onClick={() => onNavigate(entry.view)}
+                  onClick={() => navigate(entry.path)}
                   className={cn(
                     'group flex w-full items-center gap-2.5 rounded-xl border px-3 py-2.5 transition-all',
                     isActive
@@ -229,7 +254,7 @@ export function Sidebar({
         </section>
 
         {/* Conversation history — each row is a past thread the user can
-            reopen. Clicking switches session + replays the dialogue;
+            reopen. Clicking navigates to /chat/:id (ChatRoute loads it);
             the trash icon deletes the thread (index + checkpoint). */}
         <section>
           <div className="mb-2 flex items-center justify-between">
@@ -256,7 +281,8 @@ export function Sidebar({
           ) : (
             <ul className="space-y-1.5">
               {sessions.map((s) => {
-                const isActive = s.session_id === sessionId;
+                // A thread is "active" when its id appears in the URL.
+                const isActive = pathname === `/chat/${s.session_id}`;
                 return (
                   <li key={s.session_id}>
                     <div
@@ -372,7 +398,7 @@ export function Sidebar({
           </div>
           <button
             type="button"
-            onClick={logout}
+            onClick={handleLogout}
             disabled={!user}
             title="退出登录"
             className={cn(

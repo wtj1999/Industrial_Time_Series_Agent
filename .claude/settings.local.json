@@ -27,7 +27,9 @@
       "Bash(wc:*)",
       "Bash(del \"C:\\\\Users\\\\HP\\\\PycharmProjects\\\\Industrial_Time_Series_Agent\\\\agent_app\\\\agents\\\\analysis_chart_extractors.py\")",
       "Bash(node -e:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(git check-ignore:*)",
+      "Bash(npm run lint:*)"
     ]
   }
 }
