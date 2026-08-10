@@ -85,40 +85,50 @@
 
 ```mermaid
 flowchart TB
-    subgraph Input["📥 输入层 Input Layer"]
-        UQ[用户查询]
-        CSV[CSV / Parquet 文件]
-        HIST[历史上下文]
+    classDef inp  fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.5px
+    classDef und  fill:#ede9fe,stroke:#7c3aed,color:#4c1d95,stroke-width:1.5px
+    classDef orc  fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:1.5px
+    classDef task fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:1.5px
+    classDef mem  fill:#fce7f3,stroke:#db2777,color:#831843,stroke-width:1.5px
+
+    subgraph L1["📥 输入层"]
+        direction LR
+        UQ[用户查询]:::inp
+        CSV[CSV / Parquet]:::inp
+        HIST[历史上下文]:::inp
     end
 
-    subgraph Understanding["🧠 理解层 Understanding Layer"]
-        PA[Profile Agent<br/>数据画像]
-        IR[Intent Router<br/>意图识别]
-        PS[Parser Agent<br/>参数抽取]
+    subgraph L2["🧠 理解层"]
+        direction LR
+        PA[Profile · 数据画像]:::und
+        IR[Intent Router · 意图识别]:::und
+        PS[Parser · 参数抽取]:::und
     end
 
-    subgraph Orchestration["🔄 编排层 Orchestration Layer"]
-        OG[LangGraph Orchestrator<br/>状态图 + 中断机制]
-        HITL[Human-in-the-Loop<br/>路径选择 / 字段确认]
+    subgraph L3["🔄 编排层"]
+        direction LR
+        OG[LangGraph · 状态图编排]:::orc
+        HITL[Human-in-the-Loop · 中断]:::orc
     end
 
-    subgraph Task["⚙️ 任务层 Task Layer"]
-        PRE[Prediction]
-        ANO[Anomaly Detection]
-        ANA[Analysis]
-        RPT[Report]
+    subgraph L4["⚙️ 任务层"]
+        direction LR
+        PRE[Prediction · 预测]:::task
+        ANO[Anomaly · 异常检测]:::task
+        ANA[Analysis · 统计分析]:::task
+        RPT[Report · 报告生成]:::task
     end
 
-    subgraph Memory["💾 记忆层 Memory Layer"]
-        SS[SessionState]
-        PROF[CSV 画像缓存]
-        PMEM[参数记忆]
+    subgraph L5["💾 记忆层"]
+        direction LR
+        SS[SessionState]:::mem
+        PROF[CSV 画像缓存]:::mem
+        PMEM[参数记忆]:::mem
     end
 
-    Input --> Understanding --> Orchestration --> Task
-    Task -.-> Memory
-    Memory -.-> Understanding
-    Orchestration <--> HITL
+    L1 ==> L2 ==> L3 ==> L4
+    L4 -. 读写 .-> L5
+    L5 -. 复用 .-> L2
 ```
 
 <br>
@@ -129,33 +139,41 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    USER([👤 用户])
+    classDef user   fill:#fff7ed,stroke:#ea580c,color:#7c2d12,stroke-width:2px
+    classDef router fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef think  fill:#ede9fe,stroke:#7c3aed,color:#4c1d95
+    classDef exec   fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef chat   fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
 
-    ROUTER[IntentRouterAgent<br/>━━━━━━━━━<br/>工业 vs 闲聊<br/>意图路由]
+    USER([👤 用户]):::user
 
-    PROFILE[ProfileAgent<br/>━━━━━━━━━<br/>CSV 深度画像<br/>字段语义映射]
+    ROUTER[IntentRouter · 意图路由]:::router
 
-    PARSER[ParserAgent<br/>━━━━━━━━━<br/>任务参数解析<br/>多轮澄清]
+    subgraph U["🧠 数据理解"]
+        direction TB
+        PROFILE[Profile · CSV 画像]:::think
+        PARSER[Parser · 参数解析]:::think
+        PROPOSAL[Proposal · 方案生成]:::think
+    end
 
-    PROPOSAL[ProposalAgent<br/>━━━━━━━━━<br/>技术方案生成<br/>路径推荐]
+    subgraph E["⚙️ 任务执行"]
+        direction TB
+        PRED[Prediction · 时序预测]:::exec
+        AD[Anomaly · 异常检测]:::exec
+        ANALYSIS[Analysis · 统计分析]:::exec
+    end
 
-    PRED[PredictionAgent<br/>━━━━━━━━━<br/>时序预测]
-    AD[AnomalyAgent<br/>━━━━━━━━━<br/>异常检测]
-    ANALYSIS[AnalysisAgent<br/>━━━━━━━━━<br/>10 种分析模式]
-    CHAT[ChatAgent<br/>━━━━━━━━━<br/>通用问答]
+    CHAT[Chat · 通用问答]:::chat
 
-    USER -->|自然语言| ROUTER
-    ROUTER -->|工业| PROFILE
-    ROUTER -->|闲聊| CHAT
-    PROFILE --> PARSER
-    PARSER --> PROPOSAL
-    PROPOSAL --> PRED
-    PROPOSAL --> AD
-    PROPOSAL --> ANALYSIS
-    PRED --> USER
-    AD --> USER
-    ANALYSIS --> USER
-    CHAT --> USER
+    USER ==> ROUTER
+    ROUTER -->|工业任务| PROFILE
+    ROUTER -.->|闲聊| CHAT
+    PROFILE --> PARSER --> PROPOSAL
+    PROPOSAL --> PRED & AD & ANALYSIS
+    PRED      --> USER
+    AD        --> USER
+    ANALYSIS  --> USER
+    CHAT      --> USER
 ```
 
 ### 各智能体能力一览
