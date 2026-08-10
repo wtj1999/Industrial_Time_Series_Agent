@@ -1,20 +1,17 @@
-"""Train / predict / persist tools for PyOD detectors.
+"""Detect / train / persist tools for PyOD detectors.
 
 These tools operate on ``ctx.df`` and ``ctx.target_columns`` (falling
 back to ``ctx.feature_columns`` when targets are empty):
 
-- :func:`train_anomaly_detector` — fit a named detector on the current
-  DataFrame and persist it under the deterministic
-  ``artifacts/anomaly_detection/{thread_id}/{file_stem}_anomaly_detection/``
-  layout. The LLM only provides ``save_name``.
-- :func:`detect_anomalies` — one-shot fit + score (no persistence).
-- :func:`load_detector_and_predict` — load a saved detector (by bare
-  ``save_name``) and score the current DataFrame.
-- :func:`list_saved_detectors` — enumerate persisted detectors in the
-  current (thread_id, file_path) scope.
-- :func:`delete_saved_detector` — remove a saved detector artifact.
-- :func:`predict_with_detector` — score new samples on a freshly-fit
-  detector with explicit inlier/outlier split for inductive evaluation.
+- :func:`detect_with_model` — **统一入口**：自动判断加载已有模型还是
+  训练新模型并对当前 DataFrame 打分。当用户在前端选择了复用模型时，
+  走跨作用域加载分支；否则按 ``detector_name`` 训练 + 持久化 + 打分。
+  **所有打分都会持久化模型**——没有"不保存"的探索分支；不想落盘请
+  显式调 :func:`delete_saved_detector` 清理。
+- :func:`list_saved_detectors` — 枚举当前 (thread_id, file_path) 作用域
+  下的已保存检测器（只读信封，代价低）。
+- :func:`delete_saved_detector` — 删除当前作用域下的某个检测器 artifact。
+- :func:`fit_predict_with_split` — 在 train/test 切分上做归纳式评估。
 """
 
 from __future__ import annotations
@@ -54,286 +51,257 @@ logger = logging.getLogger(__name__)
 # Tools
 # ----------------------------------------------------------------------
 
-@tool("train_anomaly_detector")
-@tool_guard("train_anomaly_detector")
-def train_anomaly_detector(
+@tool("detect_with_model")
+@tool_guard("detect_with_model")
+def detect_with_model(
     detector_name: str,
     runtime: ToolRuntime,
     contamination: float = 0.1,
     save_name: Optional[str] = None,
+    return_top_n: int = 10,
     random_state: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """在当前 DataFrame 上训练指定 PyOD 检测器并持久化。
+    """对当前 DataFrame 做异常检测并打分，**自动判断是加载已有模型还是训练新模型**。
 
-    存储路径由框架根据 ``(thread_id, file_path)`` 自动拼接为::
+    决策规则（工具内部自动分派，LLM 无需也不应当干预）：
 
-        artifacts/anomaly_detection/
-          <thread_id>/<file_stem>_anomaly_detection/<save_name>.joblib
+    - **加载模式**（``mode == "load"``）：当 ``runtime.context`` 携带
+      ``model_save_name``（用户在前端 CSV 上传断点的模型选择器中选了
+      某个模型）时触发。跨作用域加载该模型（路径解析见
+      :func:`_common.resolve_model_path`）并对当前数据打分。
+      ``detector_name`` / ``contamination`` / ``save_name`` /
+      ``random_state`` 在此模式下被忽略，以模型信封里记录的为准。
 
-    大模型只需要提供 ``save_name``（如 ``"iforest_v1"``），无需也**不能**
-    生成完整路径。同一对话同一文件下的同名模型会被覆盖。
+    - **训练模式**（``mode == "train"``）：否则用 ``detector_name`` 训练
+      新检测器，持久化到当前 ``(thread_id, file_path)`` 作用域
+     （``save_name`` 控制文件名，未指定则自动生成
+      ``{detector_name}_{timestamp}``），然后对当前数据打分。
+
+    所有训练分支都会落盘——没有"不保存"的旁路。若只是临时试一下、不
+    想保留产物，请事后用 :func:`delete_saved_detector` 清理。
 
     Parameters
     ----------
     detector_name : str
-        PyOD 检测器名称，例如 ``"IForest"``、``"LOF"``、``"HBOS"``。
+        PyOD 检测器类名，**大小写敏感**（如 ``"IForest"``、``"LOF"``、
+        ``"HBOS"``）。训练模式必填；加载模式下被忽略。
     contamination : float, default 0.1
-        期望的异常比例，影响 ``threshold_`` 与 ``labels_``。
+        期望异常比例（仅训练模式有效）。影响 ``threshold_`` 与 ``labels_``。
     save_name : str, optional
-        保存文件名（不带后缀）。未提供时自动生成
-        ``{detector_name}_{timestamp}``。
-    random_state : int, optional
-        随机种子。
-
-    Returns
-    -------
-    Dict[str, Any]
-        包含 ``model_path``、``threshold``、``n_anomalies``、
-        ``training_scores`` 统计与 ``metadata``。
-    """
-    X, info = prepare_feature_matrix(runtime)
-
-    detector = build_detector_by_name(
-        detector_name,
-        contamination=contamination,
-        random_state=random_state,
-    )
-    detector.fit(X)
-
-    scores = decision_scores_(detector)
-    th = threshold_(detector)
-    lbls = labels_(detector)
-    n_anomalies = int((lbls > 0).sum()) if lbls.size else 0
-
-    if save_name is None:
-        save_name = auto_save_name(detector_name)
-    model_path = resolve_model_path(save_name, runtime)
-    ensure_dir(model_path.parent)
-
-    metadata = {
-        "detector_name": detector_name,
-        "params": {},
-        "contamination": contamination,
-        "random_state": random_state,
-        "n_samples": int(X.shape[0]),
-        "n_features": int(X.shape[1]),
-        "feature_columns": info["used_columns"],
-        "source": info["source"],
-        "n_anomalies": n_anomalies,
-        "threshold": th,
-        "transductive": is_transductive(detector_name),
-        "trained_at": datetime.now(timezone.utc).isoformat(),
-    }
-    persistence.save(detector, model_path, metadata=metadata)
-
-    extra_notes: List[str] = []
-    if is_transductive(detector_name):
-        extra_notes.append(
-            "%s 是 transductive 检测器，加载后不能对新样本 predict。"
-            % detector_name)
-
-    summary_stats = scores_summary(scores, threshold=th, top_n=10)
-    return {
-        "task_type": "anomaly_detection",
-        "tool_name": "train_anomaly_detector",
-        "detector_name": detector_name,
-        "summary": (
-            "已训练 %s，识别出 %d 个异常（contamination=%.3f），"
-            "模型保存至 %s"
-            % (detector_name, n_anomalies, contamination, model_path.name)
-        ),
-        "model_path": str(model_path),
-        "save_name": Path(model_path).stem,
-        "n_samples": int(X.shape[0]),
-        "n_features": int(X.shape[1]),
-        "threshold": th,
-        "n_anomalies": n_anomalies,
-        "training_scores": summary_stats,
-        "metadata": metadata,
-        "notes": format_notes(info, extra_notes),
-    }
-
-
-@tool("detect_anomalies")
-@tool_guard("detect_anomalies")
-def detect_anomalies(
-    detector_name: str,
-    runtime: ToolRuntime,
-    contamination: float = 0.1,
-    return_top_n: int = 10,
-    random_state: Optional[int] = None,
-) -> Dict[str, Any]:
-    """一次性训练 + 打分：在当前 DataFrame 上用指定检测器输出异常分数。
-
-    与 :func:`train_anomaly_detector` 的区别：本工具**不保存模型**，仅返回
-    分数、二值标签与 Top-N 异常行（含原始数值）。适合「快速看一下这批
-    数据用检测器能挑出哪些异常」之类的探索性需求。
-
-    Parameters
-    ----------
-    detector_name : str
-        检测器名称，例如 ``"IForest"``、``"MatrixProfile"``。
-    contamination : float, default 0.1
-        异常比例，影响 ``threshold_`` 与 ``labels_``。
+        训练模式下的保存文件名（裸名称，不带 ``.joblib`` 后缀，不带路径
+        分隔符）。未指定时自动生成 ``{detector_name}_{timestamp}``。
+        加载模式下被忽略。
     return_top_n : int, default 10
-        返回分数最高的前 N 行及其原始值。设为 0 可关闭。
+        返回分数最高的前 N 行（含原始数值）。
     random_state : int, optional
-        随机种子。
+        训练模式下的随机种子。
 
     Returns
     -------
     Dict[str, Any]
-        ``scores_summary`` 为分数统计；``top_anomalies`` 为 Top-N 行；
-        ``labels`` 仅在内存中以列表形式返回（int 0/1）。
-    """
-    ctx = runtime.context
-    df: pd.DataFrame = ctx.df
-    X, info = prepare_feature_matrix(runtime)
-
-    detector = build_detector_by_name(
-        detector_name,
-        contamination=contamination,
-        random_state=random_state,
-    )
-    detector.fit(X)
-
-    scores, lbls, th, supports_ = score_with_detector(
-        detector, X, detector_name)
-
-    top_rows = top_anomaly_rows(
-        df, scores, th, return_top_n, columns=info["used_columns"])
-    summary_stats = scores_summary(scores, threshold=th, top_n=return_top_n)
-
-    extra_notes: List[str] = []
-    if not supports_:
-        extra_notes.append(
-            "%s 是 transductive 检测器：未调用 predict，分数来自 "
-            "decision_scores_。后续对新数据无法直接打分。" % detector_name)
-        extra_notes.append("supports_out_of_sample: false")
-
-    return {
-        "task_type": "anomaly_detection",
-        "tool_name": "detect_anomalies",
-        "detector_name": detector_name,
-        "summary": (
-            "%s 完成：共 %d 个样本，%d 个被判为异常（contamination=%.3f）。"
-            % (detector_name, X.shape[0],
-               int((lbls > 0).sum()) if lbls.size else 0,
-               contamination)
-        ),
-        "n_samples": int(X.shape[0]),
-        "n_features": int(X.shape[1]),
-        "threshold": th,
-        "supports_out_of_sample": supports_,
-        "scores_summary": summary_stats,
-        "labels": lbls.tolist() if lbls.size else [],
-        "scores": scores.tolist(),
-        "top_anomalies": top_rows,
-        "notes": format_notes(info, extra_notes),
-    }
-
-
-@tool("load_detector_and_predict")
-@tool_guard("load_detector_and_predict")
-def load_detector_and_predict(
-    save_name: str,
-    runtime: ToolRuntime,
-    return_top_n: int = 10,
-) -> Dict[str, Any]:
-    """加载当前 ``(thread_id, file_path)`` 作用域下保存的检测器并打分。
-
-    ``save_name`` 是训练时给定的裸名称（如 ``"iforest_v1"``）。框架会
-    自动定位到::
-
-        artifacts/anomaly_detection/
-          <thread_id>/<file_stem>_anomaly_detection/<save_name>.joblib
-
-    Parameters
-    ----------
-    save_name : str
-        训练时使用的 save_name（不带 ``.joblib`` 后缀）。
-    return_top_n : int, default 10
-        返回分数最高的前 N 行。
-
-    Returns
-    -------
-    Dict[str, Any]
-        ``model_metadata`` 来自保存时写入的信封；``scores_summary``、
-        ``top_anomalies`` 与 :func:`detect_anomalies` 一致。
+        ``mode`` 字段标识实际走了哪条分支（``"load"`` 或 ``"train"``）。
+        ``scores`` / ``labels`` / ``threshold`` / ``scores_summary`` /
+        ``top_anomalies`` / ``feature_columns`` 在两种模式下结构一致，
+        前端 chart 提取逻辑统一处理。加载模式额外返回
+        ``model_metadata`` / ``envelope``；训练模式额外返回
+        ``training_scores`` / ``metadata`` / ``n_anomalies``。
     """
     ctx = runtime.context
     df: pd.DataFrame = ctx.df
 
-    model_path = resolve_model_path(save_name, runtime)
-    if not Path(model_path).exists():
-        return {
-            "task_type": "anomaly_detection",
-            "tool_name": "load_detector_and_predict",
-            "summary": "未找到模型文件 %s" % model_path,
-            "model_path": str(model_path),
-            "save_name": save_name,
-            "notes": [
-                "请确认 save_name 正确；可用 list_saved_detectors 查看当前 "
-                "(thread_id, file_path) 作用域下已保存的模型。"
-            ],
+    # 用户在前端选择的复用模型引用（跨作用域坐标）。None 表示走训练模式。
+    msn = getattr(ctx, "model_save_name", None)
+
+    X, info = prepare_feature_matrix(runtime)
+    extra_notes: List[str] = []
+
+    # ==================================================================
+    # 模式分派
+    # ==================================================================
+    if msn:
+        # ---------------------- 加载模式 ----------------------
+        mode = "load"
+        effective_save_name = msn
+        # detector_name 从信封里读，忽略 LLM 传入的值
+        detector_name_resolved: Optional[str] = None
+
+        model_path = resolve_model_path(msn, runtime)
+        if not Path(model_path).exists():
+            return {
+                "task_type": "anomaly_detection",
+                "tool_name": "detect_with_model",
+                "mode": mode,
+                "detector_name": None,
+                "summary": "未找到模型文件 %s" % model_path,
+                "model_path": str(model_path),
+                "save_name": msn,
+                "n_samples": int(X.shape[0]),
+                "n_features": int(X.shape[1]),
+                "threshold": None,
+                "scores": [],
+                "labels": [],
+                "scores_summary": {
+                    "n_total": int(X.shape[0]),
+                    "n_valid": 0,
+                },
+                "top_anomalies": [],
+                "feature_columns": info["used_columns"],
+                "notes": [
+                    "请确认前端选择的模型仍然存在；可在「我的模型」中确认。",
+                    "该模型可能来自其它会话，若原始文件已被清理，需要重新训练。",
+                ],
+            }
+
+        model, envelope = persistence.load(
+            model_path, strict=False, return_metadata=True)
+        saved_meta = (envelope or {}).get("metadata") or {}
+        detector_name_resolved = (
+            saved_meta.get("detector_name") or type(model).__name__
+        )
+        supports_ = not is_transductive(detector_name_resolved)
+
+        # 跨作用域来源说明：路径不在当前 artifacts_dir_for 下即跨域。
+        try:
+            current_scope_dir = artifacts_dir_for(runtime)
+            if current_scope_dir != Path(model_path).parent:
+                src_dataset = (
+                    saved_meta.get("dataset_name")
+                    or saved_meta.get("source_file")
+                    or None
+                )
+                try:
+                    mtid_seg = Path(model_path).parent.parent.name
+                except Exception:
+                    mtid_seg = None
+                parts = ["已跨会话加载模型"]
+                if mtid_seg:
+                    parts.append("来自会话 %s" % mtid_seg)
+                if src_dataset:
+                    parts.append("基于数据集 %s" % src_dataset)
+                extra_notes.append("·".join(parts))
+        except Exception:
+            pass
+
+        try:
+            scores, lbls, th, supports_ = score_with_detector(
+                model, X, detector_name_resolved)
+        except NotImplementedError:
+            extra_notes.append(
+                "模型不支持新样本 decision_function，已在当前数据上重新 fit "
+                "并读取 decision_scores_。")
+            model.fit(X)
+            scores = decision_scores_(model)
+            th = threshold_(model)
+            lbls = labels_(model)
+            supports_ = False
+
+        # 列漂移检测：训练时记录的列 vs 当前 DataFrame 实际使用的列。
+        saved_cols = list(saved_meta.get("feature_columns") or [])
+        if saved_cols and saved_cols != info["used_columns"]:
+            extra_notes.append(
+                "当前输入列与训练时记录的列不一致（训练：%s；当前：%s）。"
+                "结果可能不可靠。"
+                % (saved_cols, info["used_columns"]))
+
+        envelope_summary = {
+            k: v for k, v in (envelope or {}).items() if k != "model"
+        } if envelope else {}
+
+        result_extra: Dict[str, Any] = {
+            "model_metadata": saved_meta,
+            "envelope": envelope_summary,
         }
 
-    X, info = prepare_feature_matrix(runtime)
+        effective_save_name_for_return = msn
+        model_path_for_return = str(model_path)
 
-    model, envelope = persistence.load(
-        model_path, strict=False, return_metadata=True)
+    else:
+        # ---------------------- 训练模式 ----------------------
+        mode = "train"
+        if not detector_name:
+            raise ValueError(
+                "训练模式必须提供 detector_name；若想加载已有模型，"
+                "请在 CSV 上传卡片的模型选择器中指定。")
 
-    saved_meta = (envelope or {}).get("metadata") or {}
-    detector_name = (
-        saved_meta.get("detector_name")
-        or type(model).__name__
-    )
+        effective_save_name = save_name or auto_save_name(detector_name)
+        model_path = resolve_model_path(effective_save_name, runtime)
+        ensure_dir(model_path.parent)
+        detector_name_resolved = detector_name
 
-    supports_ = not is_transductive(detector_name)
-    extra_notes: List[str] = []
-    try:
-        scores, lbls, th, supports_ = score_with_detector(
-            model, X, detector_name)
-    except NotImplementedError:
-        extra_notes.append(
-            "模型不支持新样本 decision_function，已在当前数据上重新 fit 并"
-            "读取 decision_scores_。")
-        model.fit(X)
-        scores = decision_scores_(model)
-        th = threshold_(model)
-        lbls = labels_(model)
-        supports_ = False
+        detector = build_detector_by_name(
+            detector_name,
+            contamination=contamination,
+            random_state=random_state,
+        )
+        detector.fit(X)
+
+        scores = decision_scores_(detector)
+        th = threshold_(detector)
+        lbls = labels_(detector)
+        supports_ = not is_transductive(detector_name)
+
+        n_anomalies_train = int((lbls > 0).sum()) if lbls.size else 0
+
+        if is_transductive(detector_name):
+            extra_notes.append(
+                "%s 是 transductive 检测器，加载后不能对新样本 predict。"
+                % detector_name)
+
+        # 记录数据集来源（前端模型卡片/选择器展示「基于数据集 X 训练」）
+        raw_file_path = getattr(ctx, "file_path", None)
+        dataset_name = (
+            str(Path(str(raw_file_path)).name) if raw_file_path else None
+        )
+
+        metadata = {
+            "detector_name": detector_name,
+            "params": {},
+            "contamination": contamination,
+            "random_state": random_state,
+            "n_samples": int(X.shape[0]),
+            "n_features": int(X.shape[1]),
+            "feature_columns": info["used_columns"],
+            "source": info["source"],
+            "n_anomalies": n_anomalies_train,
+            "threshold": th,
+            "transductive": is_transductive(detector_name),
+            "trained_at": datetime.now(timezone.utc).isoformat(),
+            "dataset_name": dataset_name,
+        }
+        persistence.save(detector, model_path, metadata=metadata)
+
+        result_extra = {
+            "training_scores": scores_summary(scores, threshold=th, top_n=10),
+            "metadata": metadata,
+            "n_anomalies": n_anomalies_train,
+        }
+
+        effective_save_name_for_return = effective_save_name
+        model_path_for_return = str(model_path)
+
+    # ==================================================================
+    # 通用收尾：top rows / summary / notes
+    # ==================================================================
+    if not supports_:
+        extra_notes.append("supports_out_of_sample: false")
 
     top_rows = top_anomaly_rows(
         df, scores, th, return_top_n, columns=info["used_columns"])
     summary_stats = scores_summary(scores, threshold=th, top_n=return_top_n)
 
-    if not supports_:
-        extra_notes.append("supports_out_of_sample: false")
-
-    # Surface column-drift between training and current DataFrame.
-    saved_cols = list(saved_meta.get("feature_columns") or [])
-    if saved_cols and saved_cols != info["used_columns"]:
-        extra_notes.append(
-            "当前输入列与训练时记录的列不一致（训练：%s；当前：%s）。"
-            "结果可能不可靠。"
-            % (saved_cols, info["used_columns"]))
-
-    envelope_summary = {
-        k: v for k, v in (envelope or {}).items() if k != "model"
-    } if envelope else {}
+    n_anomalies_total = int((lbls > 0).sum()) if lbls.size else 0
 
     return {
         "task_type": "anomaly_detection",
-        "tool_name": "load_detector_and_predict",
-        "detector_name": detector_name,
+        "tool_name": "detect_with_model",
+        "mode": mode,
+        "detector_name": detector_name_resolved,
         "summary": (
-            "加载 %s 完成打分：%d 个样本，%d 个异常。"
-            % (detector_name, X.shape[0],
-               int((lbls > 0).sum()) if lbls.size else 0)
+            "[%s模式] %s 完成打分：%d 个样本，%d 个异常。"
+            % (mode, detector_name_resolved, X.shape[0], n_anomalies_total)
         ),
-        "model_path": str(model_path),
-        "save_name": save_name,
+        "model_path": model_path_for_return,
+        "save_name": effective_save_name_for_return,
         "n_samples": int(X.shape[0]),
         "n_features": int(X.shape[1]),
         "threshold": th,
@@ -342,9 +310,9 @@ def load_detector_and_predict(
         "labels": lbls.tolist() if lbls.size else [],
         "scores": scores.tolist(),
         "top_anomalies": top_rows,
-        "model_metadata": saved_meta,
-        "envelope": envelope_summary,
+        "feature_columns": info["used_columns"],
         "notes": format_notes(info, extra_notes),
+        **result_extra,
     }
 
 
@@ -697,10 +665,11 @@ def _json_safe(v: Any) -> Any:
 
 
 TOOLS = [
-    train_anomaly_detector,
-    detect_anomalies,
-    load_detector_and_predict,
+    # 统一入口：自动判断加载已有模型 / 训练新模型（持久化）+ 打分。
+    detect_with_model,
+    # 已保存模型的管理（只读枚举 / 删除）。
     list_saved_detectors,
     delete_saved_detector,
+    # 归纳式评估（train/test 切分）。
     fit_predict_with_split,
 ]

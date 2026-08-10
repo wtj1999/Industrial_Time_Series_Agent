@@ -593,6 +593,13 @@ export interface ChooseTechPathInterruptData {
 export interface UploadCsvInterruptData {
   message: string;
   hint?: string;
+  /** True 时在 CSV 上传卡片内额外渲染「复用已训练模型」选择器。
+   *  后端仅在异常检测任务下置 true；其它任务保持 undefined 以维持
+   *  向后兼容（旧会话回放不会携带此字段）。 */
+  allow_model?: boolean;
+  /** 当前任务类型字符串（如 'anomaly_detection'），用于 UI 提示。
+   *  缺省时不影响行为，仅作为辅助信息。 */
+  current_task_type?: string;
 }
 
 export interface ClarificationInterruptData {
@@ -636,6 +643,14 @@ export interface ChoosePathResume {
 
 export interface UploadCsvResume {
   file_path?: string;
+  /** 用户在 ModelPicker 中选择了某个已训练模型时填写以下字段。
+   *  全部缺省 = 不复用模型（由 LLM 自由决策训练或加载）。
+   *  后端会把它们打包成 ModelRef 写入 SessionState.selected_model_ref，
+   *  并透传给 anomaly_agent 的 context 供 resolve_model_path 跨域定位。 */
+  save_name?: string;
+  model_thread_id?: string | null;
+  model_source_file?: string | null;
+  detector_name?: string | null;
 }
 
 export interface ClarificationResume {

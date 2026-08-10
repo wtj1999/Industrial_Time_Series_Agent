@@ -8,10 +8,16 @@ import {
   RefreshCw,
   UploadCloud,
 } from 'lucide-react';
-import type { DatasetEntry, UploadCsvInterruptData } from '@/types';
+import type {
+  DatasetEntry,
+  ModelEntry,
+  UploadCsvInterruptData,
+  UploadCsvResume,
+} from '@/types';
 import { useSession } from '@/context/SessionContext';
 import * as api from '@/services/api';
 import { Button } from '@/components/ui/Button';
+import { ModelPicker } from '@/components/interrupt/ModelPicker';
 import { cn } from '@/utils/cn';
 import { formatBytes, formatRelative } from '@/utils/format';
 
@@ -28,6 +34,13 @@ export function CsvUploadPanel({
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+
+  // Optional reuse-model picker. Only rendered when the backend signals
+  // ``allow_model=true`` (anomaly-detection task). The choice is purely
+  // additive — it does NOT replace the dataset selection above; the user
+  // must always pick a file (new upload or history entry) to proceed.
+  const [pickedModel, setPickedModel] = useState<ModelEntry | null>(null);
+  const showModelPicker = interrupt.allow_model === true;
 
   // Collapsible "select from history" state. The list is fetched lazily
   // on first expand and cached for subsequent re-opens; a manual refresh
@@ -97,16 +110,30 @@ export function CsvUploadPanel({
   };
 
   const handleSubmit = () => {
+    // Build the resume payload. When the user picked a model in the
+    // ModelPicker, attach its cross-scope coordinates so the backend can
+    // populate SessionState.selected_model_ref. The orchestrator will
+    // inject `file_path` after parsing the upload / locating the reused
+    // file — we never need to pass it from the client.
+    const resumeValue: UploadCsvResume = pickedModel
+      ? {
+          save_name: pickedModel.save_name,
+          model_thread_id: pickedModel.thread_id ?? null,
+          model_source_file: pickedModel.source_file ?? null,
+          detector_name: pickedModel.detector_name ?? null,
+        }
+      : {};
+
     if (file) {
       // Backend will inject `file_path` automatically after parsing the upload,
       // so we only need to pass the file itself. See agent_app/api.py.
-      void resumeQuery({}, file);
+      void resumeQuery(resumeValue, file);
       return;
     }
     if (selectedHistory) {
       // Re-use a previously uploaded file: backend resolves the name
       // inside uploads/<user_id>/ and injects `file_path` the same way.
-      void resumeQuery({}, null, selectedHistory.file_name);
+      void resumeQuery(resumeValue, null, selectedHistory.file_name);
     }
   };
 
@@ -305,6 +332,14 @@ export function CsvUploadPanel({
             </div>
           )}
         </>
+      )}
+
+      {showModelPicker && (
+        <ModelPicker
+          selected={pickedModel}
+          onPick={setPickedModel}
+          disabled={streaming}
+        />
       )}
 
       {error && (

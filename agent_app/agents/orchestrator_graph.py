@@ -15,7 +15,7 @@ from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
 from langchain_core.messages import ToolMessage
 
 from models.schemas import (
-    TaskType, SessionState, TaskStage, IntentType, Message
+    TaskType, SessionState, TaskStage, IntentType, Message, ModelRef
 )
 from state.session_state import SessionManager
 from agents.profile_agent import ProfileAgent
@@ -986,15 +986,39 @@ class OrchestratorAgent:
         )
 
     async def _node_await_csv_upload(self, state: SessionState):
+        # 仅在异常检测任务下暴露模型选择器；其它任务（预测/分析）保持
+        # 原有行为，前端凭 allow_model 决定是否渲染 ModelPicker。
+        allow_model = state.task_type == TaskType.ANOMALY_DETECTION
+
         uploaded = interrupt({
             "type": "upload_csv",
             "message": "当前任务执行前必须上传 CSV 文件，请先上传数据文件后继续。",
             "hint": "上传完成后，请将 file_path 回传，或由后端更新会话状态后继续。",
+            "allow_model": allow_model,
+            "current_task_type": (
+                state.task_type.value if state.task_type is not None else None
+            ),
         })
 
-        update = {
-            "file_path": uploaded["file_path"]
+        update: Dict[str, Any] = {
+            "file_path": uploaded["file_path"],
         }
+
+        # 用户在前端选择了复用模型时，把跨作用域坐标打包进 ModelRef
+        # 持久化到 SessionState，供执行节点透传给 anomaly_agent。
+        # user_id 不在此处携带——resolve_model_path 永远从当前 runtime
+        # 取，保证用户隔离不被击穿。
+        save_name = uploaded.get("save_name")
+        if save_name:
+            update["selected_model_ref"] = ModelRef(
+                save_name=save_name,
+                thread_id=uploaded.get("model_thread_id"),
+                source_file=uploaded.get("model_source_file"),
+                detector_name=uploaded.get("detector_name"),
+            )
+        else:
+            # 显式清空：上一轮可能选过模型，本轮没选就要重置。
+            update["selected_model_ref"] = None
 
         return Command(
             update=update,
@@ -1127,6 +1151,7 @@ class OrchestratorAgent:
                 csv_profile=state.csv_profile,
                 user_id=user_id,
                 dialogue_history=state.dialogue_history,
+                selected_model_ref=state.selected_model_ref,
             )
 
             if isinstance(result, dict):

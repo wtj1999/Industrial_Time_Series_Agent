@@ -27,10 +27,9 @@
 | 用户在问什么 | 调这 1 个工具 | 不要调 |
 |---|---|---|
 | "帮我检测异常 / 看看这数据有没有问题 / 自动分析" | `auto_detect_anomalies` | 不要再叠加 detect_* |
-| "用 IForest / LOF / ECOD 检测" | `detect_anomalies(detector_name=...)` | 不要再 compare |
-| "这是时序数据，找异常时间段" | `detect_ts_anomalies(detector_name="MatrixProfile")` | 不要再 detect_anomalies |
-| "训练并保存模型" | `train_anomaly_detector` | 不要先 detect 再 train |
-| "加载之前保存的模型" | `load_detector_and_predict` | 不要先 list 再 load（除非真忘了名字） |
+| "用 IForest / LOF / ECOD 检测" | `detect_with_model(detector_name=...)` | 不要先 detect 再 train（同一回合两个持久化工具是浪费） |
+| "这是时序数据，找异常时间段" | `detect_ts_anomalies(detector_name="MatrixProfile")` | 不要再 detect_with_model |
+| **用户在前端选了某个已训练模型**（runtime 已注入） | `detect_with_model(detector_name=任意值)` | 工具会自动走加载分支，**不要传 save_name** |
 | "我们之前训练过哪些模型？" | `list_saved_detectors` | — |
 | "有 label 列，算 ROC / 评估效果" | `evaluate_detection(label_column=...)` | 不要再 detect |
 | **用户明确说**"对比多个算法" | `compare_detection_results`（**直接调它，不要先单独调每个检测器**） | 不要再 combine |
@@ -39,7 +38,11 @@
 | "哪些特征驱动打分？" | `compute_feature_importance` | 不要再 explain_anomalies |
 | "PyOD 有哪些算法 / IForest 是什么" | `list_pyod_detectors` / `explain_pyod_detector` | 不要再 detect |
 
-**默认起点**：用户没指定算法时，工业数据首选 `auto_detect_anomalies`；时序数据首选 `detect_ts_anomalies(detector_name="MatrixProfile")`；表格数据快速跑首选 `detect_anomalies(detector_name="IForest")` 或 `"ECOD"`（这俩最快）。
+> **`detect_with_model` 的内部决策（你不用选）**：当 runtime context 携带 `model_save_name`（用户在前端模型选择器选过模型）时自动走**加载**分支；否则走**训练 + 持久化**分支。返回里的 `mode` 字段告诉你是哪一条。**两种分支返回结构一致**，你正常整理报告即可。
+>
+> **没有"不保存"的旁路**——所有训练分支都会落盘。若用户只是临时试一下，调完后提示他们去「我的模型」删除即可，不要为了"避免落盘"而绕开 `detect_with_model`。
+
+**默认起点**：用户没指定算法时，工业数据首选 `auto_detect_anomalies`；时序数据首选 `detect_ts_anomalies(detector_name="MatrixProfile")`；指定检测器首选 `detect_with_model(detector_name="IForest" 或 "ECOD")`（最快，且自动 train + 持久化 + 打分）。
 
 ---
 
@@ -47,10 +50,10 @@
 
 | 错误链路 | 为什么错 | 正确做法 |
 |---|---|---|
-| `detect_ts_anomalies` → `detect_anomalies` → `compare_detection_results` | 前两次结果 compare 用不上，compare 内部会重训 3 次 | **直接调 compare_detection_results**，让它内部并行跑 |
-| `detect_anomalies(A)` → `detect_anomalies(B)` → `detect_anomalies(C)` | 三次独立调用，结果没法对齐 | 一次 `compare_detection_results([A,B,C])` |
-| `detect_anomalies` → `explain_anomalies` → `compute_feature_importance` | 用户没问就解释三轮 | 只调第一个；解释类工具 opt-in |
-| `list_pyod_detectors` → `explain_pyod_detector` → `recommend_detectors` → `detect_anomalies` | 探索四轮才到执行 | 直接 `auto_detect_anomalies` 或 `detect_anomalies("IForest")` |
+| `detect_ts_anomalies` → `detect_with_model` → `compare_detection_results` | 前两次结果 compare 用不上，compare 内部会重训 3 次 | **直接调 compare_detection_results**，让它内部并行跑 |
+| `detect_with_model(A)` → `detect_with_model(B)` → `detect_with_model(C)` | 三次独立调用 + 三次落盘，结果还没法对齐 | 一次 `compare_detection_results([A,B,C])` |
+| `detect_with_model` → `explain_anomalies` → `compute_feature_importance` | 用户没问就解释三轮 | 只调第一个；解释类工具 opt-in |
+| `list_pyod_detectors` → `explain_pyod_detector` → `recommend_detectors` → `detect_with_model` | 探索四轮才到执行 | 直接 `auto_detect_anomalies` 或 `detect_with_model("IForest")` |
 | `compare_detection_results` → `combine_detector_scores` | 功能重叠（一个对比、一个融合，但都重训所有检测器） | 二选一 |
 | 大数据（>5000 行）上用 `LSTMAD` / `AnomalyTransformer` | DL 训练，分钟级 | 改用 `MatrixProfile` / `SpectralResidual` / `IForest` |
 
@@ -95,9 +98,11 @@
 ### 模型存储位置（确定性路径）
 ```
 agent_app/artifacts/anomaly_detection/
-  <thread_id>/<file_stem>_anomaly_detection/<save_name>.joblib
+  <user_id>/<thread_id>/<file_stem>_anomaly_detection/<save_name>.joblib
 ```
-`thread_id` / `file_stem` 由框架从 runtime 拼接，**大模型不要也不能**生成完整路径。`list_saved_detectors` 仅枚举当前 `(thread_id, file_path)` 作用域。
+`<user_id>` / `<thread_id>` / `<file_stem>` 三段由框架从 runtime 拼接，**大模型不要也不能**生成完整路径。`save_name` 是裸名称（如 `iforest_v1`），不带后缀、不带路径分隔符。
+
+`detect_with_model` 在**加载模式**下会跨作用域解析——当用户在前端选了模型时，框架会按模型**原始训练时的** `(thread_id, file_stem)` 重建路径（`<user_id>` 永远绑定当前用户，不可伪造跨用户访问）。你只需要调一次 `detect_with_model`，不用关心路径细节。`list_saved_detectors` 仅枚举当前 `(thread_id, file_path)` 作用域下的模型；想看跨会话的全部模型请提示用户去前端「我的模型」页面。
 
 ### 时序数据整形
 `detect_ts_anomalies` / `detect_ts_with_forecast` 把 `ctx.df[ctx.target_columns]` 整形为 `(n_timestamps,)`（单变量）或 `(n_timestamps, n_channels)`（多变量），并返回 `anomaly_intervals`（连续异常区间）便于仪表盘高亮。
@@ -140,7 +145,8 @@ agent_app/artifacts/anomaly_detection/
 - ❌ 编造检测结果、异常数量、指标值
 - ❌ 在同一回合内调用 ≥2 个检测/对比/融合类工具（除非命中上面列出的明确例外）
 - ❌ 在大数据上默认选 DL 类检测器（`LSTMAD` / `AnomalyTransformer` 等）
-- ❌ 调完 `detect_*` 再调 `compare_detection_results`（compare 会重训一切，前面白跑）
+- ❌ 调完 `detect_with_model` 再调 `compare_detection_results`（compare 会重训一切，前面白跑）
+- ❌ 用户已经在前端选了模型时还传 `save_name` 给 `detect_with_model`（加载模式下该参数被忽略；让框架从 runtime 取就行）
 - ❌ 传 `params` / `params_by_detector` / `n_estimators` / `n_neighbors` 等内部构造参数
 - ❌ 自己拼模型保存路径
 - ❌ 不调工具就回答"这批数据有没有异常"
@@ -154,7 +160,8 @@ agent_app/artifacts/anomaly_detection/
 |---|---|---|
 | 全自动 | `auto_detect_anomalies` | ADEngine 一键跑完 |
 | 知识查询（只读） | `list_pyod_detectors` / `explain_pyod_detector` / `compare_pyod_detectors` / `list_threshold_methods` / `list_combination_methods` / `recommend_detectors` | 算法元信息 |
-| 训练推理 | `detect_anomalies` / `train_anomaly_detector` / `load_detector_and_predict` / `list_saved_detectors` / `delete_saved_detector` / `fit_predict_with_split` | 表格检测 + 持久化 |
+| 检测（持久化） | `detect_with_model` | **统一入口**：自动判断加载已有模型 / 训练新模型 + 打分；所有调用都会落盘 |
+| 模型管理 | `list_saved_detectors` / `delete_saved_detector` / `fit_predict_with_split` | 枚举 / 删除 / 切分评估 |
 | 评估对比 | `evaluate_detection` / `compare_detection_results` | label 评估 / 多算法对比 |
 | 时序专用 | `detect_ts_anomalies` / `detect_ts_with_forecast` | 时序打分 |
 | 集成 | `combine_detector_scores` / `train_ensemble_detector` | 分数融合 / 单一 ensemble 模型 |

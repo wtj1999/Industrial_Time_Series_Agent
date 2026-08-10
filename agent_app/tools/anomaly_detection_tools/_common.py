@@ -137,21 +137,59 @@ def ensure_dir(path: Path) -> Path:
 def resolve_model_path(save_name: str, runtime) -> Path:
     """Build the full ``.joblib`` path for ``save_name`` under the runtime scope.
 
-    The LLM only supplies a bare ``save_name`` (e.g. ``"iforest_v1"``);
-    the thread/file scoping is applied automatically. When ``save_name``
-    is an absolute path (rare — only when the user wants to point at an
-    out-of-tree artifact) it is returned verbatim.
+    Resolution order:
+
+    1. **Cross-scope** — when the runtime context carries an explicit
+       ``(model_save_name, model_thread_id, model_source_file)`` triple
+       (set by the orchestrator from the user's front-end model picker)
+       AND the requested ``save_name`` matches ``model_save_name``, the
+       path is rebuilt under the model's *original*
+       ``(user_id, thread_id, file_stem)`` scope. ``user_id`` is always
+       taken from the current runtime so users cannot cross boundaries.
+    2. **Same-scope** — otherwise the bare ``save_name`` is resolved
+       under the current ``(thread_id, file_path)`` scope.
+    3. **Escape hatch** — absolute paths or any string containing a path
+       separator are returned verbatim, so manual absolute paths still
+       work for power users.
+
+    The LLM normally only supplies a bare ``save_name`` (e.g.
+    ``"iforest_v1"``); cross-scope kicks in transparently when the user
+    picked the model up-front.
     """
     if not save_name:
         raise ValueError("save_name must be a non-empty string.")
 
-    # Allow escape hatches: absolute paths or explicit sub-paths pass through.
+    # 1. Cross-scope: user-selected model from the front-end picker.
+    ctx = getattr(runtime, "context", None)
+    msn = getattr(ctx, "model_save_name", None) if ctx is not None else None
+    mtid = getattr(ctx, "model_thread_id", None) if ctx is not None else None
+    msrc = getattr(ctx, "model_source_file", None) if ctx is not None else None
+    if msn and msn == save_name and (mtid or msrc):
+        # user_id is ALWAYS rebound to the current runtime — isolation
+        # between users cannot be broken by a forged picker payload.
+        thread_seg = _sanitize_path_segment(mtid) if mtid else "default"
+        if msrc:
+            file_seg = _sanitize_path_segment(msrc) + _FILE_SUBDIR_SUFFIX
+        else:
+            file_seg = "default" + _FILE_SUBDIR_SUFFIX
+        folder = (
+            ARTIFACTS_ROOT
+            / get_user_id(runtime)
+            / thread_seg
+            / file_seg
+        )
+        name = save_name if save_name.endswith(".joblib") else save_name + ".joblib"
+        return folder / name
+
+    # 3. Escape hatch (checked before same-scope so explicit absolute
+    #    paths still short-circuit).
     p = Path(save_name)
     if p.is_absolute():
         return p
     if "/" in save_name or "\\" in save_name:
         return p
 
+    # 2. Same-scope fallback.
     name = save_name
     if not name.endswith(".joblib"):
         name = name + ".joblib"

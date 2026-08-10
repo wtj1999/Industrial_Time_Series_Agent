@@ -833,6 +833,35 @@ class TaskSpec(BaseTaskSpec):
 #         )
 
 
+class ModelRef(BaseModel):
+    """A user-selected reference to a previously trained anomaly detector.
+
+    Populated in ``SessionState.selected_model_ref`` when the user picks an
+    existing model from the CSV-upload breakpoint's model picker. The
+    orchestrator forwards this to ``execute_anomaly_detection``, which in
+    turn seeds ``AnomalyDetectionContext`` so ``detect_with_model``'s
+    load branch can locate the model even when it was trained in a
+    different ``(thread_id, file_path)`` scope.
+
+    ``user_id`` is intentionally NOT carried here — the runtime always
+    rebinds the path to the *current* user so the picker cannot be used to
+    cross user boundaries.
+    """
+    save_name: str = Field(description="训练时给定的裸 save_name（不带 .joblib 后缀）")
+    thread_id: Optional[str] = Field(
+        default=None,
+        description="模型所属的会话 id。None 时回退到当前会话作用域。",
+    )
+    source_file: Optional[str] = Field(
+        default=None,
+        description="模型训练时所基于的数据集文件名（file_stem）。None 时回退到当前文件作用域。",
+    )
+    detector_name: Optional[str] = Field(
+        default=None,
+        description="模型对应的检测器名称，仅用于 UI 提示与 prompt hint，不参与路径解析。",
+    )
+
+
 class SessionState(BaseModel):
     """Unified session state for multi-turn conversations."""
     session_id: str
@@ -854,6 +883,16 @@ class SessionState(BaseModel):
     proposal_paths: Optional[list] = Field(default=None)
     selected_path: Optional[TechPath] = Field(default=None)
     confirmed_spec: Optional[TaskSpec] = Field(default=None)
+    selected_model_ref: Optional[ModelRef] = Field(
+        default=None,
+        description=(
+            "用户在 CSV 上传断点显式选择复用的已训练模型引用。"
+            "仅在异常检测任务下可能非空；为 None 时由 LLM 自由决策"
+            "（训练新模型或复用当前作用域内的模型）。"
+            "跨会话复用时 thread_id / source_file 指向模型原始作用域，"
+            "user_id 始终绑定当前用户，前端无法伪造。"
+        ),
+    )
     csv_profile: Optional[CSVProfile] = Field(default=None)
     csv_preview: Optional[Dict[str, Any]] = Field(default=None)
     last_user_query: Optional[str] = Field(default=None)
@@ -883,7 +922,7 @@ class SessionState(BaseModel):
         description=(
             "Structured payload for the anomaly-detection chart, emitted "
             "alongside ``execution_results`` when the sub-agent ran "
-            "detect_anomalies / detect_ts_anomalies. Mirrored on the "
+            "detect_with_model / detect_ts_anomalies. Mirrored on the "
             "frontend as a StreamEvent of type 'anomaly_chart'."
         ),
     )

@@ -13,7 +13,7 @@ Public surface
 - :func:`extract_analysis_chart` — correlation / histogram / decomposition /
   control / changepoint / acf.
 - :func:`extract_anomaly_chart` — anomaly-score scatter for
-  ``detect_anomalies`` / ``detect_ts_anomalies``.
+  ``detect_with_model`` / ``detect_ts_anomalies``.
 - :func:`extract_prediction_chart` — quantile-band forecast chart for
   ``forecast_time_series`` / ``forecast_multi_models``.
 - :func:`extract_evaluation_chart` — backtest chart for

@@ -16,7 +16,7 @@
 | 多算法共识 | 共识 / 融合 / ensemble / consensus |
 | 模型持久化 | 训练并保存 / 加载模型 / 重新打分 |
 
-**默认起点**:工业表格首选 `auto_detect_anomalies`;时序首选 `detect_ts_anomalies(detector_name="MatrixProfile")`;快速跑 `detect_anomalies(detector_name="IForest" / "ECOD")`。
+**默认起点**:工业表格首选 `auto_detect_anomalies`;时序首选 `detect_ts_anomalies(detector_name="MatrixProfile")`;指定检测器首选 `detect_with_model(detector_name="IForest" / "ECOD")`(自动 train+持久化+打分,加载模式下自动复用)。
 
 ## 何时不命中
 
@@ -46,9 +46,9 @@
 | 工具 | 用途 |
 |---|---|
 | `auto_detect_anomalies` | ADEngine 一键全流程(默认稳妥) |
-| `detect_anomalies` | 单检测器表格检测 |
+| `detect_with_model` | **统一入口**:自动 train+持久化 / 加载已有模型 + 打分 |
 | `detect_ts_anomalies` / `detect_ts_with_forecast` | 时序检测 / 预测残差异常 |
-| `train_anomaly_detector` / `load_detector_and_predict` / `list_saved_detectors` / `delete_saved_detector` | 持久化 |
+| `list_saved_detectors` / `delete_saved_detector` | 已保存模型枚举 / 删除 |
 | `evaluate_detection` | 带 label 评估(ROC-AUC / P@n / F1) |
 | `compare_detection_results` | 多算法对比(内部并行重训,**不要**先单跑再 compare) |
 | `combine_detector_scores` / `train_ensemble_detector` | 分数融合 / ensemble(二选一) |

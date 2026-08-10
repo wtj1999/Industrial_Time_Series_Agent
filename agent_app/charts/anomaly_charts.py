@@ -2,7 +2,7 @@
 
 Consumes the ``tool_calls`` list produced by
 :func:`agents.base_agent.extract_tool_calls` and turns the **last**
-``detect_anomalies`` / ``detect_ts_anomalies`` result into a frontend-
+``detect_with_model`` / ``detect_ts_anomalies`` result into a frontend-
 ready anomaly-score chart payload.
 """
 
@@ -21,7 +21,16 @@ logger = logging.getLogger(__name__)
 # in sync with :func:`_build_anomaly_scores_chart` — adding a new tool
 # name here without a matching branch in the builder will just fall
 # through to ``None`` (no chart emitted).
-_CHARTABLE_TOOLS = {"detect_anomalies", "detect_ts_anomalies"}
+#
+# ``detect_with_model`` is the unified entry point (train+load merged);
+# it emits the same ``scores`` / ``labels`` / ``threshold`` /
+# ``scores_summary`` / ``top_anomalies`` shape regardless of whether it
+# ended up training a new detector or loading a saved one, so the same
+# builder handles both modes.
+_CHARTABLE_TOOLS = {
+    "detect_with_model",
+    "detect_ts_anomalies",
+}
 
 # Cap the per-chart score array so we never ship a 100k-point JSON
 # payload to the browser. When the series is longer than this we
@@ -63,7 +72,7 @@ def extract_anomaly_chart(
 # ---------------------------------------------------------------------- #
 
 def _build_anomaly_scores_chart(result: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Convert a raw ``detect_anomalies`` / ``detect_ts_anomalies`` result
+    """Convert a raw ``detect_with_model`` / ``detect_ts_anomalies`` result
     dict into the frontend-friendly chart payload.
 
     The shape is intentionally a strict subset that both tools satisfy so

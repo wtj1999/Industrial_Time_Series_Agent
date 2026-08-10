@@ -12,6 +12,7 @@ import {
   ArrowLeft,
   Boxes,
   Cpu,
+  Database,
   Layers,
   RefreshCw,
   Target,
@@ -136,6 +137,15 @@ function ModelCard({ m }: { m: ModelEntry }) {
           >
             {m.save_name}
           </h3>
+          {(m.source_file || m.source) && (
+            <p
+              className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-steel-500"
+              title={m.source_file ?? m.source ?? ''}
+            >
+              <Database className="h-3 w-3 shrink-0 text-steel-400" />
+              <span className="truncate">基于数据集 {m.source_file ?? m.source}</span>
+            </p>
+          )}
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span className="rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-violet-700">
               {detector}
@@ -217,21 +227,14 @@ function ModelCard({ m }: { m: ModelEntry }) {
           </span>
         </div>
         <div className="flex items-center justify-between gap-2">
-          <span>来源</span>
+          <span>来源会话</span>
           <span className="flex items-center gap-1.5 truncate">
-            {m.source_file && (
-              <span
-                className="max-w-[8rem] truncate text-steel-600"
-                title={m.source_file}
-              >
-                {m.source_file}
-              </span>
-            )}
             {m.thread_id && (
               <code className="rounded bg-steel-50 px-1 py-0 text-[9px] text-steel-400">
                 {shortId(m.thread_id, 6, 4)}
               </code>
             )}
+            {!m.thread_id && <span className="text-steel-400">—</span>}
           </span>
         </div>
         <div className="flex items-center justify-between">

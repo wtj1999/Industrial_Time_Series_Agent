@@ -4,15 +4,14 @@ A refactored superset of the original ``detector_*_tools`` modules.
 Everything is grouped under this package so imports stay clean::
 
     from agent_app.tools.anomaly_detection_tools import (
-        detect_anomalies,
-        train_anomaly_detector,
+        detect_with_model,
         list_pyod_detectors,
         ...
     )
 
 The persistence layout is deterministic: every saved model lives under
 
-    artifacts/anomaly_detection/<thread_id>/<file_stem>_anomaly_detection/
+    artifacts/anomaly_detection/<user_id>/<thread_id>/<file_stem>_anomaly_detection/
 
 so the LLM never needs to (and cannot) invent a path — it only supplies
 a bare ``save_name`` (e.g. ``"iforest_v1"``).
@@ -43,15 +42,13 @@ from agent_app.tools.anomaly_detection_tools.knowledge_tools import (  # noqa: F
     list_threshold_methods,
 )
 
-# Train / predict / persist tools.
+# Detect / train / persist tools.
 from agent_app.tools.anomaly_detection_tools.train_predict_tools import (  # noqa: F401
     TOOLS as _train_predict_tools,
     delete_saved_detector,
-    detect_anomalies,
+    detect_with_model,
     fit_predict_with_split,
     list_saved_detectors,
-    load_detector_and_predict,
-    train_anomaly_detector,
 )
 
 # Evaluation tools.
@@ -106,10 +103,8 @@ TOOLS = [
     list_combination_methods,
     recommend_detectors,
 
-    # Train / predict / persist.
-    detect_anomalies,
-    train_anomaly_detector,
-    load_detector_and_predict,
+    # Detect / train / persist.
+    detect_with_model,
     list_saved_detectors,
     delete_saved_detector,
     fit_predict_with_split,
@@ -159,10 +154,8 @@ __all__ = [
     "list_threshold_methods",
     "list_combination_methods",
     "recommend_detectors",
-    # Train / predict / persist
-    "detect_anomalies",
-    "train_anomaly_detector",
-    "load_detector_and_predict",
+    # Detect / train / persist
+    "detect_with_model",
     "list_saved_detectors",
     "delete_saved_detector",
     "fit_predict_with_split",

@@ -319,7 +319,7 @@ def train_ensemble_detector(
     Returns
     -------
     Dict[str, Any]
-        与 :func:`train_anomaly_detector` 一致，附带 ``detector_name``。
+        与 :func:`detect_with_model` 一致，附带 ``detector_name``。
     """
     if detector_name not in _ENSEMBLE_DETECTORS:
         return {

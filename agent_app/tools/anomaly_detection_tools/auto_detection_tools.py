@@ -192,7 +192,7 @@ def recommend_detectors(
 
     相比 :func:`auto_detect_anomalies`，本工具不真正训练，只返回
     ADEngine 的「候选清单 + 理由 + 默认参数」，便于大模型与用户确认
-    算法选择后再调用 :func:`train_anomaly_detector` / :func:`detect_anomalies`。
+    算法选择后再调用 :func:`detect_with_model`（训练 + 持久化 + 打分）。
 
     Parameters
     ----------
@@ -270,8 +270,8 @@ def recommend_detectors(
         "profile": profile if isinstance(profile, (dict, list)) else None,
         "candidates": candidates,
         "notes": format_notes(info, [
-            "本工具只做推荐不训练；选定后可用 detect_anomalies 或 "
-            "train_anomaly_detector 执行。"]),
+            "本工具只做推荐不训练；选定后用 detect_with_model 执行"
+            "（自动 train + 持久化 + 打分）。"]),
     }
 
 
