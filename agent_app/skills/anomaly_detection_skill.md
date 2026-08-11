@@ -16,7 +16,7 @@
 | 多算法共识 | 共识 / 融合 / ensemble / consensus |
 | 模型持久化 | 训练并保存 / 加载模型 / 重新打分 |
 
-**默认起点**:工业表格首选 `auto_detect_anomalies`;时序首选 `detect_ts_anomalies(detector_name="MatrixProfile")`;指定检测器首选 `detect_with_model(detector_name="IForest" / "ECOD")`(自动 train+持久化+打分,加载模式下自动复用)。
+**默认起点**:工业表格首选 `auto_detect_anomalies`;时序首选 `detect_with_model(detector_name="MatrixProfile")`(原生时序检测器自动走时序分支);指定检测器首选 `detect_with_model(detector_name="IForest" / "ECOD")`(自动 train+持久化+打分,加载模式下自动复用)。
 
 ## 何时不命中
 
@@ -46,8 +46,7 @@
 | 工具 | 用途 |
 |---|---|
 | `auto_detect_anomalies` | ADEngine 一键全流程(默认稳妥) |
-| `detect_with_model` | **统一入口**:自动 train+持久化 / 加载已有模型 + 打分 |
-| `detect_ts_anomalies` / `detect_ts_with_forecast` | 时序检测 / 预测残差异常 |
+| `detect_with_model` | **统一入口**:自动 train+持久化 / 加载已有模型 + 打分;表格 / 时序都走它(原生时序检测器自动走时序分支,表格检测器可传 `as_time_series=True` 做滑窗时序) |
 | `list_saved_detectors` / `delete_saved_detector` | 已保存模型枚举 / 删除 |
 | `evaluate_detection` | 带 label 评估(ROC-AUC / P@n / F1) |
 | `compare_detection_results` | 多算法对比(内部并行重训,**不要**先单跑再 compare) |
@@ -58,7 +57,7 @@
 
 ## 输入 / 输出
 
-- **输入**:`target_columns`(fallback feature);非数值列跳过;`label_column`(仅评估);`time_column`(仅标注);`contamination`(默认 0.1);`save_name`(裸名称,不带路径)
+- **输入**:`target_columns`(fallback feature);非数值列跳过;`label_column`(仅评估);`as_time_series`(三态时序开关,默认按检测器自动判断);`time_column`(仅标注时间轴);`window_size`(时序滑窗);`contamination`(默认 0.1);`save_name`(裸名称,不带路径)
 - **输出**:`n_anomalies` / `anomaly_ratio` / `threshold` / `top_anomalies` / `anomaly_intervals`(时序) / `labels_` / `decision_scores_` + 图表
 
 ## 限制
@@ -66,6 +65,6 @@
 - **不做**:预测 / 趋势分布分析 / 参数优化
 - `MatrixProfile` 等 transductive 检测器不支持新样本 `predict`,`supports_out_of_sample=false` 必须告知
 - 标签全 0 / 全 1 跳过评估,**不得编造指标**
-- 不要传内部构造参数(`n_estimators` / `n_neighbors` 等),只暴露 `contamination` / `window_size` / `step` / `method` / `test_fraction` / `random_state`
+- 不要传内部构造参数(`n_estimators` / `n_neighbors` 等),只暴露 `contamination` / `window_size` / `as_time_series` / `time_column` / `method` / `test_fraction` / `random_state`
 - 不要自己拼模型路径(框架按 `(user_id, thread_id, file_path)` 拼接)
 - 同一回合 ≤ 1 个检测类工具(除非明确要求对比 / 融合 / 解释)

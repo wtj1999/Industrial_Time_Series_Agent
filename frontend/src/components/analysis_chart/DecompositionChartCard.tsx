@@ -164,7 +164,7 @@ function PanelRow({
       </div>
       <div className="h-[80px] flex-1">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 4, right: 12, bottom: 0, left: -16 }}>
+          <LineChart data={data} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#eceef2" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="idx"
@@ -178,7 +178,7 @@ function PanelRow({
               tick={{ fontSize: 9, fill: '#8493ab' }}
               tickLine={false}
               axisLine={false}
-              width={42}
+              width={56}
               tickFormatter={(v: number) => formatNumber(v)}
             />
             <Tooltip

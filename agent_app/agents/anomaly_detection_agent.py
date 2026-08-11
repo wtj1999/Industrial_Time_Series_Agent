@@ -72,8 +72,8 @@ class AnomalyDetectionAgent(BaseAgent):
         dict
             ``{"text": <LLM natural-language summary>, "chart": <chart
             payload dict or None>}``. The chart payload is extracted from
-            the most recent ``detect_with_model`` / ``detect_ts_anomalies``
-            tool result captured during this turn — if no such tool ran
+            the most recent ``detect_with_model`` tool result captured
+            during this turn — if no such tool ran
             (e.g. the LLM only called ``list_pyod_detectors``), ``chart``
             is ``None`` and the orchestrator simply skips the chart event.
         """

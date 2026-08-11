@@ -142,7 +142,7 @@ function PanelRow({
       </div>
       <div className="h-[110px] flex-1">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={rows} margin={{ top: 4, right: 12, bottom: 0, left: -16 }}>
+          <ComposedChart data={rows} margin={{ top: 4, right: 12, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#eceef2" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="lag"
@@ -156,7 +156,7 @@ function PanelRow({
               tick={{ fontSize: 9, fill: '#8493ab' }}
               tickLine={false}
               axisLine={false}
-              width={42}
+              width={48}
               tickFormatter={(v: number) => (Math.abs(v) < 0.001 && v !== 0 ? v.toExponential(0) : v.toFixed(2))}
             />
             <Tooltip

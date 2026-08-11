@@ -120,7 +120,7 @@ export function ControlChartCard({ chart }: { chart: ControlChart }) {
         <div className="min-w-0 flex-1">
           <div className="h-[260px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: -8 }}>
+              <LineChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: 0 }}>
                 <CartesianGrid stroke="#eceef2" strokeDasharray="3 3" vertical={false} />
                 <XAxis
                   dataKey="idx"
@@ -134,7 +134,7 @@ export function ControlChartCard({ chart }: { chart: ControlChart }) {
                   tick={{ fontSize: 10, fill: '#8493ab' }}
                   tickLine={false}
                   axisLine={false}
-                  width={46}
+                  width={56}
                   tickFormatter={(v: number) => formatNumber(v)}
                 />
                 <Tooltip

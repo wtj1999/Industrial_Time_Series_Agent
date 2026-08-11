@@ -61,7 +61,7 @@ export function HistogramCard({ chart }: { chart: HistogramChart }) {
 
       <div className="mt-3 h-[260px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: -8 }}>
+          <ComposedChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#eceef2" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="label"
@@ -75,7 +75,8 @@ export function HistogramCard({ chart }: { chart: HistogramChart }) {
               tick={{ fontSize: 10, fill: '#8493ab' }}
               tickLine={false}
               axisLine={false}
-              width={40}
+              width={56}
+              tickFormatter={(v: number) => formatNumber(v)}
             />
             {cumulative.some((v) => v != null) && (
               <YAxis

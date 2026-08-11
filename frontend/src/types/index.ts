@@ -269,7 +269,7 @@ export interface AnomalyChart {
   threshold: number | null;
   /** Indices into `scores` flagged as anomalies (red dots). */
   anomaly_indices: number[];
-  /** Contiguous anomaly intervals (detect_ts_anomalies only); null otherwise. */
+  /** Contiguous anomaly intervals (time-series mode only); null otherwise. */
   anomaly_intervals: AnomalyInterval[] | null;
   /** Top-N highest-scoring rows for the side table. */
   top_anomalies: AnomalyTopRow[];
@@ -716,6 +716,10 @@ export interface DatasetsResponse {
 }
 
 export interface ModelEntry {
+  /** Persisted model family. Older anomaly-model records omit this field. */
+  category?: 'anomaly_detection' | 'time_series_prediction' | string | null;
+  task_type?: 'anomaly_detection' | 'prediction' | string | null;
+  model_type?: string | null;
   save_name: string;
   file_name: string;
   detector_name?: string | null;

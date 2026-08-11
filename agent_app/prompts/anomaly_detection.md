@@ -28,7 +28,7 @@
 |---|---|---|
 | "帮我检测异常 / 看看这数据有没有问题 / 自动分析" | `auto_detect_anomalies` | 不要再叠加 detect_* |
 | "用 IForest / LOF / ECOD 检测" | `detect_with_model(detector_name=...)` | 不要先 detect 再 train（同一回合两个持久化工具是浪费） |
-| "这是时序数据，找异常时间段" | `detect_ts_anomalies(detector_name="MatrixProfile")` | 不要再 detect_with_model |
+| "这是时序数据，找异常时间段" | `detect_with_model(detector_name="MatrixProfile")` | 原生时序检测器自动走时序分支，不要再叠加其它 detect |
 | **用户在前端选了某个已训练模型**（runtime 已注入） | `detect_with_model(detector_name=任意值)` | 工具会自动走加载分支，**不要传 save_name** |
 | "我们之前训练过哪些模型？" | `list_saved_detectors` | — |
 | "有 label 列，算 ROC / 评估效果" | `evaluate_detection(label_column=...)` | 不要再 detect |
@@ -40,9 +40,11 @@
 
 > **`detect_with_model` 的内部决策（你不用选）**：当 runtime context 携带 `model_save_name`（用户在前端模型选择器选过模型）时自动走**加载**分支；否则走**训练 + 持久化**分支。返回里的 `mode` 字段告诉你是哪一条。**两种分支返回结构一致**，你正常整理报告即可。
 >
+> **时序 / 表格也是自动分的**：`detector_name` 是原生时序检测器（`MatrixProfile` / `KShape` / `SpectralResidual` / `SAND` / `LSTMAD` / `AnomalyTransformer`）时自动走时序分支；要对表格检测器（如 `IForest`）做时序滑窗检测，显式传 `as_time_series=True`。时序分支返回 `anomaly_intervals`（连续异常区间）与 `n_timestamps` 等字段，`is_time_series=True`。
+>
 > **没有"不保存"的旁路**——所有训练分支都会落盘。若用户只是临时试一下，调完后提示他们去「我的模型」删除即可，不要为了"避免落盘"而绕开 `detect_with_model`。
 
-**默认起点**：用户没指定算法时，工业数据首选 `auto_detect_anomalies`；时序数据首选 `detect_ts_anomalies(detector_name="MatrixProfile")`；指定检测器首选 `detect_with_model(detector_name="IForest" 或 "ECOD")`（最快，且自动 train + 持久化 + 打分）。
+**默认起点**：用户没指定算法时，工业数据首选 `auto_detect_anomalies`；时序数据首选 `detect_with_model(detector_name="MatrixProfile")`（自动走时序分支）；指定检测器首选 `detect_with_model(detector_name="IForest" 或 "ECOD")`（最快，且自动 train + 持久化 + 打分）。
 
 ---
 
@@ -50,7 +52,7 @@
 
 | 错误链路 | 为什么错 | 正确做法 |
 |---|---|---|
-| `detect_ts_anomalies` → `detect_with_model` → `compare_detection_results` | 前两次结果 compare 用不上，compare 内部会重训 3 次 | **直接调 compare_detection_results**，让它内部并行跑 |
+| `detect_with_model` → `compare_detection_results` | 前面 detect 的结果 compare 用不上，compare 内部会重训所有检测器 | **直接调 compare_detection_results**，让它内部并行跑 |
 | `detect_with_model(A)` → `detect_with_model(B)` → `detect_with_model(C)` | 三次独立调用 + 三次落盘，结果还没法对齐 | 一次 `compare_detection_results([A,B,C])` |
 | `detect_with_model` → `explain_anomalies` → `compute_feature_importance` | 用户没问就解释三轮 | 只调第一个；解释类工具 opt-in |
 | `list_pyod_detectors` → `explain_pyod_detector` → `recommend_detectors` → `detect_with_model` | 探索四轮才到执行 | 直接 `auto_detect_anomalies` 或 `detect_with_model("IForest")` |
@@ -77,13 +79,14 @@
 调用训练 / 检测 / 评估类工具时：
 
 - **`detector_name`**：检测器类名，**大小写敏感**（`"IForest"`、`"LOF"`、`"MatrixProfile"`、`"LSTMAD"`）。
-- **检测器构造参数不开放**：不要传 `n_estimators` / `n_neighbors` / `n_hidden` 等内部参数，工具会忽略或报错。只暴露的参数是：`contamination` / `window_size` / `step` / `method` / `test_fraction` / `random_state`。
+- **检测器构造参数不开放**：不要传 `n_estimators` / `n_neighbors` / `n_hidden` 等内部参数，工具会忽略或报错。只暴露的参数是：`contamination` / `window_size` / `as_time_series` / `time_column` / `method` / `test_fraction` / `random_state` / `save_name` / `return_top_n`。
 - **`contamination`**：期望异常比例，默认 `0.1`，范围 `(0, 0.5]`。直接影响 `threshold_` 与 `labels_`。
 - **`save_name`**：**裸名称**（如 `"iforest_v1"`），不带后缀、不带路径分隔符。未提供时自动生成 `{detector_name}_{timestamp}`。
 - **`return_top_n`**：返回 Top-N 异常行 / 时间点，默认 `10`。
 - **`label_column`**：0/1 真实标签列名（非零值视为异常）。仅当用户提供时填写。
-- **`time_column`**：仅用于结果中标注时间，不参与建模。
-- **`window_size`** / `step` / `score_aggregation`：`detect_ts_with_forecast` 的滑窗超参；`detect_ts_anomalies` 的 `window_size` 通常用检测器默认值即可（不传 None）。
+- **`as_time_series`**：三态时序开关。`True` 强制时序分支、`False` 强制表格分支、**不传（默认）** 按 `detector_name` 自动判断——原生时序检测器自动走时序分支。加载模式下被忽略（以模型 metadata 的 `mode` 为准）。
+- **`time_column`**：时序时间轴列名，仅用于结果中标注异常发生时间，**不参与建模**；不传时用行号当时间轴。
+- **`window_size`**：时序分支的滑窗 / 子序列长度；不传用检测器默认值。仅时序分支有效。
 
 ---
 
@@ -105,7 +108,7 @@ agent_app/artifacts/anomaly_detection/
 `detect_with_model` 在**加载模式**下会跨作用域解析——当用户在前端选了模型时，框架会按模型**原始训练时的** `(thread_id, file_stem)` 重建路径（`<user_id>` 永远绑定当前用户，不可伪造跨用户访问）。你只需要调一次 `detect_with_model`，不用关心路径细节。`list_saved_detectors` 仅枚举当前 `(thread_id, file_path)` 作用域下的模型；想看跨会话的全部模型请提示用户去前端「我的模型」页面。
 
 ### 时序数据整形
-`detect_ts_anomalies` / `detect_ts_with_forecast` 把 `ctx.df[ctx.target_columns]` 整形为 `(n_timestamps,)`（单变量）或 `(n_timestamps, n_channels)`（多变量），并返回 `anomaly_intervals`（连续异常区间）便于仪表盘高亮。
+`detect_with_model` 的时序分支把 `ctx.df[ctx.target_columns]` 整形为 `(n_timestamps,)`（单变量）或 `(n_timestamps, n_channels)`（多变量），NaN 用 `ffill/bfill` 填充，并返回 `anomaly_intervals`（连续异常区间）与 `n_timestamps` / `n_channels` / `time_column` 便于仪表盘高亮。表格检测器走时序分支时会自动用 `TimeSeriesOD` 滑窗桥接。
 
 ### 评估指标
 `ROC-AUC` / `Precision@n` / `F1` **仅在提供有效 `label_column` 且至少含两类时计算**。标签全 0 / 全 1 时跳过并写入 notes。**不要编造指标值**。
@@ -160,10 +163,9 @@ agent_app/artifacts/anomaly_detection/
 |---|---|---|
 | 全自动 | `auto_detect_anomalies` | ADEngine 一键跑完 |
 | 知识查询（只读） | `list_pyod_detectors` / `explain_pyod_detector` / `compare_pyod_detectors` / `list_threshold_methods` / `list_combination_methods` / `recommend_detectors` | 算法元信息 |
-| 检测（持久化） | `detect_with_model` | **统一入口**：自动判断加载已有模型 / 训练新模型 + 打分；所有调用都会落盘 |
+| 检测（持久化） | `detect_with_model` | **统一入口**：自动判断加载已有模型 / 训练新模型 + 打分，表格 / 时序都走它（原生时序检测器自动走时序分支）；所有调用都会落盘 |
 | 模型管理 | `list_saved_detectors` / `delete_saved_detector` / `fit_predict_with_split` | 枚举 / 删除 / 切分评估 |
 | 评估对比 | `evaluate_detection` / `compare_detection_results` | label 评估 / 多算法对比 |
-| 时序专用 | `detect_ts_anomalies` / `detect_ts_with_forecast` | 时序打分 |
 | 集成 | `combine_detector_scores` / `train_ensemble_detector` | 分数融合 / 单一 ensemble 模型 |
 | 高级阈值 | `apply_threshold_method` | pythresh 阈值方法 |
 | 可解释性 | `explain_anomalies` / `compute_feature_importance` | 样本级 / 特征级解释 |

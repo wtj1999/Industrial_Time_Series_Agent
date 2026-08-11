@@ -19,9 +19,9 @@ Usage::
 
     from agent_app.tools._tool_guard import tool_guard
 
-    @tool("detect_ts_anomalies")
-    @tool_guard("detect_ts_anomalies")
-    def detect_ts_anomalies(runtime: ToolRuntime, detector_name: str = "KShape", ...):
+    @tool("detect_with_model")
+    @tool_guard("detect_with_model")
+    def detect_with_model(detector_name: str, runtime: ToolRuntime, ...):
         ...
 
 The decorator uses :func:`functools.wraps`, so LangChain's ``@tool``

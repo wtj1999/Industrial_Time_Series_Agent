@@ -7,10 +7,13 @@
  * timing. Legacy/transductive markers are shown as badges.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Activity,
   ArrowLeft,
+  ArrowRight,
   Boxes,
+  ChartSpline,
   Cpu,
   Database,
   Layers,
@@ -28,11 +31,47 @@ import {
   shortId,
 } from '@/utils/format';
 
+type ModelCategory = 'anomaly_detection' | 'time_series_prediction';
+
+const CATEGORY_META: Record<
+  ModelCategory,
+  { title: string; description: string; accent: 'violet' | 'blue'; icon: typeof Activity }
+> = {
+  anomaly_detection: {
+    title: '异常检测',
+    description: '识别设备、工艺与传感器数据中的异常模式',
+    accent: 'violet',
+    icon: Activity,
+  },
+  time_series_prediction: {
+    title: '时序预测',
+    description: '预测未来趋势、周期变化与关键指标走势',
+    accent: 'blue',
+    icon: ChartSpline,
+  },
+};
+
 export function MyModelsView({ onBack }: { onBack: () => void }) {
   const [models, setModels] = useState<ModelEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<ModelCategory | null>(null);
+
+  const groupedModels = useMemo(
+    () => ({
+      anomaly_detection: models.filter(
+        (model) => getModelCategory(model) === 'anomaly_detection',
+      ),
+      time_series_prediction: models.filter(
+        (model) => getModelCategory(model) === 'time_series_prediction',
+      ),
+    }),
+    [models],
+  );
+
+  const visibleModels = activeCategory ? groupedModels[activeCategory] : [];
+  const activeMeta = activeCategory ? CATEGORY_META[activeCategory] : null;
 
   const fetchModels = useCallback(async (isRefresh: boolean) => {
     if (isRefresh) setRefreshing(true);
@@ -59,9 +98,9 @@ export function MyModelsView({ onBack }: { onBack: () => void }) {
       <div className="flex items-center gap-3 border-b border-steel-200/70 bg-white/60 px-4 py-3 backdrop-blur-md sm:px-6">
         <button
           type="button"
-          onClick={onBack}
+          onClick={() => (activeCategory ? setActiveCategory(null) : onBack())}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-steel-600 transition-colors hover:bg-steel-100 hover:text-steel-900"
-          title="返回对话"
+          title={activeCategory ? '返回模型分类' : '返回对话'}
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -69,9 +108,11 @@ export function MyModelsView({ onBack }: { onBack: () => void }) {
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 text-white">
             <Boxes className="h-3.5 w-3.5" />
           </span>
-          <h1 className="text-sm font-semibold text-steel-800">我的模型</h1>
+          <h1 className="text-sm font-semibold text-steel-800">
+            {activeMeta?.title ?? '我的模型'}
+          </h1>
           <span className="rounded-full bg-steel-100 px-2 py-0.5 text-[10px] font-medium text-steel-600">
-            {models.length} 个模型
+            {activeCategory ? visibleModels.length : models.length} 个模型
           </span>
         </div>
         <div className="flex-1" />
@@ -97,16 +138,120 @@ export function MyModelsView({ onBack }: { onBack: () => void }) {
             <LoadingState />
           ) : error ? (
             <ErrorState message={error} onRetry={() => void fetchModels(true)} />
-          ) : models.length === 0 ? (
-            <EmptyState onBack={onBack} />
+          ) : activeCategory ? (
+            visibleModels.length === 0 ? (
+              <CategoryEmptyState
+                category={activeCategory}
+                onBack={() => setActiveCategory(null)}
+              />
+            ) : (
+              <>
+                <p className="mb-4 text-xs text-steel-500">{activeMeta?.description}</p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {visibleModels.map((m) => (
+                    <ModelCard key={`${m.thread_id ?? ''}/${m.file_name}`} m={m} />
+                  ))}
+                </div>
+              </>
+            )
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {models.map((m) => (
-                <ModelCard key={`${m.thread_id ?? ''}/${m.file_name}`} m={m} />
-              ))}
-            </div>
+            <CategoryGrid groupedModels={groupedModels} onSelect={setActiveCategory} />
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function getModelCategory(model: ModelEntry): ModelCategory {
+  const marker = [
+    model.category,
+    model.task_type,
+    model.model_type,
+    model.file_name,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return marker.includes('prediction') || marker.includes('forecast')
+    ? 'time_series_prediction'
+    : 'anomaly_detection';
+}
+
+function CategoryGrid({
+  groupedModels,
+  onSelect,
+}: {
+  groupedModels: Record<ModelCategory, ModelEntry[]>;
+  onSelect: (category: ModelCategory) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-steel-400">
+          模型资产
+        </p>
+        <h2 className="mt-1 text-lg font-semibold tracking-tight text-steel-900">
+          按任务类型浏览
+        </h2>
+        <p className="mt-1 text-xs text-steel-500">
+          选择模型的应用方向，再查看已训练并保存的具体模型。
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {(Object.keys(CATEGORY_META) as ModelCategory[]).map((category) => {
+          const meta = CATEGORY_META[category];
+          const Icon = meta.icon;
+          const count = groupedModels[category].length;
+          const isViolet = meta.accent === 'violet';
+
+          return (
+            <button
+              key={category}
+              type="button"
+              onClick={() => onSelect(category)}
+              className={cn(
+                'group relative min-h-[190px] overflow-hidden rounded-2xl border bg-white p-5 text-left shadow-sm transition-all',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                isViolet
+                  ? 'border-violet-200/80 hover:border-violet-400 hover:shadow-soft focus-visible:ring-violet-500'
+                  : 'border-blue-200/80 hover:border-blue-400 hover:shadow-soft focus-visible:ring-blue-500',
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'absolute -right-10 -top-12 h-36 w-36 rounded-full opacity-60 transition-transform duration-300 group-hover:scale-110',
+                  isViolet ? 'bg-violet-50' : 'bg-blue-50',
+                )}
+              />
+              <div className="relative flex h-full flex-col">
+                <div className="flex items-start justify-between gap-4">
+                  <span
+                    className={cn(
+                      'flex h-11 w-11 items-center justify-center rounded-xl',
+                      isViolet
+                        ? 'bg-violet-100 text-violet-700'
+                        : 'bg-blue-100 text-blue-700',
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] font-medium text-steel-500">
+                    {count} 个模型
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+                <h3 className="mt-6 text-base font-semibold text-steel-900">{meta.title}</h3>
+                <p className="mt-1.5 max-w-sm text-xs leading-5 text-steel-500">
+                  {meta.description}
+                </p>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -310,23 +455,33 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   );
 }
 
-function EmptyState({ onBack }: { onBack: () => void }) {
+function CategoryEmptyState({
+  category,
+  onBack,
+}: {
+  category: ModelCategory;
+  onBack: () => void;
+}) {
+  const meta = CATEGORY_META[category];
+  const Icon = meta.icon;
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-steel-100 to-steel-200 text-steel-400">
-        <Train className="h-7 w-7" />
+        <Icon className="h-7 w-7" />
       </div>
-      <h2 className="mt-5 text-sm font-semibold text-steel-700">还没有保存过模型</h2>
+      <h2 className="mt-5 text-sm font-semibold text-steel-700">
+        还没有保存的{meta.title}模型
+      </h2>
       <p className="mt-1.5 max-w-xs text-[11px] text-steel-500">
-        在对话中训练异常检测模型或时序预测模型后，保存的模型会出现在这里。
+        在对话中完成训练并保存模型后，模型卡片会出现在这个分类中。
       </p>
       <button
         type="button"
         onClick={onBack}
-        className="mt-4 inline-flex h-8 items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 text-xs font-medium text-violet-700 hover:bg-violet-100"
+        className="mt-4 inline-flex h-8 items-center gap-1.5 rounded-lg border border-steel-200 bg-white px-3 text-xs font-medium text-steel-700 hover:bg-steel-50"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
-        返回对话训练
+        返回模型分类
       </button>
     </div>
   );

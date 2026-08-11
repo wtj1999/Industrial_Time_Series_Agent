@@ -30,7 +30,7 @@
 
 - "调用 `analyze_missing_values` 检查数据质量"
 - "使用 `forecast_time_series(model="sundial", prediction_length=24)` 预测"
-- "执行 `detect_ts_anomalies(detector_name="MatrixProfile")`"
+- "执行 `detect_with_model(detector_name="MatrixProfile", as_time_series=True)`"
 - "通过 `compare_detection_results` 对比多个检测器"
 
 ✅ 正确写法（方法论语言）：

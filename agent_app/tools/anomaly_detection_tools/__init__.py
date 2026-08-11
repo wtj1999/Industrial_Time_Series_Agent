@@ -58,13 +58,6 @@ from agent_app.tools.anomaly_detection_tools.evaluation_tools import (  # noqa: 
     evaluate_detection,
 )
 
-# Time-series tools.
-from agent_app.tools.anomaly_detection_tools.time_series_tools import (  # noqa: F401
-    TOOLS as _ts_tools,
-    detect_ts_anomalies,
-    detect_ts_with_forecast,
-)
-
 # Ensemble / score-combination tools.
 from agent_app.tools.anomaly_detection_tools.ensemble_tools import (  # noqa: F401
     TOOLS as _ensemble_tools,
@@ -113,10 +106,6 @@ TOOLS = [
     evaluate_detection,
     compare_detection_results,
 
-    # Time-series.
-    detect_ts_anomalies,
-    detect_ts_with_forecast,
-
     # Ensemble.
     combine_detector_scores,
     train_ensemble_detector,
@@ -162,9 +151,6 @@ __all__ = [
     # Evaluation
     "evaluate_detection",
     "compare_detection_results",
-    # Time-series
-    "detect_ts_anomalies",
-    "detect_ts_with_forecast",
     # Ensemble
     "combine_detector_scores",
     "train_ensemble_detector",

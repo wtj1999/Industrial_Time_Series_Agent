@@ -12,7 +12,7 @@
  *   - a Recharts LineChart of per-sample anomaly scores with a dashed
  *     red threshold reference line, red anomaly dots, and optional
  *     `<ReferenceArea>` bands for contiguous anomaly intervals
- *     (detect_ts_anomalies only)
+ *     (time-series mode only)
  *   - a compact Top-N anomalies table with per-row column values
  */
 
@@ -148,7 +148,7 @@ function Body({ chart }: { chart: AnomalyChart }) {
     <div className="mt-3">
       <div className="h-[260px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: -8 }}>
+          <LineChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#eceef2" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="x"
@@ -162,13 +162,14 @@ function Body({ chart }: { chart: AnomalyChart }) {
               tickLine={false}
               axisLine={false}
               domain={yDomain ?? ['auto', 'auto']}
-              width={48}
+              width={56}
+              tickFormatter={(v: number) => formatNumber(v)}
             />
             <Tooltip
               cursor={{ stroke: '#8eb6ff', strokeWidth: 1, strokeDasharray: '4 4' }}
               content={<ChartTooltip xLabel={chart.x_label} />}
             />
-            {/* Contiguous anomaly intervals (detect_ts_anomalies only) */}
+            {/* Contiguous anomaly intervals (time-series mode only) */}
             {hasIntervals &&
               (chart.anomaly_intervals ?? []).map((iv, idx) => (
                 <ReferenceArea

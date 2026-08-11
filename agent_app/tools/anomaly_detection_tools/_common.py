@@ -8,6 +8,9 @@ modules need:
 - KnowledgeBase singleton access (cached process-wide).
 - Detector construction through the vendored ``_detector_factory``.
 - Feature-matrix preparation from ``ctx.df[ctx.target_columns]``.
+- Time-series matrix preparation / detection helpers (shaping, sliding-window
+  bridge construction, anomaly intervals, Top-N timestamps) used by
+  ``detect_with_model``'s time-series branch.
 - Transductive-detector detection (no ``predict`` / ``decision_function``).
 - Score summarisation (min/max/mean/std + Top-N anomaly indices).
 - Score scaling helpers shared across train/predict/evaluate/ensemble tools.
@@ -447,6 +450,218 @@ def prepare_feature_matrix(runtime) -> Tuple[np.ndarray, Dict[str, Any]]:
     info["imputed_nan_count"] = nan_count
     info["n_features"] = int(X.shape[1])
     return X, info
+
+
+# ----------------------------------------------------------------------
+# Time-series matrix preparation / detection
+#
+# Shared by ``detect_with_model``'s time-series branch. These mirror the
+# tabular helpers above but preserve temporal order (1-D ``(n_timestamps,)``
+# or 2-D ``(n_timestamps, n_channels)``) and impute NaNs with ffill/bfill
+# instead of the column median, which suits ordered series better.
+# ----------------------------------------------------------------------
+
+# Detectors that ship as native PyOD time-series implementations. Any other
+# name is bridged through :class:`TimeSeriesOD` (sliding windows) by
+# :func:`build_ts_detector`.
+TS_NATIVE_DETECTORS = {
+    "KShape", "MatrixProfile", "SpectralResidual", "SAND",
+    "LSTMAD", "AnomalyTransformer", "TimeSeriesOD",
+}
+
+def prepare_ts_matrix(runtime, time_column: Optional[str]):
+    """Extract a time-series matrix from context.
+
+    Returns ``(X, time_index, info)`` where ``X`` has shape
+    ``(n_timestamps,)`` when there is a single channel, or
+    ``(n_timestamps, n_channels)`` for multi-channel data. ``time_index``
+    is the per-row timestamp/position used to label Top-N anomaly windows
+    in the result.
+    """
+    ctx = runtime.context
+    df: pd.DataFrame = ctx.df
+    targets: List[str] = list(getattr(ctx, "target_columns", None) or [])
+    features: List[str] = list(getattr(ctx, "feature_columns", None) or [])
+    if not targets and not features:
+        raise ValueError(
+            "No target_columns or feature_columns available in context; "
+            "cannot build a time series matrix.")
+    candidates = targets if targets else features
+
+    present = [c for c in candidates if c in df.columns]
+    skipped_missing = [c for c in candidates if c not in df.columns]
+    numeric_cols: List[str] = []
+    skipped_non_numeric: List[str] = []
+    for c in present:
+        as_num = pd.to_numeric(df[c], errors="coerce")
+        if as_num.notna().any():
+            numeric_cols.append(c)
+        else:
+            skipped_non_numeric.append(c)
+    if not numeric_cols:
+        raise ValueError(
+            "No numeric columns available in candidates=%r." % (candidates,))
+
+    sub = df[numeric_cols].apply(pd.to_numeric, errors="coerce")
+    nan_count = int(sub.isna().sum().sum())
+    if nan_count > 0:
+        # Forward-fill then back-fill for time series (preserves temporal locality).
+        sub = sub.ffill().bfill().fillna(0.0)
+
+    arr = sub.to_numpy(dtype=np.float64)
+    if arr.shape[1] == 1:
+        ts_array = arr[:, 0]
+    else:
+        ts_array = arr
+
+    if time_column and time_column in df.columns:
+        time_index = df[time_column].tolist()
+        time_column_used: Optional[str] = time_column
+    else:
+        time_index = list(range(arr.shape[0]))
+        time_column_used = None
+
+    info = {
+        "used_columns": numeric_cols,
+        "source": "target" if targets else "feature",
+        "skipped_missing": skipped_missing,
+        "skipped_non_numeric": skipped_non_numeric,
+        "imputed_nan_count": nan_count,
+        "n_timestamps": int(arr.shape[0]),
+        "n_channels": int(arr.shape[1]),
+        "time_column": time_column_used,
+    }
+    return ts_array, time_index, info
+
+
+def build_ts_detector(
+    detector_name: str,
+    window_size: Optional[int],
+    params: Optional[Dict[str, Any]],
+    contamination: float,
+    random_state: Optional[int] = None,
+):
+    """Build a time-series detector.
+
+    Falls back to wrapping an arbitrary tabular detector with
+    :class:`TimeSeriesOD` (sliding windows) when ``detector_name`` is not
+    a native ``ts_*`` detector.
+    """
+    name = detector_name
+    merged: Dict[str, Any] = dict(params or {})
+
+    if name not in TS_NATIVE_DETECTORS:
+        bridge_params: Dict[str, Any] = {"contamination": contamination}
+        if window_size is not None:
+            bridge_params["window_size"] = window_size
+        if merged:
+            bridge_params["params"] = merged
+        return build_detector_by_name(
+            "TimeSeriesOD",
+            params={"detector": name, **bridge_params},
+            contamination=contamination,
+            random_state=random_state,
+        )
+
+    if window_size is not None and "window_size" not in merged:
+        if name != "SpectralResidual":  # uses score_window instead
+            merged["window_size"] = window_size
+    return build_detector_by_name(
+        name,
+        params=merged,
+        contamination=contamination,
+        random_state=random_state,
+    )
+
+
+def anomaly_intervals(
+    labels: np.ndarray,
+    time_index: Optional[List[Any]],
+    threshold: Optional[float],
+    max_intervals: int = 20,
+) -> List[Dict[str, Any]]:
+    """Collapse binary per-timestamp labels into contiguous intervals."""
+    labels = np.asarray(labels, dtype=int)
+    if labels.size == 0:
+        return []
+    flag = labels > 0
+    if not flag.any():
+        return []
+    diff = np.diff(flag.astype(int), prepend=0, append=0)
+    starts = np.nonzero(diff == 1)[0]
+    ends = np.nonzero(diff == -1)[0]
+    intervals: List[Dict[str, Any]] = []
+    for s, e in zip(starts, ends):
+        if time_index is not None:
+            t_start = time_index[s]
+            t_end = time_index[e - 1]
+        else:
+            t_start = int(s)
+            t_end = int(e - 1)
+        intervals.append({
+            "start_index": int(s),
+            "end_index": int(e - 1),
+            "length": int(e - s),
+            "time_start": t_start,
+            "time_end": t_end,
+        })
+        if len(intervals) >= max_intervals:
+            break
+    return intervals
+
+
+def top_ts_anomalies(
+    scores: np.ndarray,
+    time_index: Optional[List[Any]],
+    threshold: Optional[float],
+    top_n: int,
+) -> List[Dict[str, Any]]:
+    """Return the top-N highest-scoring timestamps with context."""
+    scores = np.asarray(scores, dtype=float).ravel()
+    n = min(int(top_n), len(scores)) if top_n else 0
+    if n <= 0:
+        return []
+    finite = np.isfinite(scores)
+    valid_positions = np.nonzero(finite)[0]
+    valid_scores = scores[finite]
+    if valid_scores.size == 0:
+        return []
+    order = np.argsort(valid_scores)[::-1][:n]
+    picked = valid_positions[order]
+    rows: List[Dict[str, Any]] = []
+    for pos in picked:
+        item: Dict[str, Any] = {
+            "timestamp_index": int(pos),
+            "score": float(scores[pos]),
+            "time": time_index[pos] if time_index is not None else int(pos),
+        }
+        if threshold is not None:
+            item["is_anomaly"] = bool(scores[pos] > threshold)
+        rows.append(item)
+    return rows
+
+
+def format_ts_notes(info: Dict[str, Any], extra: Optional[List[str]] = None) -> List[str]:
+    """Format time-series diagnostics + extra hints into a ``notes`` list."""
+    notes: List[str] = []
+    if info.get("skipped_missing"):
+        notes.append(
+            "target_columns 中缺失的列：%s"
+            % ", ".join(info["skipped_missing"]))
+    if info.get("skipped_non_numeric"):
+        notes.append(
+            "跳过 %d 个非数值列：%s"
+            % (len(info["skipped_non_numeric"]),
+               ", ".join(map(str, info["skipped_non_numeric"]))))
+    if info.get("imputed_nan_count"):
+        notes.append(
+            "用 ffill/bfill 填充了 %d 个 NaN 值（时序优先保留时序连续性）。"
+            % info["imputed_nan_count"])
+    if info.get("source") == "feature":
+        notes.append("target_columns 为空，退回到 feature_columns 作为时序输入。")
+    if extra:
+        notes.extend(extra)
+    return notes
 
 
 # ----------------------------------------------------------------------

@@ -337,7 +337,7 @@ export function BacktestChartCard({ chart }: { chart: BacktestChart }) {
       {/* Main composed chart. */}
       <div className="mt-2 h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={rows} margin={{ top: 6, right: 16, bottom: 0, left: -8 }}>
+          <ComposedChart data={rows} margin={{ top: 6, right: 16, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#eceef2" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="idx"
@@ -351,7 +351,7 @@ export function BacktestChartCard({ chart }: { chart: BacktestChart }) {
               tick={{ fontSize: 9, fill: '#8493ab' }}
               tickLine={false}
               axisLine={false}
-              width={48}
+              width={56}
               tickFormatter={(v: number) => formatNumber(v)}
             />
             <Tooltip

@@ -4,10 +4,12 @@ These tools operate on ``ctx.df`` and ``ctx.target_columns`` (falling
 back to ``ctx.feature_columns`` when targets are empty):
 
 - :func:`detect_with_model` — **统一入口**：自动判断加载已有模型还是
-  训练新模型并对当前 DataFrame 打分。当用户在前端选择了复用模型时，
-  走跨作用域加载分支；否则按 ``detector_name`` 训练 + 持久化 + 打分。
-  **所有打分都会持久化模型**——没有"不保存"的探索分支；不想落盘请
-  显式调 :func:`delete_saved_detector` 清理。
+  训练新模型并对当前 DataFrame 打分，同时覆盖**表格与时序**两类数据
+  （``as_time_series`` 三态控制；原生时序检测器自动走时序分支）。当
+  用户在前端选择了复用模型时，走跨作用域加载分支；否则按
+  ``detector_name`` 训练 + 持久化 + 打分。**所有打分都会持久化模型**
+  ——没有"不保存"的探索分支；不想落盘请显式调
+  :func:`delete_saved_detector` 清理。
 - :func:`list_saved_detectors` — 枚举当前 (thread_id, file_path) 作用域
   下的已保存检测器（只读信封，代价低）。
 - :func:`delete_saved_detector` — 删除当前作用域下的某个检测器 artifact。
@@ -27,20 +29,26 @@ from langchain.tools import ToolRuntime, tool
 
 from agent_app.tools._tool_guard import tool_guard
 from agent_app.tools.anomaly_detection_tools._common import (
+    TS_NATIVE_DETECTORS,
+    anomaly_intervals,
     artifacts_dir_for,
     auto_save_name,
     build_detector_by_name,
+    build_ts_detector,
     decision_scores_,
     ensure_dir,
     format_notes,
+    format_ts_notes,
     is_transductive,
     labels_,
     prepare_feature_matrix,
+    prepare_ts_matrix,
     resolve_model_path,
     score_with_detector,
     scores_summary,
     threshold_,
     top_anomaly_rows,
+    top_ts_anomalies,
 )
 from agent_app.tools.outlier_detection_scripts.pyod.utils import persistence
 
@@ -60,8 +68,12 @@ def detect_with_model(
     save_name: Optional[str] = None,
     return_top_n: int = 10,
     random_state: Optional[int] = None,
+    as_time_series: Optional[bool] = None,
+    time_column: Optional[str] = None,
+    window_size: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """对当前 DataFrame 做异常检测并打分，**自动判断是加载已有模型还是训练新模型**。
+    """对当前 DataFrame 做异常检测并打分，**自动判断是加载已有模型还是训练新模型**，
+    并**同时支持表格数据与时序数据**（统一入口）。
 
     决策规则（工具内部自动分派，LLM 无需也不应当干预）：
 
@@ -71,11 +83,24 @@ def detect_with_model(
       :func:`_common.resolve_model_path`）并对当前数据打分。
       ``detector_name`` / ``contamination`` / ``save_name`` /
       ``random_state`` 在此模式下被忽略，以模型信封里记录的为准。
+      时序 / 表格的整形方式也以模型 metadata 的 ``mode`` 字段为准。
 
     - **训练模式**（``mode == "train"``）：否则用 ``detector_name`` 训练
       新检测器，持久化到当前 ``(thread_id, file_path)`` 作用域
      （``save_name`` 控制文件名，未指定则自动生成
       ``{detector_name}_{timestamp}``），然后对当前数据打分。
+
+    **时序 / 表格的选择**（仅训练模式生效，加载模式以 metadata 为准）：
+
+    - ``as_time_series=True`` → 强制时序分支；``False`` → 强制表格分支。
+    - ``as_time_series=None``（默认）→ 自动判断：``detector_name`` 属于原生
+      时序检测器（``MatrixProfile`` / ``KShape`` / ``SpectralResidual`` 等）
+      时走时序分支，否则走表格分支。
+    - 时序分支把 ``ctx.df[ctx.target_columns]`` 整形为 ``(n_timestamps,)``
+      或 ``(n_timestamps, n_channels)``（NaN 用 ffill/bfill 填充），非原生
+      时序检测器会自动用 ``TimeSeriesOD`` 滑窗桥接。返回 ``anomaly_intervals``
+      （连续异常区间）、``n_timestamps`` / ``n_channels`` / ``time_column``。
+    - 表格分支保持原有行为（每行一个 iid 样本，NaN 用列中位数填充）。
 
     所有训练分支都会落盘——没有"不保存"的旁路。若只是临时试一下、不
     想保留产物，请事后用 :func:`delete_saved_detector` 清理。
@@ -84,7 +109,7 @@ def detect_with_model(
     ----------
     detector_name : str
         PyOD 检测器类名，**大小写敏感**（如 ``"IForest"``、``"LOF"``、
-        ``"HBOS"``）。训练模式必填；加载模式下被忽略。
+        ``"HBOS"``、``"MatrixProfile"``）。训练模式必填；加载模式下被忽略。
     contamination : float, default 0.1
         期望异常比例（仅训练模式有效）。影响 ``threshold_`` 与 ``labels_``。
     save_name : str, optional
@@ -92,18 +117,28 @@ def detect_with_model(
         分隔符）。未指定时自动生成 ``{detector_name}_{timestamp}``。
         加载模式下被忽略。
     return_top_n : int, default 10
-        返回分数最高的前 N 行（含原始数值）。
+        返回分数最高的前 N 行（表格）/ 前 N 个时间点（时序）。
     random_state : int, optional
         训练模式下的随机种子。
+    as_time_series : bool, optional
+        三态开关：``True`` 强制时序、``False`` 强制表格、``None``（默认）
+        按 ``detector_name`` 是否为原生时序检测器自动判断。加载模式下被忽略。
+    time_column : str, optional
+        时序时间轴列名，仅用于在结果中标注异常发生时间，**不参与建模**。
+        未提供时用行号当时间轴。加载模式下以模型 metadata 记录的为准。
+    window_size : int, optional
+        时序分支的滑窗 / 子序列长度。仅时序分支有效；未提供时用检测器默认值。
 
     Returns
     -------
     Dict[str, Any]
-        ``mode`` 字段标识实际走了哪条分支（``"load"`` 或 ``"train"``）。
-        ``scores`` / ``labels`` / ``threshold`` / ``scores_summary`` /
-        ``top_anomalies`` / ``feature_columns`` 在两种模式下结构一致，
-        前端 chart 提取逻辑统一处理。加载模式额外返回
-        ``model_metadata`` / ``envelope``；训练模式额外返回
+        ``mode`` 字段标识实际走了哪条分支（``"load"`` 或 ``"train"``），
+        ``is_time_series`` 标识是否走了时序分支。``scores`` / ``labels`` /
+        ``threshold`` / ``scores_summary`` / ``top_anomalies`` /
+        ``feature_columns`` 在两种模式下结构一致，前端 chart 提取逻辑统一
+        处理。时序分支额外返回 ``anomaly_intervals`` / ``time_column`` /
+        ``n_timestamps`` / ``n_channels`` / ``window_size``（表格时为 None）。
+        加载模式额外返回 ``model_metadata`` / ``envelope``；训练模式额外返回
         ``training_scores`` / ``metadata`` / ``n_anomalies``。
     """
     ctx = runtime.context
@@ -112,8 +147,14 @@ def detect_with_model(
     # 用户在前端选择的复用模型引用（跨作用域坐标）。None 表示走训练模式。
     msn = getattr(ctx, "model_save_name", None)
 
-    X, info = prepare_feature_matrix(runtime)
     extra_notes: List[str] = []
+
+    # 跨分支共享的局部变量（按 load/train × 时序/表格 分派后填充）。
+    info: Optional[Dict[str, Any]] = None       # 表格整形诊断
+    ts_info: Optional[Dict[str, Any]] = None    # 时序整形诊断
+    time_index: Optional[List[Any]] = None      # 时序时间轴（表格为 None）
+    is_ts = False
+    window_size_used: Optional[int] = None
 
     # ==================================================================
     # 模式分派
@@ -131,21 +172,24 @@ def detect_with_model(
                 "task_type": "anomaly_detection",
                 "tool_name": "detect_with_model",
                 "mode": mode,
+                "is_time_series": False,
                 "detector_name": None,
                 "summary": "未找到模型文件 %s" % model_path,
                 "model_path": str(model_path),
                 "save_name": msn,
-                "n_samples": int(X.shape[0]),
-                "n_features": int(X.shape[1]),
+                "n_samples": 0,
+                "n_features": 0,
                 "threshold": None,
                 "scores": [],
                 "labels": [],
-                "scores_summary": {
-                    "n_total": int(X.shape[0]),
-                    "n_valid": 0,
-                },
+                "scores_summary": {"n_total": 0, "n_valid": 0},
                 "top_anomalies": [],
-                "feature_columns": info["used_columns"],
+                "feature_columns": [],
+                "anomaly_intervals": None,
+                "time_column": None,
+                "n_timestamps": None,
+                "n_channels": None,
+                "window_size": None,
                 "notes": [
                     "请确认前端选择的模型仍然存在；可在「我的模型」中确认。",
                     "该模型可能来自其它会话，若原始文件已被清理，需要重新训练。",
@@ -159,6 +203,22 @@ def detect_with_model(
             saved_meta.get("detector_name") or type(model).__name__
         )
         supports_ = not is_transductive(detector_name_resolved)
+
+        # 时序 / 表格的整形方式以模型 metadata 的 ``mode`` 为准（加载模式
+        # 下忽略 LLM 传入的 as_time_series / window_size）。旧模型没有
+        # ``mode`` 字段，一律视为表格。
+        saved_mode = saved_meta.get("mode") or "tabular"
+        is_ts = (saved_mode == "time_series")
+        if is_ts:
+            ts_time_column = saved_meta.get("time_column") or time_column
+            X, time_index, ts_info = prepare_ts_matrix(runtime, ts_time_column)
+            window_size_used = (
+                saved_meta.get("window_size")
+                if saved_meta.get("window_size") is not None
+                else getattr(model, "window_size", None)
+            )
+        else:
+            X, info = prepare_feature_matrix(runtime)
 
         # 跨作用域来源说明：路径不在当前 artifacts_dir_for 下即跨域。
         try:
@@ -182,6 +242,15 @@ def detect_with_model(
         except Exception:
             pass
 
+        # transductive 检测器（如 MatrixProfile）没有对新样本打分的能力，
+        # 其 ``decision_scores_`` 只反映训练数据。加载后必须先在当前数据上
+        # 重新 fit，否则读到的是原训练集的旧分数（长度都对不上）。
+        if is_transductive(detector_name_resolved):
+            extra_notes.append(
+                "%s 是 transductive 检测器，加载的模型已在当前数据上重新 fit "
+                "后打分。" % detector_name_resolved)
+            model.fit(X)
+
         try:
             scores, lbls, th, supports_ = score_with_detector(
                 model, X, detector_name_resolved)
@@ -196,12 +265,13 @@ def detect_with_model(
             supports_ = False
 
         # 列漂移检测：训练时记录的列 vs 当前 DataFrame 实际使用的列。
+        used_cols = (ts_info or info or {}).get("used_columns") or []
         saved_cols = list(saved_meta.get("feature_columns") or [])
-        if saved_cols and saved_cols != info["used_columns"]:
+        if saved_cols and saved_cols != used_cols:
             extra_notes.append(
                 "当前输入列与训练时记录的列不一致（训练：%s；当前：%s）。"
                 "结果可能不可靠。"
-                % (saved_cols, info["used_columns"]))
+                % (saved_cols, used_cols))
 
         envelope_summary = {
             k: v for k, v in (envelope or {}).items() if k != "model"
@@ -222,30 +292,17 @@ def detect_with_model(
             raise ValueError(
                 "训练模式必须提供 detector_name；若想加载已有模型，"
                 "请在 CSV 上传卡片的模型选择器中指定。")
-
-        effective_save_name = save_name or auto_save_name(detector_name)
-        model_path = resolve_model_path(effective_save_name, runtime)
-        ensure_dir(model_path.parent)
         detector_name_resolved = detector_name
 
-        detector = build_detector_by_name(
-            detector_name,
-            contamination=contamination,
-            random_state=random_state,
-        )
-        detector.fit(X)
-
-        scores = decision_scores_(detector)
-        th = threshold_(detector)
-        lbls = labels_(detector)
-        supports_ = not is_transductive(detector_name)
-
-        n_anomalies_train = int((lbls > 0).sum()) if lbls.size else 0
-
-        if is_transductive(detector_name):
-            extra_notes.append(
-                "%s 是 transductive 检测器，加载后不能对新样本 predict。"
-                % detector_name)
+        # 时序 / 表格分流：as_time_series 三态（None=按检测器自动判断）。
+        if as_time_series is None:
+            is_ts = detector_name in TS_NATIVE_DETECTORS
+        else:
+            is_ts = bool(as_time_series)
+            if (not is_ts) and detector_name in TS_NATIVE_DETECTORS:
+                extra_notes.append(
+                    "%s 是原生时序检测器，但 as_time_series=False，"
+                    "已按表格矩阵运行。" % detector_name)
 
         # 记录数据集来源（前端模型卡片/选择器展示「基于数据集 X 训练」）
         raw_file_path = getattr(ctx, "file_path", None)
@@ -253,22 +310,86 @@ def detect_with_model(
             str(Path(str(raw_file_path)).name) if raw_file_path else None
         )
 
-        metadata = {
-            "detector_name": detector_name,
-            "params": {},
-            "contamination": contamination,
-            "random_state": random_state,
-            "n_samples": int(X.shape[0]),
-            "n_features": int(X.shape[1]),
-            "feature_columns": info["used_columns"],
-            "source": info["source"],
-            "n_anomalies": n_anomalies_train,
-            "threshold": th,
-            "transductive": is_transductive(detector_name),
-            "trained_at": datetime.now(timezone.utc).isoformat(),
-            "dataset_name": dataset_name,
-        }
+        effective_save_name = save_name or auto_save_name(detector_name)
+
+        if is_ts:
+            # ---------------- 时序分支 ----------------
+            X, time_index, ts_info = prepare_ts_matrix(runtime, time_column)
+            detector = build_ts_detector(
+                detector_name, window_size, None, contamination,
+                random_state=random_state)
+            detector.fit(X)
+            scores, lbls, th, supports_ = score_with_detector(
+                detector, X, detector_name)
+            window_size_used = getattr(detector, "window_size", window_size)
+
+            if detector_name not in TS_NATIVE_DETECTORS:
+                extra_notes.append(
+                    "%s 不是原生时序检测器，已用 TimeSeriesOD 滑窗桥接"
+                    "（window=%r）。" % (detector_name, window_size_used))
+
+            metadata = {
+                "detector_name": detector_name,
+                "params": {},
+                "contamination": contamination,
+                "random_state": random_state,
+                "window_size": window_size_used,
+                "n_timestamps": ts_info["n_timestamps"],
+                "n_channels": ts_info["n_channels"],
+                "n_samples": ts_info["n_timestamps"],
+                "n_features": ts_info["n_channels"],
+                "feature_columns": ts_info["used_columns"],
+                "source": ts_info["source"],
+                "threshold": th,
+                "transductive": is_transductive(detector_name),
+                "trained_at": datetime.now(timezone.utc).isoformat(),
+                "dataset_name": dataset_name,
+                "time_column": ts_info["time_column"],
+                "mode": "time_series",
+            }
+        else:
+            # ---------------- 表格分支 ----------------
+            X, info = prepare_feature_matrix(runtime)
+            detector = build_detector_by_name(
+                detector_name,
+                contamination=contamination,
+                random_state=random_state,
+            )
+            detector.fit(X)
+            scores = decision_scores_(detector)
+            th = threshold_(detector)
+            lbls = labels_(detector)
+            supports_ = not is_transductive(detector_name)
+
+            metadata = {
+                "detector_name": detector_name,
+                "params": {},
+                "contamination": contamination,
+                "random_state": random_state,
+                "n_samples": int(X.shape[0]),
+                "n_features": int(X.shape[1]),
+                "feature_columns": info["used_columns"],
+                "source": info["source"],
+                "threshold": th,
+                "transductive": is_transductive(detector_name),
+                "trained_at": datetime.now(timezone.utc).isoformat(),
+                "dataset_name": dataset_name,
+                "mode": "tabular",
+            }
+
+        n_anomalies_train = int((lbls > 0).sum()) if lbls.size else 0
+        metadata["n_anomalies"] = n_anomalies_train
+
+        if is_transductive(detector_name):
+            extra_notes.append(
+                "%s 是 transductive 检测器，加载后不能对新样本 predict。"
+                % detector_name)
+
+        model_path = resolve_model_path(effective_save_name, runtime)
+        ensure_dir(model_path.parent)
         persistence.save(detector, model_path, metadata=metadata)
+        model_path_for_return = str(model_path)
+        effective_save_name_for_return = effective_save_name
 
         result_extra = {
             "training_scores": scores_summary(scores, threshold=th, top_n=10),
@@ -276,42 +397,66 @@ def detect_with_model(
             "n_anomalies": n_anomalies_train,
         }
 
-        effective_save_name_for_return = effective_save_name
-        model_path_for_return = str(model_path)
-
     # ==================================================================
-    # 通用收尾：top rows / summary / notes
+    # 通用收尾：top rows / intervals / summary / notes
     # ==================================================================
     if not supports_:
         extra_notes.append("supports_out_of_sample: false")
 
-    top_rows = top_anomaly_rows(
-        df, scores, th, return_top_n, columns=info["used_columns"])
     summary_stats = scores_summary(scores, threshold=th, top_n=return_top_n)
-
     n_anomalies_total = int((lbls > 0).sum()) if lbls.size else 0
+
+    if is_ts:
+        top_rows = top_ts_anomalies(scores, time_index, th, return_top_n)
+        intervals_out = anomaly_intervals(lbls, time_index, th)
+        notes_out = format_ts_notes(ts_info, extra_notes)
+        n_samples_out = int(ts_info["n_timestamps"])
+        n_features_out = int(ts_info["n_channels"])
+        feature_columns_out = ts_info["used_columns"]
+        summary_text = (
+            "[%s模式] %s 时序检测完成：%d 个时间戳，%d 个异常，"
+            "%d 个连续异常区间。"
+            % (mode, detector_name_resolved, n_samples_out,
+               n_anomalies_total, len(intervals_out))
+        )
+    else:
+        top_rows = top_anomaly_rows(
+            df, scores, th, return_top_n, columns=info["used_columns"])
+        intervals_out = None
+        notes_out = format_notes(info, extra_notes)
+        n_samples_out = int(X.shape[0])
+        n_features_out = int(X.shape[1])
+        feature_columns_out = info["used_columns"]
+        summary_text = (
+            "[%s模式] %s 完成打分：%d 个样本，%d 个异常。"
+            % (mode, detector_name_resolved, n_samples_out, n_anomalies_total)
+        )
 
     return {
         "task_type": "anomaly_detection",
         "tool_name": "detect_with_model",
         "mode": mode,
+        "is_time_series": is_ts,
         "detector_name": detector_name_resolved,
-        "summary": (
-            "[%s模式] %s 完成打分：%d 个样本，%d 个异常。"
-            % (mode, detector_name_resolved, X.shape[0], n_anomalies_total)
-        ),
+        "summary": summary_text,
         "model_path": model_path_for_return,
         "save_name": effective_save_name_for_return,
-        "n_samples": int(X.shape[0]),
-        "n_features": int(X.shape[1]),
+        "n_samples": n_samples_out,
+        "n_features": n_features_out,
         "threshold": th,
         "supports_out_of_sample": supports_,
         "scores_summary": summary_stats,
         "labels": lbls.tolist() if lbls.size else [],
         "scores": scores.tolist(),
         "top_anomalies": top_rows,
-        "feature_columns": info["used_columns"],
-        "notes": format_notes(info, extra_notes),
+        "feature_columns": feature_columns_out,
+        "notes": notes_out,
+        # 时序专属字段（表格模式下均为 None），前端 chart 依此渲染区间高亮。
+        "anomaly_intervals": intervals_out,
+        "time_column": ts_info["time_column"] if is_ts else None,
+        "n_timestamps": int(ts_info["n_timestamps"]) if is_ts else None,
+        "n_channels": int(ts_info["n_channels"]) if is_ts else None,
+        "window_size": window_size_used if is_ts else None,
         **result_extra,
     }
 
@@ -372,6 +517,8 @@ def list_saved_detectors(runtime: ToolRuntime) -> Dict[str, Any]:
                     "threshold": meta.get("threshold"),
                     "transductive": meta.get("transductive"),
                     "trained_at": meta.get("trained_at"),
+                    # tabular / time_series；旧模型无此字段时为 None。
+                    "mode": meta.get("mode"),
                     "size_bytes": fp.stat().st_size,
                 })
             else:

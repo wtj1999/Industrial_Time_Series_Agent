@@ -2,8 +2,9 @@
 
 Consumes the ``tool_calls`` list produced by
 :func:`agents.base_agent.extract_tool_calls` and turns the **last**
-``detect_with_model`` / ``detect_ts_anomalies`` result into a frontend-
-ready anomaly-score chart payload.
+``detect_with_model`` result into a frontend-ready anomaly-score chart
+payload. Legacy ``detect_ts_anomalies`` payloads (from sessions recorded
+before the tool was merged into ``detect_with_model``) are still accepted.
 """
 
 from __future__ import annotations
@@ -22,14 +23,20 @@ logger = logging.getLogger(__name__)
 # name here without a matching branch in the builder will just fall
 # through to ``None`` (no chart emitted).
 #
-# ``detect_with_model`` is the unified entry point (train+load merged);
-# it emits the same ``scores`` / ``labels`` / ``threshold`` /
-# ``scores_summary`` / ``top_anomalies`` shape regardless of whether it
-# ended up training a new detector or loading a saved one, so the same
-# builder handles both modes.
+# ``detect_with_model`` is the unified entry point (train+load and
+# tabular+time-series all merged); it emits the same ``scores`` /
+# ``labels`` / ``threshold`` / ``scores_summary`` / ``top_anomalies``
+# shape regardless of mode, so the same builder handles every case. The
+# time-series interval bands are detected from the ``anomaly_intervals``
+# field rather than the tool name.
+#
+# ``detect_ts_anomalies`` is RETAINED for backward compatibility only —
+# sessions recorded before the merge still carry that ``tool_name`` in
+# their stored ``tool_calls`` and must keep rendering. New runs never
+# emit it.
 _CHARTABLE_TOOLS = {
     "detect_with_model",
-    "detect_ts_anomalies",
+    "detect_ts_anomalies",  # legacy, pre-merge payloads
 }
 
 # Cap the per-chart score array so we never ship a 100k-point JSON
@@ -72,10 +79,11 @@ def extract_anomaly_chart(
 # ---------------------------------------------------------------------- #
 
 def _build_anomaly_scores_chart(result: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Convert a raw ``detect_with_model`` / ``detect_ts_anomalies`` result
-    dict into the frontend-friendly chart payload.
+    """Convert a raw ``detect_with_model`` result dict (tabular or
+    time-series; legacy ``detect_ts_anomalies`` payloads also work) into
+    the frontend-friendly chart payload.
 
-    The shape is intentionally a strict subset that both tools satisfy so
+    The shape is intentionally a strict subset that every mode satisfies so
     the React component can treat them uniformly::
 
         {
@@ -138,8 +146,12 @@ def _build_anomaly_scores_chart(result: Dict[str, Any]) -> Optional[Dict[str, An
         "original_n_samples": n_samples,
     }
 
-    if tool_name == "detect_ts_anomalies":
-        intervals = result.get("anomaly_intervals") or []
+    # Time-series runs (merged ``detect_with_model`` or legacy
+    # ``detect_ts_anomalies``) are detected by DATA rather than tool name:
+    # they carry a non-empty ``anomaly_intervals`` list and/or a
+    # ``time_column``. Tabular runs leave ``anomaly_intervals`` as None.
+    intervals = result.get("anomaly_intervals") or []
+    if intervals:
         chart["anomaly_intervals"] = [
             {
                 "start_index": int(iv.get("start_index", 0)),
@@ -151,9 +163,9 @@ def _build_anomaly_scores_chart(result: Dict[str, Any]) -> Optional[Dict[str, An
             for iv in intervals
             if isinstance(iv, dict)
         ]
-        time_col = result.get("time_column")
-        if time_col:
-            chart["x_label"] = time_col
+    time_col = result.get("time_column")
+    if time_col:
+        chart["x_label"] = time_col
 
     return chart
 
