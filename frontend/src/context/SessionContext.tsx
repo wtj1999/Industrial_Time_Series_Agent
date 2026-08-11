@@ -487,15 +487,29 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setStreaming(false);
       abortRef.current = null;
 
-      // After completion, attempt to refresh session metadata.
-      void refresh(completedData);
+      // Aborted streams (user switched / created a session mid-flight)
+      // must not trigger the post-stream refresh — this stream's session
+      // is no longer the active one.
+      if (controller.signal.aborted) return;
+
+      // After completion, attempt to refresh session metadata. Pass the
+      // session id this stream actually ran on — the `sessionId` state
+      // captured by this memoized closure can be stale (see refresh()).
+      void refresh(completedData, params.sessionId);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [handleEvent, pushItem],
   );
 
-  // Kept outside useCallback deps to avoid re-binding runStream each render
-  async function refresh(completedData?: CompletedEvent['data'] | null) {
+  // Kept outside useCallback deps to avoid re-binding runStream each render.
+  // ``sid`` MUST be the session id the stream actually ran on — the
+  // ``sessionId`` state captured by this memoized closure can be stale
+  // (e.g. the id generated at mount, before the user created a new
+  // session), which used to cause spurious 404s on /api/session/{id}.
+  async function refresh(
+    completedData?: CompletedEvent['data'] | null,
+    sid: string = sessionId,
+  ) {
     // The streaming `completed` event carries the raw LangGraph state dict,
     // whose field names differ from the SessionInfo shape (e.g. `task_type`
     // vs `current_task`, `csv_profile` object vs `has_csv_profile` bool).
@@ -508,7 +522,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           ? raw.dialogue_history.length
           : (raw.dialogue_turns as number | undefined);
         setSessionInfo((prev) => ({
-          session_id: (raw.session_id as string) ?? prev?.session_id ?? sessionId,
+          session_id: (raw.session_id as string) ?? prev?.session_id ?? sid,
           created_at: (raw.created_at as string) ?? prev?.created_at ?? '',
           updated_at: (raw.updated_at as string) ?? new Date().toISOString(),
           is_active: (raw.is_active as boolean) ?? prev?.is_active ?? true,
@@ -538,7 +552,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     // Best-effort server refresh — overwrites the locally-derived snapshot
     // with the canonical SessionInfo from /api/session/{id}.
     api
-      .getSessionInfo(sessionId)
+      .getSessionInfo(sid)
       .then(setSessionInfo)
       .catch(() => {
         /* Ignore background refresh errors - the session may not exist server-side
