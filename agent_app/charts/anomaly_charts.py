@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 # emit it.
 _CHARTABLE_TOOLS = {
     "detect_with_model",
+    "evaluate_detection",
     "detect_ts_anomalies",  # legacy, pre-merge payloads
 }
 
@@ -68,7 +69,11 @@ def extract_anomaly_chart(
         tool_name = payload.get("tool_name")
         if tool_name not in _CHARTABLE_TOOLS:
             continue
-        chart = _build_anomaly_scores_chart(payload)
+        chart = (
+            _build_detection_evaluation_chart(payload)
+            if tool_name == "evaluate_detection"
+            else _build_anomaly_scores_chart(payload)
+        )
         if chart is not None:
             return chart
     return None
@@ -168,6 +173,74 @@ def _build_anomaly_scores_chart(result: Dict[str, Any]) -> Optional[Dict[str, An
         chart["x_label"] = time_col
 
     return chart
+
+
+def _optional_number(value: Any) -> Optional[float]:
+    """Return a finite float for JSON chart payloads, otherwise ``None``."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _build_detection_evaluation_chart(
+    result: Dict[str, Any],
+) -> Optional[Dict[str, Any]]:
+    """Build the compact metric dashboard for ``evaluate_detection``."""
+    metrics_raw = result.get("metrics") or {}
+    scores_raw = result.get("scores_summary") or {}
+    if not isinstance(metrics_raw, dict) or not isinstance(scores_raw, dict):
+        return None
+
+    metric_names = (
+        "roc_auc", "average_precision", "precision_at_n",
+        "precision", "recall", "f1",
+    )
+    metrics = {name: _optional_number(metrics_raw.get(name)) for name in metric_names}
+
+    n_samples = int(result.get("n_samples") or scores_raw.get("n_total") or 0)
+    n_anomalies = int(
+        metrics_raw.get("n_flagged")
+        or scores_raw.get("n_above_threshold")
+        or 0
+    )
+
+    confusion_matrix = None
+    actual_positive = metrics_raw.get("n_labeled_anomalies")
+    actual_negative = metrics_raw.get("n_labeled_inliers")
+    true_positive = metrics_raw.get("n_true_positive")
+    predicted_positive = metrics_raw.get("n_flagged")
+    if all(v is not None for v in (
+        actual_positive, actual_negative, true_positive, predicted_positive,
+    )):
+        tp = max(0, int(true_positive))
+        fp = max(0, int(predicted_positive) - tp)
+        fn = max(0, int(actual_positive) - tp)
+        tn = max(0, int(actual_negative) - fp)
+        confusion_matrix = {"tp": tp, "fp": fp, "fn": fn, "tn": tn}
+
+    detector_name = str(result.get("detector_name") or "")
+    return {
+        "chart_type": "anomaly_evaluation",
+        "tool_name": "evaluate_detection",
+        "detector_name": detector_name,
+        "title": f"{detector_name} 检测效果评估".strip(),
+        "summary": result.get("summary"),
+        "n_samples": n_samples,
+        "n_anomalies": n_anomalies,
+        "n_features": int(result.get("n_features") or 0),
+        "threshold": _optional_number(result.get("threshold")),
+        "label_column": result.get("label_column"),
+        "supports_out_of_sample": result.get("supports_out_of_sample"),
+        "metrics": metrics,
+        "confusion_matrix": confusion_matrix,
+        "scores_summary": {
+            name: _optional_number(scores_raw.get(name))
+            for name in ("min", "max", "mean", "std")
+        },
+        "notes": [str(note) for note in (result.get("notes") or [])],
+    }
 
 
 # ---------------------------------------------------------------------- #

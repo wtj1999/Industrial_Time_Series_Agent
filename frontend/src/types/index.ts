@@ -251,7 +251,9 @@ export interface AnomalyTopRow {
   values?: Record<string, number | string | null>;
 }
 
-export interface AnomalyChart {
+export type AnomalyChart = AnomalyScoresChart | AnomalyEvaluationChart;
+
+export interface AnomalyScoresChart {
   chart_type: 'anomaly_scores';
   tool_name: string;
   detector_name: string;
@@ -276,6 +278,38 @@ export interface AnomalyChart {
   feature_columns: string[];
   downsampled?: boolean;
   original_n_samples?: number;
+}
+
+export interface AnomalyEvaluationMetrics {
+  roc_auc: number | null;
+  average_precision: number | null;
+  precision_at_n: number | null;
+  precision: number | null;
+  recall: number | null;
+  f1: number | null;
+}
+
+export interface AnomalyEvaluationChart {
+  chart_type: 'anomaly_evaluation';
+  tool_name: 'evaluate_detection';
+  detector_name: string;
+  title: string;
+  summary?: string | null;
+  n_samples: number;
+  n_anomalies: number;
+  n_features: number;
+  threshold: number | null;
+  label_column: string | null;
+  supports_out_of_sample: boolean | null;
+  metrics: AnomalyEvaluationMetrics;
+  confusion_matrix: { tp: number; fp: number; fn: number; tn: number } | null;
+  scores_summary: {
+    min: number | null;
+    max: number | null;
+    mean: number | null;
+    std: number | null;
+  };
+  notes: string[];
 }
 
 export interface AnomalyChartEvent {

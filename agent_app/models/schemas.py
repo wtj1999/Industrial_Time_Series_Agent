@@ -922,7 +922,8 @@ class SessionState(BaseModel):
         description=(
             "Structured payload for the anomaly-detection chart, emitted "
             "alongside ``execution_results`` when the sub-agent ran "
-            "detect_with_model (tabular or time-series). Mirrored on the "
+            "detect_with_model (tabular or time-series) or "
+            "evaluate_detection. Mirrored on the "
             "frontend as a StreamEvent of type 'anomaly_chart'."
         ),
     )

@@ -29,8 +29,13 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
-import type { AnomalyChart, AnomalyTopRow } from '@/types';
+import { AlertTriangle, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import type {
+  AnomalyChart,
+  AnomalyEvaluationChart,
+  AnomalyScoresChart,
+  AnomalyTopRow,
+} from '@/types';
 
 const SCORE_STROKE = '#3366ff';
 const THRESHOLD_STROKE = '#ef4444'; // rose-500
@@ -47,7 +52,11 @@ export function AnomalyChartCard({ chart }: { chart: AnomalyChart }) {
   return (
     <Bubble>
       <Header chart={chart} />
-      <Body chart={chart} />
+      {chart.chart_type === 'anomaly_evaluation' ? (
+        <EvaluationBody chart={chart} />
+      ) : (
+        <Body chart={chart} />
+      )}
     </Bubble>
   );
 }
@@ -78,7 +87,7 @@ function Header({ chart }: { chart: AnomalyChart }) {
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
       <div className="min-w-0 flex-1">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-steel-500">
-          异常检测结果
+          {chart.chart_type === 'anomaly_evaluation' ? '异常检测评估' : '异常检测结果'}
         </div>
         <div
           className="mt-0.5 truncate text-[13px] font-medium text-steel-800"
@@ -94,7 +103,7 @@ function Header({ chart }: { chart: AnomalyChart }) {
         <span className="rounded-full bg-rose-50 px-2 py-0.5 text-rose-700">
           {chart.n_anomalies.toLocaleString()} 异常 · {pct.toFixed(1)}%
         </span>
-        {chart.downsampled && chart.original_n_samples && (
+        {chart.chart_type === 'anomaly_scores' && chart.downsampled && chart.original_n_samples && (
           <span
             className="rounded-full bg-amber-50 px-2 py-0.5 text-amber-700"
             title={`分数序列过长（${chart.original_n_samples.toLocaleString()} 点），已降采样到 ${chart.scores.length} 点展示；异常位置全部保留`}
@@ -109,7 +118,125 @@ function Header({ chart }: { chart: AnomalyChart }) {
 
 /* ------------------------------------------------------------------ */
 
-function Body({ chart }: { chart: AnomalyChart }) {
+const METRIC_META: Array<{
+  key: keyof AnomalyEvaluationChart['metrics'];
+  label: string;
+  description: string;
+}> = [
+  { key: 'roc_auc', label: 'ROC-AUC', description: '分数区分正常与异常样本的能力' },
+  { key: 'average_precision', label: 'AP', description: '精确率—召回率曲线下的平均精度' },
+  { key: 'precision_at_n', label: 'Precision@n', description: '前 N 个高分样本中的异常命中率' },
+  { key: 'precision', label: 'Precision', description: '判为异常的样本中真实异常的比例' },
+  { key: 'recall', label: 'Recall', description: '真实异常样本被成功检出的比例' },
+  { key: 'f1', label: 'F1', description: 'Precision 与 Recall 的调和平均' },
+];
+
+function EvaluationBody({ chart }: { chart: AnomalyEvaluationChart }) {
+  const availableMetrics = METRIC_META.filter(({ key }) => chart.metrics[key] != null);
+  const stats = [
+    ['最小值', chart.scores_summary.min],
+    ['均值', chart.scores_summary.mean],
+    ['最大值', chart.scores_summary.max],
+    ['标准差', chart.scores_summary.std],
+    ['决策阈值', chart.threshold],
+  ] as const;
+
+  return (
+    <div className="mt-3">
+      {availableMetrics.length > 0 ? (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {availableMetrics.map(({ key, label, description }) => {
+            const value = chart.metrics[key] as number;
+            const pct = Math.max(0, Math.min(100, value * 100));
+            return (
+              <div
+                key={key}
+                className="rounded-xl border border-steel-200/80 bg-steel-50/40 px-3 py-2.5"
+                title={description}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-medium text-steel-500">{label}</span>
+                  <span className="font-mono text-[13px] font-semibold text-steel-800">
+                    {value.toFixed(3)}
+                  </span>
+                </div>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-steel-200/80">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-brand-500 to-violet-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="flex gap-2 rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2.5 text-[11px] text-amber-800">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>未提供包含正常与异常两类的有效标签列，本次仅展示检测分数统计。</span>
+        </div>
+      )}
+
+      <div className={chart.confusion_matrix ? 'mt-3 grid gap-3 md:grid-cols-[1fr_1.15fr]' : 'mt-3'}>
+        {chart.confusion_matrix && <ConfusionMatrix chart={chart} />}
+        <div className="rounded-xl border border-steel-200/80 bg-white p-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-steel-500">
+              分数分布摘要
+            </span>
+            {chart.label_column && (
+              <span className="truncate rounded bg-brand-50 px-1.5 py-0.5 text-[9px] text-brand-700">
+                标签列 · {chart.label_column}
+              </span>
+            )}
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-5 md:grid-cols-2 lg:grid-cols-5">
+            {stats.map(([label, value]) => (
+              <div key={label} className="min-w-0">
+                <div className="text-[9px] text-steel-400">{label}</div>
+                <div className="mt-0.5 truncate font-mono text-[11px] font-medium text-steel-700" title={value == null ? undefined : String(value)}>
+                  {value == null ? '—' : formatNumber(value)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 border-t border-steel-100 pt-2 text-[10px] text-steel-400">
+        指标范围为 0–1，数值越高表示检测效果越好
+        {chart.supports_out_of_sample === false ? '；该检测器仅支持当前样本内评估' : ''}
+      </div>
+    </div>
+  );
+}
+
+function ConfusionMatrix({ chart }: { chart: AnomalyEvaluationChart }) {
+  const matrix = chart.confusion_matrix!;
+  const cells = [
+    { label: '真阳性', short: 'TP', value: matrix.tp, tone: 'bg-emerald-50 text-emerald-800 border-emerald-200' },
+    { label: '假阳性', short: 'FP', value: matrix.fp, tone: 'bg-rose-50 text-rose-800 border-rose-200' },
+    { label: '假阴性', short: 'FN', value: matrix.fn, tone: 'bg-amber-50 text-amber-800 border-amber-200' },
+    { label: '真阴性', short: 'TN', value: matrix.tn, tone: 'bg-steel-50 text-steel-700 border-steel-200' },
+  ];
+  return (
+    <div className="rounded-xl border border-steel-200/80 bg-white p-3">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-steel-500">
+        混淆矩阵
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-1.5">
+        {cells.map((cell) => (
+          <div key={cell.short} className={`rounded-lg border px-2 py-1.5 ${cell.tone}`} title={cell.label}>
+            <div className="text-[9px] opacity-70">{cell.short} · {cell.label}</div>
+            <div className="mt-0.5 font-mono text-sm font-semibold tabular-nums">{cell.value.toLocaleString()}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Body({ chart }: { chart: AnomalyScoresChart }) {
   const anomalySet = useMemo(
     () => new Set(chart.anomaly_indices),
     [chart.anomaly_indices],
