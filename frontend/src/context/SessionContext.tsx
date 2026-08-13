@@ -30,6 +30,7 @@ import {
 } from '@/utils/format';
 import type {
   AnomalyChart,
+  AnomalyTrainingProgress,
   AnalysisChart,
   CompletedEvent,
   CSVPreview,
@@ -49,6 +50,12 @@ export type ConversationItem =
   | { kind: 'interrupt'; id: string; interrupt: InterruptPayload; status: 'pending' | 'submitted' }
   | { kind: 'csv_preview'; id: string; preview: CSVPreview }
   | { kind: 'anomaly_chart'; id: string; chart: AnomalyChart }
+  | {
+      kind: 'anomaly_training_progress';
+      id: string;
+      progress: AnomalyTrainingProgress;
+      history: AnomalyTrainingProgress[];
+    }
   | { kind: 'analysis_chart'; id: string; chart: AnalysisChart }
   | { kind: 'prediction_chart'; id: string; chart: PredictionChart }
   | { kind: 'status'; id: string; text: string; tone: 'info' | 'error' | 'success' };
@@ -360,6 +367,34 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           }
           break;
         }
+        case 'anomaly_training_progress': {
+          const progress = ev.data;
+          setItems((prev) => {
+            const index = prev.findIndex(
+              (item) => item.kind === 'anomaly_training_progress' &&
+                item.progress.operation_id === progress.operation_id,
+            );
+            if (index < 0) {
+              return [...prev, {
+                kind: 'anomaly_training_progress' as const,
+                id: `training-${progress.operation_id}`,
+                progress,
+                history: [progress],
+              }];
+            }
+            const next = [...prev];
+            const current = next[index];
+            if (current.kind === 'anomaly_training_progress') {
+              next[index] = {
+                ...current,
+                progress,
+                history: [...current.history, progress],
+              };
+            }
+            return next;
+          });
+          break;
+        }
         case 'interrupt': {
           const payload = ev.data;
           pendingRef.current = null;
@@ -468,6 +503,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       await api.streamQuery(params, {
         onToken: (t) => handleEvent({ type: 'token', content: t }, assistantId),
         onUpdate: (d) => handleEvent({ type: 'update', data: d }, assistantId),
+        onAnomalyTrainingProgress: (p) => handleEvent(
+          { type: 'anomaly_training_progress', data: p }, assistantId,
+        ),
         onInterrupt: (ev) => handleEvent(ev as InterruptEvent, assistantId),
         onCsvPreview: (p) => handleEvent({ type: 'csv_preview', data: p }, assistantId),
         onAnomalyChart: (c) => handleEvent({ type: 'anomaly_chart', data: c }, assistantId),

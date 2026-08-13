@@ -183,6 +183,23 @@ export interface UpdateEvent {
   data: Record<string, unknown>;
 }
 
+export interface AnomalyTrainingProgress {
+  event: 'anomaly_training_progress';
+  operation_id: string;
+  detector_name: string;
+  stage: 'preparing' | 'training' | 'scoring' | 'saving' | 'completed';
+  current?: number;
+  total?: number;
+  percent?: number;
+  message?: string;
+  metrics?: Record<string, number>;
+}
+
+export interface AnomalyTrainingProgressEvent {
+  type: 'anomaly_training_progress';
+  data: AnomalyTrainingProgress;
+}
+
 export interface CompletedEvent {
   type: 'completed';
   data: Record<string, unknown>;
@@ -652,6 +669,7 @@ export type InterruptEvent =
 export type StreamEvent =
   | TokenEvent
   | UpdateEvent
+  | AnomalyTrainingProgressEvent
   | CompletedEvent
   | ErrorEvent
   | CsvPreviewEvent

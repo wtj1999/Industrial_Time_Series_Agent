@@ -226,6 +226,8 @@ class BaseDeepLearningDetector(BaseDetector):
         train_loader : torch.utils.data.DataLoader
             The data loader for training the model.
         """
+        previous_epoch_loss = None
+        best_epoch_loss = float('inf')
         for epoch in tqdm.trange(self.epoch_num,
                                  desc=f'Training: ',
                                  disable=not self.verbose == 1):
@@ -251,6 +253,34 @@ class BaseDeepLearningDetector(BaseDetector):
                     print(f'Epoch {epoch + 1}/{self.epoch_num}, '
                           f'loss={overall_loss:.4f}, '
                           f'time={time.time() - start_time:.2f}s')
+
+            callback = getattr(self, '_progress_callback', None)
+            if callable(callback):
+                loss_value = float(np.asarray(overall_loss).mean())
+                best_epoch_loss = min(best_epoch_loss, loss_value)
+                change_pct = (
+                    ((loss_value - previous_epoch_loss) /
+                     abs(previous_epoch_loss)) * 100.0
+                    if previous_epoch_loss not in (None, 0.0) else 0.0
+                )
+                epoch_seconds = time.time() - start_time
+                throughput = float(self.data_num or 0) / max(
+                    epoch_seconds, 1e-9)
+                callback(
+                    'training', current=epoch + 1, total=self.epoch_num,
+                    percent=round((epoch + 1) * 100.0 / self.epoch_num, 2),
+                    metrics={
+                        'loss': loss_value,
+                        'best_loss': best_epoch_loss,
+                        'change_pct': change_pct,
+                        'learning_rate': float(
+                            self.optimizer.param_groups[0]['lr']),
+                        'epoch_seconds': epoch_seconds,
+                        'throughput_per_second': throughput,
+                    },
+                    message=f'正在训练 {self.__class__.__name__}',
+                )
+                previous_epoch_loss = loss_value
 
             self.epoch_update()
 

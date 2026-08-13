@@ -16,6 +16,7 @@ Reference:
 
 import logging
 import math
+import time
 import numpy as np
 from sklearn.utils.validation import check_is_fitted
 
@@ -596,11 +597,16 @@ class AnomalyTransformer(BaseDetector):
             self.d_model, self.n_heads, self.n_layers, str(device),
         )
 
+        previous_recon_loss = None
+        best_recon_loss = float('inf')
         for epoch in range(self.epochs):
+            epoch_started_at = time.perf_counter()
             last_loss_min = float('nan')
             last_loss_max = float('nan')
             last_recon = float('nan')
             last_assdis = float('nan')
+            recon_losses = []
+            association_discrepancies = []
             for (batch,) in loader:
                 batch = batch.to(device)
 
@@ -632,6 +638,18 @@ class AnomalyTransformer(BaseDetector):
                 last_loss_max = float(loss_max.item())
                 last_recon = float(recon_loss.item())
                 last_assdis = float(ass_dis_min.mean().item())
+                recon_losses.append(last_recon)
+                association_discrepancies.append(last_assdis)
+
+            mean_recon = float(np.mean(recon_losses))
+            mean_assdis = float(np.mean(association_discrepancies))
+            best_recon_loss = min(best_recon_loss, mean_recon)
+            recon_change_pct = (
+                ((mean_recon - previous_recon_loss) / abs(previous_recon_loss)) * 100.0
+                if previous_recon_loss not in (None, 0.0) else 0.0
+            )
+            epoch_seconds = time.perf_counter() - epoch_started_at
+            windows_per_second = float(windows.shape[0]) / max(epoch_seconds, 1e-9)
 
             logger.info(
                 "AnomalyTransformer train: epoch %d/%d, "
@@ -641,6 +659,25 @@ class AnomalyTransformer(BaseDetector):
                 last_loss_min, last_recon,
                 self.lambda_ * last_assdis, last_loss_max,
             )
+            callback = getattr(self, '_progress_callback', None)
+            if callable(callback):
+                callback(
+                    'training', current=epoch + 1, total=self.epochs,
+                    percent=round((epoch + 1) * 100.0 / self.epochs, 2),
+                    metrics={
+                        # Use the same public progress contract as every
+                        # other DL detector. Transformer-specific minimax
+                        # objectives remain available in the server log.
+                        'loss': mean_recon,
+                        'best_loss': best_recon_loss,
+                        'change_pct': recon_change_pct,
+                        'learning_rate': float(optimizer.param_groups[0]['lr']),
+                        'epoch_seconds': epoch_seconds,
+                        'throughput_per_second': windows_per_second,
+                    },
+                    message='正在训练 Anomaly Transformer',
+                )
+            previous_recon_loss = mean_recon
 
     def decision_function(self, X):
         """Predict raw anomaly scores for time series X.

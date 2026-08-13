@@ -5,6 +5,7 @@ import { MessageBubble } from './MessageBubble';
 import { InterruptCard } from '@/components/interrupt/InterruptCard';
 import { CsvPreviewCard } from '@/components/csv_preview/CsvPreviewCard';
 import { AnomalyChartCard } from '@/components/anomaly_chart/AnomalyChartCard';
+import { TrainingProgressCard } from '@/components/anomaly_chart/TrainingProgressCard';
 import { CorrelationHeatmapCard } from '@/components/analysis_chart/CorrelationHeatmapCard';
 import { HistogramCard } from '@/components/analysis_chart/HistogramCard';
 import { DecompositionChartCard } from '@/components/analysis_chart/DecompositionChartCard';
@@ -104,6 +105,15 @@ export function ChatView() {
             }
             if (item.kind === 'anomaly_chart') {
               return <AnomalyChartCard key={item.id} chart={item.chart} />;
+            }
+            if (item.kind === 'anomaly_training_progress') {
+              return (
+                <TrainingProgressCard
+                  key={item.id}
+                  progress={item.progress}
+                  history={item.history}
+                />
+              );
             }
             if (item.kind === 'analysis_chart') {
               return <AnalysisChartCard key={item.id} chart={item.chart} />;

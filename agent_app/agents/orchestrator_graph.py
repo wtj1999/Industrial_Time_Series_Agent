@@ -288,10 +288,17 @@ class OrchestratorAgent:
             async for mode, chunk in graph.astream(
                     input_state,
                     config=config,
-                    stream_mode=["messages", "updates"],
+                    stream_mode=["messages", "updates", "custom"],
             ):
 
-                if mode == "messages":
+                if mode == "custom":
+                    if isinstance(chunk, dict) and chunk.get("event") == "anomaly_training_progress":
+                        yield {
+                            "type": "anomaly_training_progress",
+                            "data": chunk,
+                        }
+
+                elif mode == "messages":
                     message, metadata = chunk
 
                     md = metadata or {}
@@ -1142,6 +1149,12 @@ class OrchestratorAgent:
                 result_text = result
 
         elif task_type == TaskType.ANOMALY_DETECTION:
+            # This node owns the outer graph stream. The anomaly agent below
+            # runs a separate create_agent graph via invoke(), so LangGraph
+            # cannot automatically bubble its custom events to this stream.
+            # Pass the outer writer through the framework context explicitly.
+            from langgraph.config import get_stream_writer
+            stream_writer = get_stream_writer()
             result = await self.anomaly_agent.execute_anomaly_detection(
                 file_path=file_path,
                 thread_id=session_id,
@@ -1152,6 +1165,7 @@ class OrchestratorAgent:
                 user_id=user_id,
                 dialogue_history=state.dialogue_history,
                 selected_model_ref=state.selected_model_ref,
+                stream_writer=stream_writer,
             )
 
             if isinstance(result, dict):

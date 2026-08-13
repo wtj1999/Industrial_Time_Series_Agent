@@ -19,6 +19,7 @@ back to ``ctx.feature_columns`` when targets are empty):
 from __future__ import annotations
 
 import logging
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -53,6 +54,40 @@ from agent_app.tools.anomaly_detection_tools._common import (
 from agent_app.tools.outlier_detection_scripts.pyod.utils import persistence
 
 logger = logging.getLogger(__name__)
+
+
+def _training_progress_emitter(detector_name: str, injected_writer=None):
+    """Return a best-effort LangGraph custom-stream emitter.
+
+    Tools are also invoked directly by tests and scripts, where no LangGraph
+    stream writer exists.  In that case progress reporting is intentionally a
+    no-op and must never affect model training.
+    """
+    operation_id = uuid.uuid4().hex
+    writer = injected_writer
+    if writer is None:
+        try:
+            from langgraph.config import get_stream_writer
+            writer = get_stream_writer()
+        except Exception:
+            writer = None
+
+    def emit(stage: str, **data: Any) -> None:
+        if writer is None:
+            return
+        payload = {
+            "event": "anomaly_training_progress",
+            "operation_id": operation_id,
+            "detector_name": detector_name,
+            "stage": stage,
+            **data,
+        }
+        try:
+            writer(payload)
+        except Exception:
+            logger.debug("Unable to emit training progress", exc_info=True)
+
+    return emit
 
 
 # ----------------------------------------------------------------------
@@ -142,6 +177,13 @@ def detect_with_model(
         ``training_scores`` / ``metadata`` / ``n_anomalies``。
     """
     ctx = runtime.context
+    # The anomaly agent is an independently invoked inner graph. Its own
+    # custom stream is not automatically forwarded by the orchestrator's
+    # outer graph, so the outer writer is explicitly carried in context.
+    progress = _training_progress_emitter(
+        detector_name or "saved detector",
+        getattr(ctx, "stream_writer", None),
+    )
     df: pd.DataFrame = ctx.df
 
     # 用户在前端选择的复用模型引用（跨作用域坐标）。None 表示走训练模式。
@@ -293,6 +335,7 @@ def detect_with_model(
                 "训练模式必须提供 detector_name；若想加载已有模型，"
                 "请在 CSV 上传卡片的模型选择器中指定。")
         detector_name_resolved = detector_name
+        progress("preparing", message="正在准备训练数据与模型参数")
 
         # 时序 / 表格分流：as_time_series 三态（None=按检测器自动判断）。
         if as_time_series is None:
@@ -318,7 +361,16 @@ def detect_with_model(
             detector = build_ts_detector(
                 detector_name, window_size, None, contamination,
                 random_state=random_state)
+            setattr(detector, "_progress_callback", progress)
+            progress(
+                "training",
+                current=0,
+                total=int(getattr(detector, "epochs", 0) or 0),
+                percent=0.0,
+                message=f"开始训练 {detector_name}",
+            )
             detector.fit(X)
+            progress("scoring", message="训练完成，正在计算异常分数")
             scores, lbls, th, supports_ = score_with_detector(
                 detector, X, detector_name)
             window_size_used = getattr(detector, "window_size", window_size)
@@ -355,7 +407,16 @@ def detect_with_model(
                 contamination=contamination,
                 random_state=random_state,
             )
+            setattr(detector, "_progress_callback", progress)
+            progress(
+                "training",
+                current=0,
+                total=int(getattr(detector, "epochs", getattr(detector, "epoch_num", 0)) or 0),
+                percent=0.0,
+                message=f"开始训练 {detector_name}",
+            )
             detector.fit(X)
+            progress("scoring", message="训练完成，正在计算异常分数")
             scores = decision_scores_(detector)
             th = threshold_(detector)
             lbls = labels_(detector)
@@ -387,6 +448,7 @@ def detect_with_model(
 
         model_path = resolve_model_path(effective_save_name, runtime)
         ensure_dir(model_path.parent)
+        progress("saving", message="正在保存模型与训练元数据")
         persistence.save(detector, model_path, metadata=metadata)
         model_path_for_return = str(model_path)
         effective_save_name_for_return = effective_save_name
@@ -396,6 +458,7 @@ def detect_with_model(
             "metadata": metadata,
             "n_anomalies": n_anomalies_train,
         }
+        progress("completed", percent=100.0, message="模型训练与保存已完成")
 
     # ==================================================================
     # 通用收尾：top rows / intervals / summary / notes

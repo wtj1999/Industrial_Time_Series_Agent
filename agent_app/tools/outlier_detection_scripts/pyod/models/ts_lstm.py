@@ -11,6 +11,7 @@ prediction errors from a fitted multivariate Gaussian.
 # License: BSD 2 clause
 
 import logging
+import time
 
 import numpy as np
 from sklearn.utils.validation import check_is_fitted
@@ -168,8 +169,12 @@ class LSTMAD(BaseDetector):
         )
 
         model.train()
+        previous_epoch_loss = None
+        best_epoch_loss = float('inf')
         for epoch in range(self.epochs):
+            epoch_started_at = time.perf_counter()
             last_loss = float('nan')
+            batch_losses = []
             for batch_x, batch_y in loader:
                 batch_x = batch_x.to(device)
                 batch_y = batch_y.to(device)
@@ -179,10 +184,35 @@ class LSTMAD(BaseDetector):
                 loss.backward()
                 optimizer.step()
                 last_loss = float(loss.item())
+                batch_losses.append(last_loss)
+            mean_loss = float(np.mean(batch_losses))
+            best_epoch_loss = min(best_epoch_loss, mean_loss)
+            loss_change_pct = (
+                ((mean_loss - previous_epoch_loss) / abs(previous_epoch_loss)) * 100.0
+                if previous_epoch_loss not in (None, 0.0) else 0.0
+            )
+            epoch_seconds = time.perf_counter() - epoch_started_at
+            samples_per_second = float(inputs.shape[0]) / max(epoch_seconds, 1e-9)
             logger.info(
                 "LSTMAD train: epoch %d/%d, last_batch_loss=%.6f",
                 epoch + 1, self.epochs, last_loss,
             )
+            callback = getattr(self, '_progress_callback', None)
+            if callable(callback):
+                callback(
+                    'training', current=epoch + 1, total=self.epochs,
+                    percent=round((epoch + 1) * 100.0 / self.epochs, 2),
+                    metrics={
+                        'loss': mean_loss,
+                        'best_loss': best_epoch_loss,
+                        'change_pct': loss_change_pct,
+                        'learning_rate': float(optimizer.param_groups[0]['lr']),
+                        'epoch_seconds': epoch_seconds,
+                        'throughput_per_second': samples_per_second,
+                    },
+                    message='正在训练 LSTM 异常检测模型',
+                )
+            previous_epoch_loss = mean_loss
 
         model.eval()
         return model

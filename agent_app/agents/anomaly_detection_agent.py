@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 import pandas as pd
 from dataclasses import dataclass, field
 
@@ -42,6 +42,10 @@ class AnomalyDetectionContext:
     model_save_name: Optional[str] = None
     model_thread_id: Optional[str] = None
     model_source_file: Optional[str] = None
+    # Framework-only bridge to the orchestrator graph's custom stream.
+    # The anomaly agent itself is invoked as an independent inner graph, so
+    # custom events otherwise terminate at its non-streaming invoke() call.
+    stream_writer: Optional[Callable[[Any], None]] = None
 
 
 class AnomalyDetectionAgent(BaseAgent):
@@ -64,6 +68,7 @@ class AnomalyDetectionAgent(BaseAgent):
             user_id: Optional[str] = None,
             dialogue_history: Optional[List[Message]] = None,
             selected_model_ref: Optional[ModelRef] = None,
+            stream_writer: Optional[Callable[[Any], None]] = None,
     ) -> Dict[str, Any]:
         """Run the anomaly-detection sub-agent.
 
@@ -97,6 +102,7 @@ class AnomalyDetectionAgent(BaseAgent):
             model_save_name=selected_model_ref.save_name if selected_model_ref else None,
             model_thread_id=selected_model_ref.thread_id if selected_model_ref else None,
             model_source_file=selected_model_ref.source_file if selected_model_ref else None,
+            stream_writer=stream_writer,
         )
 
         # 历史对话由 orchestrator 的 SessionState(checkpointer 落盘)传
