@@ -1,5 +1,14 @@
 # Prediction Skill
 
+## Chronos-2 / TimesFM 2.5 微调
+
+- 命中词：微调、finetune、LoRA、继续训练、训练 Chronos/TimesFM。
+- 工具：`finetune_prediction_model`；权重保存在远程服务器，本地保存 JSON 索引。
+- 支持范围：Chronos-2=`full|lora`，TimesFM 2.5=`lora`。
+- 训练流：`status -> progress* -> completed`，失败为 `failed`；前端动态展示步数、百分比、loss、学习率等。
+- 预测复用：前端选中微调模型后，`forecast_time_series` 自动把远程 `modelPath` 交给预测服务；模型缓存由远端按 `model + modelPath` 隔离。
+- 微调后评估：训练前从历史末尾预留 `holdout_steps`（默认等于 `prediction_length`），训练完成后分别用基础权重和微调权重预测同一 holdout，返回双模型曲线及 MAE/RMSE/MAPE/sMAPE/MASE 对比。
+
 > 工业时序**预测**:7 个时序基础模型,对未来 N 步给点预测 + 9 个分位区间。**不做异常检测、不做因果归因**。
 
 `task_type=prediction`

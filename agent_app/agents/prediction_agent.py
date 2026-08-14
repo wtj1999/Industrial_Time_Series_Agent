@@ -1,9 +1,9 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 import pandas as pd
 from dataclasses import dataclass
 
-from models.schemas import TaskSpec, TechPath, CSVProfile, Message
+from models.schemas import ModelRef, TaskSpec, TechPath, CSVProfile, Message
 
 from agents.base_agent import BaseAgent, extract_tool_calls
 from charts import extract_evaluation_chart, extract_prediction_chart
@@ -37,6 +37,9 @@ class PredictionContext:
     user_id: Optional[str] = None
     thread_id: Optional[str] = None
     file_path: Optional[str] = None
+    selected_model_type: Optional[str] = None
+    selected_model_path: Optional[str] = None
+    stream_writer: Optional[Callable[[Any], None]] = None
 
 
 class PredictionAgent(BaseAgent):
@@ -71,6 +74,8 @@ class PredictionAgent(BaseAgent):
             csv_profile: Optional[CSVProfile],
             user_id: Optional[str] = None,
             dialogue_history: Optional[List[Message]] = None,
+            selected_model_ref: Optional[ModelRef] = None,
+            stream_writer: Optional[Callable[[Any], None]] = None,
     ) -> Dict[str, Any]:
         """Run the prediction sub-agent.
 
@@ -84,6 +89,16 @@ class PredictionAgent(BaseAgent):
             ``None`` until a prediction-chart extractor is added.
         """
         df = pd.read_csv(file_path)
+
+        selected_model_type = None
+        selected_model_path = None
+        if selected_model_ref and selected_model_ref.category == "time_series_prediction":
+            from tools.prediction_tools.finetuning_tools import resolve_prediction_model_index
+            selected_record = resolve_prediction_model_index(
+                user_id, selected_model_ref.thread_id, selected_model_ref.save_name
+            )
+            selected_model_type = selected_record.get("model_type")
+            selected_model_path = selected_record.get("model_path")
 
         ctx = PredictionContext(
             df=df,
@@ -100,6 +115,9 @@ class PredictionAgent(BaseAgent):
             user_id=user_id,
             thread_id=thread_id,
             file_path=file_path,
+            selected_model_type=selected_model_type,
+            selected_model_path=selected_model_path,
+            stream_writer=stream_writer,
         )
 
         recent_history = (dialogue_history or [])[-10:]
@@ -107,6 +125,13 @@ class PredictionAgent(BaseAgent):
             f"[{getattr(m, 'role', '?')}] {getattr(m, 'content', '')}"
             for m in recent_history
         ) or "(无)"
+
+        model_hint = (
+            "【用户指定微调模型】必须调用 forecast_time_series，模型由运行时固定为 "
+            f"{selected_model_ref.model_type}，远程 modelPath 已安全注入；不要改用其他模型。"
+            if selected_model_path
+            else "用户未选择微调模型；按需求使用基础模型预测，或在明确要求微调时调用 finetune_prediction_model。"
+        )
 
         user_prompt = f"""
             你现在要执行工业时序预测任务。
@@ -125,6 +150,8 @@ class PredictionAgent(BaseAgent):
 
                CSV画像：
                {csv_profile.model_dump_json(indent=2, ensure_ascii=False) if csv_profile else "None"}
+
+               模型选择约束：{model_hint}
 
                请据此选择工具并输出结构化结果。
         """

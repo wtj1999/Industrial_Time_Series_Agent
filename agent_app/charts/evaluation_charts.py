@@ -35,7 +35,11 @@ logger = logging.getLogger(__name__)
 
 
 # Tools whose structured output we know how to visualise.
-_CHARTABLE_TOOLS = {"backtest_forecast", "compare_forecast_models_backtest"}
+_CHARTABLE_TOOLS = {
+    "backtest_forecast",
+    "compare_forecast_models_backtest",
+    "finetune_prediction_model",
+}
 
 # Nine quantile levels the upstream normaliser always emits (see
 # ``prediction_tools._common.normalize_forecast``). The single-model
@@ -149,7 +153,10 @@ def _build_backtest_chart(
         per_model_per_col = _expand_single_model(metrics)
         rank_by: Optional[str] = None
         ranking: List[Dict[str, Any]] = []
-    elif tool_name == "compare_forecast_models_backtest":
+    elif tool_name in {
+        "compare_forecast_models_backtest",
+        "finetune_prediction_model",
+    }:
         model_names = [str(m) for m in (metrics.get("models") or [])]
         per_model_per_col = _expand_multi_model(metrics)
         rank_by = metrics.get("rank_by") or "mae"

@@ -31,6 +31,7 @@ import {
 import type {
   AnomalyChart,
   AnomalyTrainingProgress,
+  PredictionFinetuningProgress,
   AnalysisChart,
   CompletedEvent,
   CSVPreview,
@@ -55,6 +56,12 @@ export type ConversationItem =
       id: string;
       progress: AnomalyTrainingProgress;
       history: AnomalyTrainingProgress[];
+    }
+  | {
+      kind: 'prediction_finetuning_progress';
+      id: string;
+      progress: PredictionFinetuningProgress;
+      history: PredictionFinetuningProgress[];
     }
   | { kind: 'analysis_chart'; id: string; chart: AnalysisChart }
   | { kind: 'prediction_chart'; id: string; chart: PredictionChart }
@@ -395,6 +402,30 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
+        case 'prediction_finetuning_progress': {
+          const progress = ev.data;
+          setItems((prev) => {
+            const index = prev.findIndex(
+              (item) => item.kind === 'prediction_finetuning_progress' &&
+                item.progress.operation_id === progress.operation_id,
+            );
+            if (index < 0) {
+              return [...prev, {
+                kind: 'prediction_finetuning_progress' as const,
+                id: `finetuning-${progress.operation_id}`,
+                progress,
+                history: [progress],
+              }];
+            }
+            const next = [...prev];
+            const current = next[index];
+            if (current.kind === 'prediction_finetuning_progress') {
+              next[index] = { ...current, progress, history: [...current.history, progress] };
+            }
+            return next;
+          });
+          break;
+        }
         case 'interrupt': {
           const payload = ev.data;
           pendingRef.current = null;
@@ -505,6 +536,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         onUpdate: (d) => handleEvent({ type: 'update', data: d }, assistantId),
         onAnomalyTrainingProgress: (p) => handleEvent(
           { type: 'anomaly_training_progress', data: p }, assistantId,
+        ),
+        onPredictionFinetuningProgress: (p) => handleEvent(
+          { type: 'prediction_finetuning_progress', data: p }, assistantId,
         ),
         onInterrupt: (ev) => handleEvent(ev as InterruptEvent, assistantId),
         onCsvPreview: (p) => handleEvent({ type: 'csv_preview', data: p }, assistantId),

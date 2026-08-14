@@ -121,6 +121,9 @@ export function CsvUploadPanel({
           model_thread_id: pickedModel.thread_id ?? null,
           model_source_file: pickedModel.source_file ?? null,
           detector_name: pickedModel.detector_name ?? null,
+          model_category: pickedModel.category ?? null,
+          model_type: pickedModel.model_type ?? null,
+          model_path: pickedModel.model_path ?? null,
         }
       : {};
 
@@ -339,6 +342,7 @@ export function CsvUploadPanel({
           selected={pickedModel}
           onPick={setPickedModel}
           disabled={streaming}
+          taskType={interrupt.current_task_type}
         />
       )}
 

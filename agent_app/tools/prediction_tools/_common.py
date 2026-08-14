@@ -87,6 +87,11 @@ API_ENDPOINT_1: str = "http://10.2.128.43:19053/time/seriesPredict"
 # ``moirai-2.0-R-small``, ``timer-s1`` and ``tirex-1.1-gifteval``.
 API_ENDPOINT_2: str = "http://10.2.128.43:19054/time/seriesPredict"
 
+# Dedicated inference service for remotely fine-tuned Chronos / TimesFM.
+FINETUNED_PREDICTION_ENDPOINT: str = (
+    "http://10.2.128.43:19155/time/seriesPredict"
+)
+
 # Default per-request timeout in seconds. Foundation-model inference on
 # long series can take a while, so keep this generous but bounded.
 DEFAULT_TIMEOUT: int = 120
@@ -365,10 +370,11 @@ def prepare_series(
 
 def call_predict_api(
     model: str,
-    data_list: Sequence[float],
+    data_list: Sequence[Any],
     prediction_length: int,
     endpoint: Optional[str] = None,
     timeout: Optional[int] = None,
+    model_path: Optional[str] = None,
 ) -> Dict[str, Any]:
     """POST to the forecasting service. Returns the parsed JSON body.
 
@@ -376,38 +382,60 @@ def call_predict_api(
     when ``endpoint`` is ``None``. ``model`` is matched case-insensitively
     and the canonical name is sent in the payload.
 
-    The unified API protocol expects ``dataList`` as a 2-D array of shape
-    ``[n_variables, input_history_length]``. The prediction tools call
-    the service one variable at a time, so this function wraps the
-    caller's flat 1-D ``data_list`` into ``[1, len(data_list)]`` before
-    sending. The response is correspondingly ``[1, prediction_length, 9]``.
+    ``data_list`` accepts a legacy 1-D series or the canonical 2-D matrix
+    ``[n_variates, context_len]``. Requests are always sent as 2-D.
     """
     import requests  # local import keeps module import side-effect free
 
     canonical, entry = resolve_model(model)
-    if endpoint is None:
+    use_finetuned_endpoint = bool(
+        model_path and canonical in {"chronos-2", "timesfm-2.5"}
+    )
+    if use_finetuned_endpoint:
+        # A selected remote checkpoint must be served by the dedicated
+        # fine-tuned inference process; do not let a legacy endpoint
+        # override silently route it to a base-model service.
+        endpoint = FINETUNED_PREDICTION_ENDPOINT
+    elif endpoint is None:
         endpoint = entry["preferred_endpoint"]
     if timeout is None:
         timeout = DEFAULT_TIMEOUT
     if prediction_length <= 0:
         raise ValueError("prediction_length 必须 > 0，当前=%r" % prediction_length)
 
-    # Unified protocol: dataList is 2-D [n_variables, history_length].
-    # All prediction-family tools operate per-column (single variable),
-    # so we wrap the caller's 1-D array into one outer row.
-    data_2d = [[float(x) for x in data_list]]
+    data_2d = _coerce_prediction_data_2d(data_list)
     payload = {
         "model": canonical,
         "dataList": data_2d,
         "predictionLength": int(prediction_length),
     }
+    if model_path:
+        payload["modelPath"] = model_path
     logger.info(
-        "call_predict_api: endpoint=%s model=%s n_input=%d horizon=%d",
-        endpoint, canonical, len(payload["dataList"][0]), prediction_length)
+        "call_predict_api: endpoint=%s model=%s n_variates=%d context_len=%d horizon=%d tuned=%s",
+        endpoint, canonical, len(data_2d), len(data_2d[0]),
+        prediction_length, use_finetuned_endpoint)
     resp = requests.post(endpoint, json=payload, timeout=timeout)
     resp.raise_for_status()
     body = resp.json()
     return body if isinstance(body, dict) else {"raw": body}
+
+
+def _coerce_prediction_data_2d(data_list: Sequence[Any]) -> List[List[float]]:
+    """Normalize prediction input to a rectangular numeric 2-D matrix."""
+    if not data_list:
+        raise ValueError("dataList 不能为空")
+    first = data_list[0]
+    if isinstance(first, (list, tuple, np.ndarray, pd.Series)):
+        rows = [[float(value) for value in row] for row in data_list]
+    else:
+        rows = [[float(value) for value in data_list]]
+    if not rows or not rows[0]:
+        raise ValueError("dataList 中的序列不能为空")
+    width = len(rows[0])
+    if any(len(row) != width for row in rows):
+        raise ValueError("dataList 必须是规则二维数组，各序列 context_len 必须一致")
+    return rows
 
 
 # ----------------------------------------------------------------------

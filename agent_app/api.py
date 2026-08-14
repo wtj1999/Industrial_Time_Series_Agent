@@ -144,7 +144,7 @@ async def index():
             'GET /api/sessions/{session_id}/messages': 'Get the stored dialogue history for a session',
             'DELETE /api/sessions/{session_id}': 'Delete a conversation thread (index + checkpoint state)',
             'GET /api/datasets': 'List all uploaded data files',
-            'GET /api/models': 'List all trained anomaly-detection models',
+            'GET /api/models': 'List anomaly-detection and fine-tuned prediction models',
             'GET /health': 'Health check endpoint',
         },
         'documentation': {
@@ -755,6 +755,14 @@ def _models_root() -> Path:
         return Path(__file__).resolve().parent / "artifacts" / "anomaly_detection"
 
 
+def _prediction_models_root() -> Path:
+    try:
+        from tools.prediction_tools.finetuning_tools import PREDICTION_MODEL_INDEX_ROOT
+        return PREDICTION_MODEL_INDEX_ROOT
+    except Exception:
+        return Path(__file__).resolve().parent / "artifacts" / "prediction_models"
+
+
 @app.get("/api/datasets", response_model=Dict[str, Any])
 async def list_datasets(
     x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
@@ -811,14 +819,14 @@ async def list_datasets(
 async def list_models(
     x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
 ):
-    """List every persisted anomaly-detection model the requesting user
-    owns.
+    """List every anomaly and fine-tuned prediction model the user owns.
 
     Walks ``artifacts/anomaly_detection/<user_id>/`` and reads each
     ``.joblib`` envelope's metadata **without** unpickling the model
     body — we load with ``mmap_mode="r"`` and only touch the envelope
     dict keys, mirroring the pattern in ``list_saved_detectors``. Models
-    belonging to other users are never visible.
+    Prediction weights remain remote; their local JSON indexes are merged
+    into the same response. Models belonging to other users are never visible.
     """
     import joblib
 
@@ -826,14 +834,6 @@ async def list_models(
         user_id = _sanitize_user_id(x_user_id)
         root = _models_root()
         user_root = root / user_id
-        if not user_root.exists():
-            return {
-                "models": [],
-                "total": 0,
-                "user_id": user_id,
-                "root": str(root),
-                "failed": [],
-            }
 
         entries: List[Dict[str, Any]] = []
         failed: List[Dict[str, str]] = []
@@ -866,6 +866,8 @@ async def list_models(
             if isinstance(obj, dict) and "_pyod_persistence_version" in obj:
                 meta = obj.get("metadata") or {}
                 entries.append({
+                    "category": "anomaly_detection",
+                    "task_type": "anomaly_detection",
                     "save_name": fp.stem,
                     "file_name": fp.name,
                     "detector_name": meta.get("detector_name"),
@@ -888,6 +890,8 @@ async def list_models(
                 })
             else:
                 entries.append({
+                    "category": "anomaly_detection",
+                    "task_type": "anomaly_detection",
                     "save_name": fp.stem,
                     "file_name": fp.name,
                     "detector_name": None,
@@ -898,6 +902,24 @@ async def list_models(
                     "thread_id": thread_id,
                     "source_file": source_file or None,
                 })
+
+        prediction_root = _prediction_models_root() / user_id
+        if prediction_root.exists():
+            for fp in prediction_root.glob("**/*.json"):
+                try:
+                    record = json.loads(fp.read_text(encoding="utf-8"))
+                    if not isinstance(record, dict) or not record.get("model_path"):
+                        raise ValueError("invalid prediction model index")
+                    record.setdefault("category", "time_series_prediction")
+                    record.setdefault("task_type", "prediction")
+                    record.setdefault("file_name", fp.name)
+                    record["size_bytes"] = int(fp.stat().st_size)
+                    entries.append(record)
+                except Exception as exc:
+                    failed.append({
+                        "file_name": fp.name,
+                        "error": "%s: %s" % (type(exc).__name__, exc),
+                    })
 
         entries.sort(
             key=lambda e: e.get("saved_at") or e.get("trained_at") or "",

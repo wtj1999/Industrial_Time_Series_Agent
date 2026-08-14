@@ -87,6 +87,9 @@ from agent_app.tools.prediction_tools.evaluation_tools import (  # noqa: F401
     backtest_forecast,
     compare_forecast_models_backtest,
 )
+from agent_app.tools.prediction_tools.finetuning_tools import (  # noqa: F401
+    finetune_prediction_model,
+)
 
 
 # Canonical tool list, in the suggested registration order:
@@ -99,6 +102,7 @@ TOOLS = [
     list_prediction_models,
     explain_prediction_model,
     recommend_prediction_model,
+    finetune_prediction_model,
 
     # Forecast
     forecast_time_series,
@@ -142,6 +146,7 @@ __all__ = [
     "list_prediction_models",
     "explain_prediction_model",
     "recommend_prediction_model",
+    "finetune_prediction_model",
 
     # Forecast
     "forecast_time_series",

@@ -2,9 +2,9 @@
  * "我的模型" — full-page list of every persisted anomaly-detection
  * model across all sessions. Backed by ``GET /api/models``.
  *
- * Each card surfaces the detector name, training stats (n_samples /
- * n_features / n_anomalies), feature columns, source dataset and
- * timing. Legacy/transductive markers are shown as badges.
+ * Anomaly cards surface detector statistics; prediction cards surface
+ * foundation-model and fine-tuning metadata. Remote prediction weights
+ * are represented by local JSON indexes, so index-file size is omitted.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -26,7 +26,6 @@ import type { ModelEntry } from '@/types';
 import { cn } from '@/utils/cn';
 import {
   formatAbsolute,
-  formatBytes,
   formatRelative,
   shortId,
 } from '@/utils/format';
@@ -258,7 +257,11 @@ function CategoryGrid({
 }
 
 function ModelCard({ m }: { m: ModelEntry }) {
-  const detector = m.detector_name || m.model_class || '未知检测器';
+  const category = getModelCategory(m);
+  const isPrediction = category === 'time_series_prediction';
+  const detector = isPrediction
+    ? (m.model_type || '时序预测模型')
+    : (m.detector_name || m.model_class || '未知检测器');
   const trainedAt = m.trained_at || m.saved_at;
   const isTransductive = m.transductive === true;
   const isLegacy = m.legacy === true;
@@ -318,30 +321,60 @@ function ModelCard({ m }: { m: ModelEntry }) {
         />
         <Stat
           icon={Target}
-          label="特征数"
+          label={isPrediction ? '训练序列' : '特征数'}
           value={m.n_features != null ? String(m.n_features) : '—'}
         />
-        <Stat
-          icon={Train}
-          label="异常数"
-          value={m.n_anomalies != null ? m.n_anomalies.toLocaleString() : '—'}
-          tone={m.n_anomalies != null && m.n_anomalies > 0 ? 'warn' : 'neutral'}
-        />
-        <Stat
-          icon={Cpu}
-          label="污染率"
-          value={
-            m.contamination != null
-              ? `${(m.contamination * 100).toFixed(1)}%`
-              : '—'
-          }
-        />
+        {isPrediction ? (
+          <>
+            <Stat
+              icon={Train}
+              label="微调方式"
+              value={(m.training?.finetune_mode || '—').toUpperCase()}
+            />
+            <Stat
+              icon={Cpu}
+              label="训练步数"
+              value={m.training?.num_steps != null
+                ? m.training.num_steps.toLocaleString()
+                : '—'}
+            />
+          </>
+        ) : (
+          <>
+            <Stat
+              icon={Train}
+              label="异常数"
+              value={m.n_anomalies != null ? m.n_anomalies.toLocaleString() : '—'}
+              tone={m.n_anomalies != null && m.n_anomalies > 0 ? 'warn' : 'neutral'}
+            />
+            <Stat
+              icon={Cpu}
+              label="污染率"
+              value={
+                m.contamination != null
+                  ? `${(m.contamination * 100).toFixed(1)}%`
+                  : '—'
+              }
+            />
+          </>
+        )}
       </div>
+
+      {isPrediction && (
+        <div className="mt-2 flex items-center justify-between rounded-lg border border-blue-100 bg-blue-50/50 px-2.5 py-2 text-[10px]">
+          <span className="text-steel-500">上下文 / 预测窗口</span>
+          <span className="font-medium tabular-nums text-blue-700">
+            {m.training?.context_length ?? '自动'} / {m.training?.prediction_length ?? '—'}
+          </span>
+        </div>
+      )}
 
       {/* Feature columns */}
       {m.feature_columns && m.feature_columns.length > 0 && (
         <div className="mt-3 border-t border-steel-100 pt-2.5">
-          <div className="mb-1 text-[10px] text-steel-500">特征列</div>
+          <div className="mb-1 text-[10px] text-steel-500">
+            {isPrediction ? '训练目标列' : '特征列'}
+          </div>
           <div className="flex flex-wrap gap-1">
             {m.feature_columns.slice(0, 6).map((col) => (
               <span
@@ -381,10 +414,6 @@ function ModelCard({ m }: { m: ModelEntry }) {
             )}
             {!m.thread_id && <span className="text-steel-400">—</span>}
           </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span>文件大小</span>
-          <span className="text-steel-600">{formatBytes(m.size_bytes)}</span>
         </div>
       </div>
     </div>

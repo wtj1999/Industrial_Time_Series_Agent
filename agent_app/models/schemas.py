@@ -860,6 +860,9 @@ class ModelRef(BaseModel):
         default=None,
         description="模型对应的检测器名称，仅用于 UI 提示与 prompt hint，不参与路径解析。",
     )
+    category: Optional[str] = Field(default=None)
+    model_type: Optional[str] = Field(default=None)
+    model_path: Optional[str] = Field(default=None)
 
 
 class SessionState(BaseModel):
@@ -887,7 +890,7 @@ class SessionState(BaseModel):
         default=None,
         description=(
             "用户在 CSV 上传断点显式选择复用的已训练模型引用。"
-            "仅在异常检测任务下可能非空；为 None 时由 LLM 自由决策"
+            "在异常检测或预测任务下可能非空；为 None 时由 LLM 自由决策"
             "（训练新模型或复用当前作用域内的模型）。"
             "跨会话复用时 thread_id / source_file 指向模型原始作用域，"
             "user_id 始终绑定当前用户，前端无法伪造。"

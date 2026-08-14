@@ -23,7 +23,7 @@ Design principles
 
 3. **Granular tools.** Each tool answers one well-scoped question:
    - :func:`get_basic_info` — overall structure
-   - :func:`analyze_column_tool` — per-column detail
+   - :func:`analyze_column_tool` — batched column details
 """
 
 from __future__ import annotations
@@ -49,7 +49,7 @@ from agent_app.tools.profile_tools._common import (  # noqa: F401
 
 # Canonical tool list, in the suggested call order:
 #   1) get_basic_info    — overall structure
-#   2) analyze_column    — one call per column
+#   2) analyze_column    — all columns in one batched call
 TOOLS = [
     get_basic_info,
     analyze_column_tool,

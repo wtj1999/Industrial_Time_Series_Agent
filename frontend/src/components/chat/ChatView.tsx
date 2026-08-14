@@ -115,6 +115,15 @@ export function ChatView() {
                 />
               );
             }
+            if (item.kind === 'prediction_finetuning_progress') {
+              return (
+                <TrainingProgressCard
+                  key={item.id}
+                  progress={item.progress}
+                  history={item.history}
+                />
+              );
+            }
             if (item.kind === 'analysis_chart') {
               return <AnalysisChartCard key={item.id} chart={item.chart} />;
             }

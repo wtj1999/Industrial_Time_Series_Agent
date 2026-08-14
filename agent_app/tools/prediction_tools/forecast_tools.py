@@ -29,6 +29,7 @@ from agent_app.tools._tool_guard import tool_guard
 from agent_app.tools.prediction_tools._common import (
     AVAILABLE_MODELS,
     DEFAULT_TIMEOUT,
+    FINETUNED_PREDICTION_ENDPOINT,
     MODEL_REGISTRY,
     call_predict_api,
     downsample_history,
@@ -105,7 +106,10 @@ def forecast_time_series(
         raise ValueError(
             "prediction_length 必须 > 0，当前=%r" % prediction_length)
 
-    canonical, entry = resolve_model(model)
+    ctx = runtime.context
+    selected_model = getattr(ctx, "selected_model_type", None)
+    selected_model_path = getattr(ctx, "selected_model_path", None)
+    canonical, entry = resolve_model(selected_model or model)
 
     df = get_df(runtime)
     cols = resolve_columns(runtime)
@@ -135,12 +139,167 @@ def forecast_time_series(
     # column since this tool runs a single model on every column.
     chart_history: Dict[str, Any] = {}
 
+    # The unified remote contract accepts all target variates in one 2-D
+    # request. Keep response-to-column mapping deterministic by preserving
+    # ``numeric_cols`` order.
+    return _forecast_time_series_batched(
+        canonical=canonical,
+        entry=entry,
+        df=df,
+        numeric_cols=numeric_cols,
+        non_numeric=non_numeric,
+        prediction_length=prediction_length,
+        history_tail=history_tail,
+        impute=impute,
+        endpoint=endpoint,
+        timeout=timeout,
+        selected_model_path=selected_model_path,
+    )
+
+    # for col in numeric_cols:
+    #     arr, info = prepare_series(df, col, impute=impute, history_tail=history_tail)
+    #     common_info = info
+    #     # Capture history BEFORE the API call so we always ship it,
+    #     # even when the call later fails. This keeps the chart payload
+    #     # lossless on partial-failure turns.
+    #     hist_list, hist_n, hist_ds = _downsample_history(arr)
+    #     chart_history[col] = {
+    #         "history": hist_list,
+    #         "n_full": hist_n,
+    #         "downsampled": hist_ds,
+    #     }
+    #     if arr.size < 2:
+    #         per_column[col] = {
+    #             "n_input": int(arr.size),
+    #             "note": "样本不足（需 >= 2）",
+    #         }
+    #         continue
+    #
+    #     try:
+    #         body = call_predict_api(
+    #             model=canonical,
+    #             data_list=arr.tolist(),
+    #             prediction_length=prediction_length,
+    #             endpoint=endpoint,
+    #             timeout=timeout,
+    #             model_path=selected_model_path,
+    #         )
+    #     except Exception as exc:
+    #         logger.exception(
+    #             "forecast_time_series: API 调用失败 col=%s model=%s",
+    #             col, canonical)
+    #         err = "%s: %s" % (type(exc).__name__, exc)
+    #         per_column[col] = {"error": err, "n_input": int(arr.size)}
+    #         errors.append("%s: %s" % (col, err))
+    #         continue
+    #
+    #     if body.get("code") != "success":
+    #         msg = body.get("message", body)
+    #         per_column[col] = {
+    #             "error": "API 返回非成功: %s" % msg,
+    #             "n_input": int(arr.size),
+    #         }
+    #         errors.append("%s: API code=%s" % (col, body.get("code")))
+    #         continue
+    #
+    #     raw = body.get("predict_data_result")
+    #     if raw is None:
+    #         per_column[col] = {
+    #             "error": "predict_data_result 为空",
+    #             "n_input": int(arr.size),
+    #         }
+    #         errors.append("%s: predict_data_result 为空" % col)
+    #         continue
+    #
+    #     try:
+    #         norm = normalize_forecast(raw, canonical, prediction_length)
+    #     except Exception as exc:
+    #         logger.exception(
+    #             "forecast_time_series: 归一化失败 col=%s model=%s",
+    #             col, canonical)
+    #         per_column[col] = {
+    #             "error": "归一化失败: %s: %s" % (type(exc).__name__, exc),
+    #             "n_input": int(arr.size),
+    #             "raw_shape": str(np.asarray(raw).shape),
+    #         }
+    #         continue
+    #
+    #     norm["n_input"] = int(arr.size)
+    #     norm["input_first"] = round_float(float(arr[0]))
+    #     norm["input_last"] = round_float(float(arr[-1]))
+    #     per_column[col] = norm
+    #
+    #     point = norm["point_forecast"]
+    #     findings.append(
+    #         "%s：未来 %d 步中位数预测首末 = %+.4g → %+.4g。"
+    #         % (col, prediction_length, point[0], point[-1]))
+    #
+    # notes_extra: List[str] = []
+    # if non_numeric:
+    #     notes_extra.append("非数值列已跳过：%s" % ", ".join(non_numeric))
+    # if errors:
+    #     notes_extra.append(
+    #         "共 %d 列预测失败：%s"
+    #         % (len(errors), "; ".join(errors[:5])))
+    # if common_info.get("history_tail"):
+    #     notes_extra.append(
+    #         "已截取最近 %d 步历史送入模型。" % common_info["history_tail"])
+    #
+    # return make_envelope(
+    #     tool_name="forecast_time_series",
+    #     summary="完成 %d/%d 列的预测（模型=%s，horizon=%d）。"
+    #             % (len([c for c in per_column.values() if "error" not in c]),
+    #                len(numeric_cols), canonical, prediction_length),
+    #     key_findings=findings or ["无成功预测结果。"],
+    #     metrics={
+    #         "model": canonical,
+    #         "model_path": selected_model_path,
+    #         "endpoint": entry["preferred_endpoint"],
+    #         "prediction_length": int(prediction_length),
+    #         "history_tail": history_tail,
+    #         "impute": impute,
+    #         "per_column": per_column,
+    #         "chart_history": chart_history,
+    #     },
+    #     recommendations=[
+    #         "需要历史回测时改用 backtest_forecast；多模型对比时改用 "
+    #         "forecast_multi_models。",
+    #         "samples 类模型（如 sundial）的样本路径默认截断为 100 条，"
+    #         "分位带始终基于完整样本计算。",
+    #     ],
+    #     notes=format_notes(
+    #         {"skipped_non_numeric": non_numeric,
+    #          "n_nan": common_info.get("n_nan", 0),
+    #          "impute": impute},
+    #         notes_extra),
+    # )
+
+
+def _forecast_time_series_batched(
+    *,
+    canonical: str,
+    entry: Dict[str, Any],
+    df: pd.DataFrame,
+    numeric_cols: List[str],
+    non_numeric: List[str],
+    prediction_length: int,
+    history_tail: Optional[int],
+    impute: str,
+    endpoint: Optional[str],
+    timeout: Optional[int],
+    selected_model_path: Optional[str],
+) -> Dict[str, Any]:
+    """Forecast every target column with one rectangular 2-D API call."""
+    per_column: Dict[str, Any] = {}
+    chart_history: Dict[str, Any] = {}
+    findings: List[str] = []
+    errors: List[str] = []
+    prepared: List[tuple[str, np.ndarray, Dict[str, Any]]] = []
+
     for col in numeric_cols:
-        arr, info = prepare_series(df, col, impute=impute, history_tail=history_tail)
-        common_info = info
-        # Capture history BEFORE the API call so we always ship it,
-        # even when the call later fails. This keeps the chart payload
-        # lossless on partial-failure turns.
+        arr, info = prepare_series(
+            df, col, impute=impute, history_tail=history_tail
+        )
         hist_list, hist_n, hist_ds = _downsample_history(arr)
         chart_history[col] = {
             "history": hist_list,
@@ -150,105 +309,138 @@ def forecast_time_series(
         if arr.size < 2:
             per_column[col] = {
                 "n_input": int(arr.size),
-                "note": "样本不足（需 >= 2）",
+                "note": "样本不足（需要 >= 2）",
             }
             continue
+        prepared.append((col, arr, info))
 
+    # ``impute=drop`` can leave columns with different lengths. The API
+    # requires a rectangular matrix, so retain the newest common suffix.
+    context_len = min((arr.size for _, arr, _ in prepared), default=0)
+    if context_len:
+        prepared = [
+            (col, arr[-context_len:], info) for col, arr, info in prepared
+        ]
+
+    request_endpoint = (
+        FINETUNED_PREDICTION_ENDPOINT
+        if selected_model_path and canonical in {"chronos-2", "timesfm-2.5"}
+        else (endpoint or entry["preferred_endpoint"])
+    )
+
+    if prepared:
         try:
             body = call_predict_api(
                 model=canonical,
-                data_list=arr.tolist(),
+                data_list=[arr.tolist() for _, arr, _ in prepared],
                 prediction_length=prediction_length,
                 endpoint=endpoint,
                 timeout=timeout,
+                model_path=selected_model_path,
             )
         except Exception as exc:
             logger.exception(
-                "forecast_time_series: API 调用失败 col=%s model=%s",
-                col, canonical)
-            err = "%s: %s" % (type(exc).__name__, exc)
-            per_column[col] = {"error": err, "n_input": int(arr.size)}
-            errors.append("%s: %s" % (col, err))
-            continue
+                "forecast_time_series: batched API failed model=%s cols=%s",
+                canonical,
+                [col for col, _, _ in prepared],
+            )
+            error = "%s: %s" % (type(exc).__name__, exc)
+            for col, arr, _ in prepared:
+                per_column[col] = {"error": error, "n_input": int(arr.size)}
+                errors.append("%s: %s" % (col, error))
+        else:
+            raw = body.get("predict_data_result")
+            response_error: Optional[str] = None
+            raw_array: Optional[np.ndarray] = None
+            if body.get("code") != "success":
+                response_error = "API 返回非成功: %s" % body.get("message", body)
+            elif raw is None:
+                response_error = "predict_data_result 为空"
+            else:
+                raw_array = np.asarray(raw)
+                if raw_array.ndim != 3 or raw_array.shape[0] != len(prepared):
+                    response_error = (
+                        "批量响应变量数不匹配，期望 %d，实际 shape=%s"
+                        % (len(prepared), raw_array.shape)
+                    )
 
-        if body.get("code") != "success":
-            msg = body.get("message", body)
-            per_column[col] = {
-                "error": "API 返回非成功: %s" % msg,
-                "n_input": int(arr.size),
-            }
-            errors.append("%s: API code=%s" % (col, body.get("code")))
-            continue
-
-        raw = body.get("predict_data_result")
-        if raw is None:
-            per_column[col] = {
-                "error": "predict_data_result 为空",
-                "n_input": int(arr.size),
-            }
-            errors.append("%s: predict_data_result 为空" % col)
-            continue
-
-        try:
-            norm = normalize_forecast(raw, canonical, prediction_length)
-        except Exception as exc:
-            logger.exception(
-                "forecast_time_series: 归一化失败 col=%s model=%s",
-                col, canonical)
-            per_column[col] = {
-                "error": "归一化失败: %s: %s" % (type(exc).__name__, exc),
-                "n_input": int(arr.size),
-                "raw_shape": str(np.asarray(raw).shape),
-            }
-            continue
-
-        norm["n_input"] = int(arr.size)
-        norm["input_first"] = round_float(float(arr[0]))
-        norm["input_last"] = round_float(float(arr[-1]))
-        per_column[col] = norm
-
-        point = norm["point_forecast"]
-        findings.append(
-            "%s：未来 %d 步中位数预测首末 = %+.4g → %+.4g。"
-            % (col, prediction_length, point[0], point[-1]))
+            if response_error:
+                for col, arr, _ in prepared:
+                    per_column[col] = {
+                        "error": response_error,
+                        "n_input": int(arr.size),
+                    }
+                    errors.append("%s: %s" % (col, response_error))
+            else:
+                assert raw_array is not None
+                for index, (col, arr, _) in enumerate(prepared):
+                    try:
+                        norm = normalize_forecast(
+                            raw_array[index:index + 1],
+                            canonical,
+                            prediction_length,
+                        )
+                    except Exception as exc:
+                        error = "归一化失败 %s: %s" % (type(exc).__name__, exc)
+                        per_column[col] = {
+                            "error": error,
+                            "n_input": int(arr.size),
+                            "raw_shape": str(raw_array[index:index + 1].shape),
+                        }
+                        errors.append("%s: %s" % (col, error))
+                        continue
+                    norm["n_input"] = int(arr.size)
+                    norm["input_first"] = round_float(float(arr[0]))
+                    norm["input_last"] = round_float(float(arr[-1]))
+                    per_column[col] = norm
+                    point = norm["point_forecast"]
+                    findings.append(
+                        "%s：未来 %d 步中位数预测首末 = %+.4g → %+.4g。"
+                        % (col, prediction_length, point[0], point[-1])
+                    )
 
     notes_extra: List[str] = []
     if non_numeric:
         notes_extra.append("非数值列已跳过：%s" % ", ".join(non_numeric))
     if errors:
         notes_extra.append(
-            "共 %d 列预测失败：%s"
-            % (len(errors), "; ".join(errors[:5])))
-    if common_info.get("history_tail"):
-        notes_extra.append(
-            "已截取最近 %d 步历史送入模型。" % common_info["history_tail"])
+            "共 %d 列预测失败：%s" % (len(errors), "; ".join(errors[:5]))
+        )
+    if prepared and any(arr.size != context_len for _, arr, _ in prepared):
+        notes_extra.append("各列已对齐到最新公共上下文窗口。")
 
+    successes = sum(
+        1 for result in per_column.values()
+        if "error" not in result and "note" not in result
+    )
     return make_envelope(
         tool_name="forecast_time_series",
-        summary="完成 %d/%d 列的预测（模型=%s，horizon=%d）。"
-                % (len([c for c in per_column.values() if "error" not in c]),
-                   len(numeric_cols), canonical, prediction_length),
+        summary="完成 %d/%d 列预测（模型 %s，horizon=%d，一次二维请求）。"
+        % (successes, len(numeric_cols), canonical, prediction_length),
         key_findings=findings or ["无成功预测结果。"],
         metrics={
             "model": canonical,
-            "endpoint": entry["preferred_endpoint"],
+            "model_path": selected_model_path,
+            "endpoint": request_endpoint,
             "prediction_length": int(prediction_length),
             "history_tail": history_tail,
+            "context_length": context_len,
+            "n_variates": len(prepared),
+            "n_api_calls": 1 if prepared else 0,
             "impute": impute,
             "per_column": per_column,
             "chart_history": chart_history,
         },
         recommendations=[
-            "需要历史回测时改用 backtest_forecast；多模型对比时改用 "
-            "forecast_multi_models。",
-            "samples 类模型（如 sundial）的样本路径默认截断为 100 条，"
-            "分位带始终基于完整样本计算。",
+            "需要历史回测时使用 backtest_forecast；多模型比较时使用 forecast_multi_models。"
         ],
         notes=format_notes(
-            {"skipped_non_numeric": non_numeric,
-             "n_nan": common_info.get("n_nan", 0),
-             "impute": impute},
-            notes_extra),
+            {
+                "skipped_non_numeric": non_numeric,
+                "impute": impute,
+            },
+            notes_extra,
+        ),
     )
 
 

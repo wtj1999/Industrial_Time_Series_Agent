@@ -47,7 +47,7 @@ class ProfileAgent(BaseAgent):
         请执行以下流程：
 
         1. 调用 get_basic_info 获取数据整体信息；
-        2. 调用 analyze_column 分析所有重要字段；
+        2. 将全部列名作为列表传入 analyze_column，一次性分析所有字段；
         3. 综合分析结果生成完整的 CSVProfile。
 
         最终仅返回符合 CSVProfile Schema 的结构化对象。

@@ -34,9 +34,9 @@
 
 ---
 
-## analyze_column(column_name)
+## analyze_column(column_names)
 
-分析指定字段，返回该列的：
+批量分析指定字段，`column_names` 是列名列表，返回列表中每一列的：
 
 - 字段类型（ColumnType 枚举之一）
 - 缺失率
@@ -47,7 +47,7 @@
 这些仅用于帮助你做业务归类判断，**不要**把它们写入 CSVProfile —— 当前 schema
 不包含这些字段。
 
-对**每一个列**都应调用该工具，确保 columns 字典覆盖完整。
+应将 `get_basic_info()` 返回的**全部列名一次性传入**，确保 columns 字典覆盖完整。
 
 ---
 
@@ -63,9 +63,9 @@
 - `total_columns`
 - 全部列名（后续要逐列分析）
 
-## 第二步：逐列分析
+## 第二步：批量列分析
 
-对每一个列调用 `analyze_column(column_name)`，得到该列的：
+调用一次 `analyze_column(column_names)`，将全部列名作为列表传入，得到每一列的：
 
 - `name`
 - `type`（ColumnType）

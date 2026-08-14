@@ -297,6 +297,11 @@ class OrchestratorAgent:
                             "type": "anomaly_training_progress",
                             "data": chunk,
                         }
+                    elif isinstance(chunk, dict) and chunk.get("event") == "prediction_finetuning_progress":
+                        yield {
+                            "type": "prediction_finetuning_progress",
+                            "data": chunk,
+                        }
 
                 elif mode == "messages":
                     message, metadata = chunk
@@ -993,9 +998,10 @@ class OrchestratorAgent:
         )
 
     async def _node_await_csv_upload(self, state: SessionState):
-        # 仅在异常检测任务下暴露模型选择器；其它任务（预测/分析）保持
-        # 原有行为，前端凭 allow_model 决定是否渲染 ModelPicker。
-        allow_model = state.task_type == TaskType.ANOMALY_DETECTION
+        # 异常检测与预测均可选择各自类别的已训练模型。
+        allow_model = state.task_type in (
+            TaskType.ANOMALY_DETECTION, TaskType.PREDICTION
+        )
 
         uploaded = interrupt({
             "type": "upload_csv",
@@ -1022,6 +1028,9 @@ class OrchestratorAgent:
                 thread_id=uploaded.get("model_thread_id"),
                 source_file=uploaded.get("model_source_file"),
                 detector_name=uploaded.get("detector_name"),
+                category=uploaded.get("model_category"),
+                model_type=uploaded.get("model_type"),
+                model_path=uploaded.get("model_path"),
             )
         else:
             # 显式清空：上一轮可能选过模型，本轮没选就要重置。
@@ -1129,6 +1138,8 @@ class OrchestratorAgent:
                 result_text = result
 
         elif task_type == TaskType.PREDICTION:
+            from langgraph.config import get_stream_writer
+            stream_writer = get_stream_writer()
             result = await self.prediction_agent.execute_prediction(
                 file_path=file_path,
                 thread_id=session_id,
@@ -1138,6 +1149,8 @@ class OrchestratorAgent:
                 csv_profile=state.csv_profile,
                 user_id=user_id,
                 dialogue_history=state.dialogue_history,
+                selected_model_ref=state.selected_model_ref,
+                stream_writer=stream_writer,
             )
 
             if isinstance(result, dict):

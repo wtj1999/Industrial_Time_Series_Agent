@@ -200,6 +200,23 @@ export interface AnomalyTrainingProgressEvent {
   data: AnomalyTrainingProgress;
 }
 
+export interface PredictionFinetuningProgress {
+  event: 'prediction_finetuning_progress';
+  operation_id: string;
+  model_name: string;
+  stage: 'preparing' | 'training' | 'evaluating' | 'completed' | 'failed';
+  current?: number;
+  total?: number;
+  percent?: number;
+  message?: string;
+  metrics?: Record<string, number>;
+}
+
+export interface PredictionFinetuningProgressEvent {
+  type: 'prediction_finetuning_progress';
+  data: PredictionFinetuningProgress;
+}
+
 export interface CompletedEvent {
   type: 'completed';
   data: Record<string, unknown>;
@@ -670,6 +687,7 @@ export type StreamEvent =
   | TokenEvent
   | UpdateEvent
   | AnomalyTrainingProgressEvent
+  | PredictionFinetuningProgressEvent
   | CompletedEvent
   | ErrorEvent
   | CsvPreviewEvent
@@ -703,6 +721,9 @@ export interface UploadCsvResume {
   model_thread_id?: string | null;
   model_source_file?: string | null;
   detector_name?: string | null;
+  model_category?: string | null;
+  model_type?: string | null;
+  model_path?: string | null;
 }
 
 export interface ClarificationResume {
@@ -772,6 +793,15 @@ export interface ModelEntry {
   category?: 'anomaly_detection' | 'time_series_prediction' | string | null;
   task_type?: 'anomaly_detection' | 'prediction' | string | null;
   model_type?: string | null;
+  model_path?: string | null;
+  output_dir?: string | null;
+  base_model_path?: string | null;
+  training?: {
+    prediction_length?: number | null;
+    context_length?: number | null;
+    num_steps?: number | null;
+    finetune_mode?: 'full' | 'lora' | string | null;
+  } | null;
   save_name: string;
   file_name: string;
   detector_name?: string | null;

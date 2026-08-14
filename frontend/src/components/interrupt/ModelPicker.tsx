@@ -36,9 +36,10 @@ export interface ModelPickerProps {
   onPick: (m: ModelEntry | null) => void;
   /** Disable all interactive elements (e.g. while a stream is in flight). */
   disabled?: boolean;
+  taskType?: string;
 }
 
-export function ModelPicker({ selected, onPick, disabled }: ModelPickerProps) {
+export function ModelPicker({ selected, onPick, disabled, taskType }: ModelPickerProps) {
   const [open, setOpen] = useState(false);
   const [models, setModels] = useState<ModelEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,10 @@ export function ModelPicker({ selected, onPick, disabled }: ModelPickerProps) {
     setError(null);
     try {
       const res = await api.listModels();
-      setModels(res.models ?? []);
+      const expected = taskType === 'prediction' ? 'prediction' : 'anomaly_detection';
+      setModels((res.models ?? []).filter((model) =>
+        (model.task_type ?? 'anomaly_detection') === expected
+      ));
       loadedRef.current = true;
     } catch (err) {
       setError(err instanceof Error ? err.message : '获取模型列表失败');
@@ -145,7 +149,7 @@ export function ModelPicker({ selected, onPick, disabled }: ModelPickerProps) {
                 const isSelected =
                   selected?.save_name === m.save_name &&
                   selected?.thread_id === m.thread_id;
-                const detector = m.detector_name || m.model_class || '检测器';
+                const detector = m.model_type || m.detector_name || m.model_class || '模型';
                 const dataset = m.source_file || m.source || null;
                 const stats: string[] = [];
                 if (m.n_samples != null) stats.push(`${m.n_samples.toLocaleString()}行`);
@@ -227,7 +231,7 @@ export function ModelPicker({ selected, onPick, disabled }: ModelPickerProps) {
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-violet-800">
-                {selected.detector_name || selected.model_class || '检测器'}
+                {selected.model_type || selected.detector_name || selected.model_class || '模型'}
                 <span className="mx-1 text-violet-300">·</span>
                 {selected.save_name}
               </p>
