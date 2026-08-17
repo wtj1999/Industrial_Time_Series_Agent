@@ -70,7 +70,7 @@ def forecast_time_series(
     prediction_length: int = 8,
     history_tail: Optional[int] = None,
     impute: str = "ffill",
-    endpoint: Optional[str] = None,
+    # endpoint: Optional[str] = None,
     timeout: Optional[int] = None,
 ) -> Dict[str, Any]:
     """调用远端预测服务，对每个目标列输出未来 ``prediction_length`` 步预测。
@@ -91,8 +91,6 @@ def forecast_time_series(
         未提供时使用全部历史。
     impute : {"ffill","bfill","median","zero","drop"}, default "ffill"
         NaN 填充策略。时序默认前向填充。
-    endpoint : str, optional
-        自定义端点 URL；默认走模型注册表中的 preferred endpoint。
     timeout : int, optional
         单次 HTTP 调用超时秒数（默认 120）。
 
@@ -151,7 +149,7 @@ def forecast_time_series(
         prediction_length=prediction_length,
         history_tail=history_tail,
         impute=impute,
-        endpoint=endpoint,
+        endpoint=None,
         timeout=timeout,
         selected_model_path=selected_model_path,
     )

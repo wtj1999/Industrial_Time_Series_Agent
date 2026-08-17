@@ -273,8 +273,8 @@ def finetune_prediction_model(
     runtime: ToolRuntime,
     save_name: str,
     prediction_length: int,
-    holdout_steps: Optional[int] = None,
-    context_length: Optional[int] = None,
+    holdout_steps: Optional[int] = 8,
+    context_length: Optional[int] = 96,
     num_steps: int = 1000,
     learning_rate: float = 1e-5,
     batch_size: int = 32,
@@ -323,14 +323,16 @@ def finetune_prediction_model(
     holdout_data = [series[-effective_holdout:] for series in full_data_list]
     if canonical == "timesfm-2.5":
         effective_context = int(context_length or 64)
-        minimum = effective_context + prediction_length
-        if any(len(series) < minimum for series in data_list):
-            raise ValueError(
-                "扣除 holdout 后，每条训练序列必须至少达到 "
-                "contextLength + predictionLength"
-            )
     else:
-        effective_context = context_length
+        effective_context = int(context_length or 96)
+
+    minimum = effective_context + prediction_length
+
+    if any(len(series) < minimum for series in data_list):
+        raise ValueError(
+            "扣除 holdout 后，每条训练序列必须至少达到 "
+            "contextLength + predictionLength"
+        )
 
     safe_name = _safe_segment(save_name, canonical + "-finetuned")
     user = _safe_segment(getattr(ctx, "user_id", None), "anonymous")
@@ -355,7 +357,7 @@ def finetune_prediction_model(
     if device:
         payload["device"] = device
     else:
-        payload["device"] = "cuda:0"
+        payload["device"] = "cuda:1"
     if canonical == "timesfm-2.5":
         payload.update({
             "loraR": int(lora_r),
@@ -434,7 +436,7 @@ def finetune_prediction_model(
     emit("evaluating", percent=95.0, message="正在进行基础模型与微调模型 holdout 对比")
     evaluation = _evaluate_finetuned_holdout(
         canonical,
-        data_list,
+        [series[-effective_context:] for series in data_list],
         holdout_data,
         numeric,
         effective_holdout,

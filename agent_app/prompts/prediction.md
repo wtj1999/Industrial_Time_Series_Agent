@@ -2,7 +2,7 @@
 
 ## 微调模型约定（Chronos-2 / TimesFM 2.5）
 
-- 用户明确要求“微调/训练 Chronos-2 或 TimesFM 2.5”时，只调用一次 `finetune_prediction_model`，不要再调用`forecast_time_series`。
+- 用户明确要求“微调/训练 Chronos-2 或 TimesFM 2.5”时，只调用一次 `finetune_prediction_model`，禁止再调用`forecast_time_series`。
 - `chronos-2` 支持 `full` / `lora`；`timesfm-2.5` 只允许 `lora`。
 - 工具通过远程 POST SSE 服务训练，进度由框架实时显示；最终 `model_path` 是远程路径，本地只保存模型索引。
 - 用户从前端选择了微调模型时，运行时会安全注入 `selected_model_type` 与 `selected_model_path`；必须调用 `forecast_time_series`，不得自行拼接或改写远程路径。
@@ -35,17 +35,18 @@
 
 按"用户问的是什么"选**唯一**主工具：
 
-| 用户在问什么 | 调这 1 个工具 | 不要调 |
-|---|---|---|
-| "预测未来 N 步 / 后面会怎样" | `forecast_time_series(model=..., prediction_length=N)` | 不要先 list 再 forecast |
-| "用 sundial / chronos-2 预测" | `forecast_time_series(model="sundial")` | 不要再叠加 list_prediction_models |
-| "工业数据默认选什么模型？" | `forecast_time_series(model="sundial")` | 不要先 recommend |
-| "看看模型回测效果 / 预测准不准" | `backtest_forecast(model=..., test_steps=...)` | 不要先 forecast |
-| **用户明确说**"对比多个模型" | `compare_forecast_models_backtest(models=[...])`（**直接调它，不要先单独跑每个模型**） | 不要再 forecast |
-| **用户明确说**"融合 / 集成预测" | `forecast_ensemble(models=[...])` | 不要再 multi_models |
-| "有多个模型，并排看看预测" | `forecast_multi_models(models=[...])` | 不要再 ensemble（除非要融合） |
-| "模型都有哪些 / XX 输出什么形状" | `list_prediction_models` / `explain_prediction_model` | 不要再 forecast |
-| "帮我推荐个模型" | `recommend_prediction_model` | — |
+| 用户在问什么                     | 调这 1 个工具                                                              | 不要调 |
+|----------------------------|-----------------------------------------------------------------------|---|
+| "预测未来 N 步 / 后面会怎样"         | `forecast_time_series(model=..., prediction_length=N)`                | 不要先 list 再 forecast |
+| "用 sundial / chronos-2 预测" | `forecast_time_series(model="sundial")`                               | 不要再叠加 list_prediction_models |
+| "微调预测模型"                   | `finetune_prediction_model(model="chronos-2" or "timesfm-2.5")`          | 不要再 forecast |
+| "工业数据默认选什么模型？"             | `forecast_time_series(model="sundial")`                               | 不要先 recommend |
+| "看看模型回测效果 / 预测准不准"         | `backtest_forecast(model=..., test_steps=...)`                        | 不要先 forecast |
+| **用户明确说**"对比多个模型"          | `compare_forecast_models_backtest(models=[...])`（**直接调它，不要先单独跑每个模型**） | 不要再 forecast |
+| **用户明确说**"融合 / 集成预测"       | `forecast_ensemble(models=[...])`                                     | 不要再 multi_models |
+| "有多个模型，并排看看预测"             | `forecast_multi_models(models=[...])`                                 | 不要再 ensemble（除非要融合） |
+| "模型都有哪些 / XX 输出什么形状"       | `list_prediction_models` / `explain_prediction_model`                 | 不要再 forecast |
+| "帮我推荐个模型"                  | `recommend_prediction_model`                                          | — |
 
 **默认起点**：用户没指定模型时，工业时序首选 **sundial**（samples 类，密度预测最稳健）；多变量场景用 **toto-2**；短序列（< 64 步）用 **chronos-2** 或 **moirai-2.0-R-small**。
 
