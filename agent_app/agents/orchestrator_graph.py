@@ -80,6 +80,10 @@ class OrchestratorAgent:
         self._checkpointer: Any = None
         self._graph: Any = None
         self._init_lock = asyncio.Lock()
+        # LangGraph checkpoints are single-writer per thread.  HTTP request
+        # cancellation and a rapid follow-up request can otherwise overlap
+        # before the API layer has observed/registered the disconnect.
+        self._session_run_locks: Dict[str, asyncio.Lock] = {}
 
         logger.info(
             "Orchestrator Agent initialized (graph + checkpointer will be "
@@ -194,6 +198,24 @@ class OrchestratorAgent:
             resume_value: Optional[Any] = None,
             user_id: Optional[str] = None,
     ):
+        """Serialize the complete graph stream for one checkpoint thread."""
+        lock = self._session_run_locks.setdefault(session_id, asyncio.Lock())
+        async with lock:
+            async for event in self._process_query_unlocked(
+                    query=query,
+                    session_id=session_id,
+                    resume_value=resume_value,
+                    user_id=user_id,
+            ):
+                yield event
+
+    async def _process_query_unlocked(
+            self,
+            query: str,
+            session_id: str,
+            resume_value: Optional[Any] = None,
+            user_id: Optional[str] = None,
+    ):
         try:
             graph = await self._ensure_graph()
             config = {"configurable": {"thread_id": session_id}}
@@ -243,14 +265,62 @@ class OrchestratorAgent:
                 "file_path": file_path,
             }
 
-            interrupted = bool(snapshot.next)
+            # ``snapshot.next`` is also populated for a run that was forcibly
+            # cancelled between nodes.  Only an actual LangGraph
+            # ``interrupt()`` is resumable with ``Command(resume=...)``.
+            # Treating every pending node as a business interrupt is what made
+            # a browser refresh poison the next turn with resume=None.
+            interrupted = any(
+                bool(getattr(task, "interrupts", None))
+                for task in (getattr(snapshot, "tasks", None) or ())
+            )
+
+            # A pending node without an interrupt payload is an orphaned run,
+            # normally left by an older server version cancelling a graph
+            # when the browser disconnected.  Feeding a new state into that
+            # checkpoint makes LangGraph schedule both the old pending node
+            # and the new START path in the same superstep; both write scalar
+            # channels such as ``session_id`` and trigger
+            # INVALID_CONCURRENT_GRAPH_UPDATE.  We already copied the last
+            # durable values above, so discard only the broken checkpoint and
+            # seed a clean run from those preserved values below.
+            if snapshot.next and not interrupted:
+                removed = await self._clear_thread(session_id)
+                logger.warning(
+                    "Recovered orphaned graph run: session=%s pending=%s "
+                    "cleared_checkpoints=%d",
+                    session_id,
+                    snapshot.next,
+                    removed,
+                )
+
+            # A historical thread can still be paused at a real business
+            # interrupt even though the replay UI does not initially render
+            # its one-shot card.  A normal chat submission carries no
+            # ``resume_value``; calling Command(resume=None) hits an invalid
+            # LangGraph path (and, in some versions, an internal unbound
+            # ``resume_is_map`` variable).  Re-emit the saved interrupt so the
+            # frontend can render the proper selector/upload/clarification UI.
+            if interrupted and resume_value is None:
+                for task in snapshot.tasks:
+                    task_interrupts = getattr(task, "interrupts", None) or ()
+                    if task_interrupts:
+                        yield {
+                            "type": "interrupt",
+                            "data": task_interrupts[0].value,
+                        }
+                        return
+                raise RuntimeError(
+                    "Session is interrupted but no interrupt payload is available"
+                )
 
             # 断点回传
             if interrupted:
-                input_state = Command(
-                update=update if update else None,
-                resume=resume_value
-            )
+                # External interrupt resumption must not inject a second full
+                # state update into the resume superstep. Doing so makes the
+                # input task and resumed task both write scalar channels such
+                # as ``session_id``.
+                input_state = Command(resume=resume_value)
             # initial state
             else:
                 initial_state = dict(current_values)
@@ -433,6 +503,10 @@ class OrchestratorAgent:
 
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}", exc_info=True)
+            # Do not silently turn backend failures into an apparently valid
+            # stream with no terminal event.  The API generator converts this
+            # exception into a structured ``type=error`` event.
+            raise
 
     # ------------------------------------------------------------------ #
     # Session-level helpers (used by /api/session/{id} & /reset endpoints)
@@ -653,6 +727,14 @@ class OrchestratorAgent:
         if checkpointer is None:
             # Graph not built yet → nothing to clear.
             return 0
+
+        # Prefer the checkpointer's public deletion API. It serializes the
+        # operation with checkpoint writes and clears saver-specific pending
+        # state that hand-written SQL may not know about.
+        adelete_thread = getattr(checkpointer, "adelete_thread", None)
+        if callable(adelete_thread):
+            await adelete_thread(session_id)
+            return 1
 
         # InMemorySaver path: drop every key belonging to this thread.
         storage = getattr(checkpointer, "storage", None)

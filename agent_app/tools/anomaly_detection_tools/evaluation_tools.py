@@ -24,6 +24,7 @@ import pandas as pd
 from langchain.tools import ToolRuntime, tool
 
 from agent_app.tools._tool_guard import tool_guard
+from agent_app.tools.anomaly_detection_tools._result_limits import limit_anomaly_result
 from agent_app.tools.anomaly_detection_tools._common import (
     build_detector_by_name,
     format_notes,
@@ -201,7 +202,7 @@ def evaluate_detection(
             "%s 是 transductive 检测器：supports_out_of_sample=false。"
             % detector_name)
 
-    return {
+    return limit_anomaly_result({
         "task_type": "anomaly_detection",
         "tool_name": "evaluate_detection",
         "detector_name": detector_name,
@@ -219,7 +220,7 @@ def evaluate_detection(
         "metrics": metrics,
         "label_column": label_column,
         "notes": format_notes(info, notes),
-    }
+    })
 
 
 @tool("compare_detection_results")
@@ -340,7 +341,7 @@ def compare_detection_results(
         majority = max(1, len(successful) // 2 + 1)
         consensus = [int(i) for i in np.nonzero(votes >= majority)[0]]
 
-    return {
+    return limit_anomaly_result({
         "task_type": "anomaly_detection",
         "tool_name": "compare_detection_results",
         "summary": (
@@ -357,7 +358,7 @@ def compare_detection_results(
         "consensus_anomalies": consensus,
         "n_consensus": len(consensus),
         "notes": format_notes(info, notes),
-    }
+    })
 
 
 TOOLS = [

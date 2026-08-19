@@ -27,6 +27,7 @@ import pandas as pd
 from langchain.tools import ToolRuntime, tool
 
 from agent_app.tools._tool_guard import tool_guard
+from agent_app.tools.anomaly_detection_tools._result_limits import limit_anomaly_result
 from agent_app.tools.anomaly_detection_tools._common import (
     auto_save_name,
     build_detector_by_name,
@@ -262,7 +263,7 @@ def combine_detector_scores(
     consensus_summary = scores_summary(
         consensus, threshold=consensus_threshold, top_n=return_top_n)
 
-    return {
+    return limit_anomaly_result({
         "task_type": "anomaly_detection",
         "tool_name": "combine_detector_scores",
         "summary": (
@@ -283,7 +284,7 @@ def combine_detector_scores(
         # "n_buckets_requested": int(n_buckets) if method in ("aom", "moa") else None,
         # "n_buckets_used": n_buckets_used,
         "notes": format_notes(info, notes),
-    }
+    })
 
 
 @tool("train_ensemble_detector")

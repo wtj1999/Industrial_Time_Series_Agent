@@ -16,6 +16,7 @@ import numpy as np
 from langchain.tools import ToolRuntime, tool
 
 from agent_app.tools._tool_guard import tool_guard
+from agent_app.tools.anomaly_detection_tools._result_limits import limit_anomaly_result
 from agent_app.tools.anomaly_detection_tools._common import (
     build_detector_by_name,
     format_notes,
@@ -188,7 +189,7 @@ def apply_threshold_method(
         }
         persistence.save(detector, model_path, metadata=metadata)
 
-    return {
+    return limit_anomaly_result({
         "task_type": "anomaly_detection",
         "tool_name": "apply_threshold_method",
         "detector_name": detector_name,
@@ -207,7 +208,7 @@ def apply_threshold_method(
         "model_path": str(model_path) if model_path else None,
         "save_name": save_name if model_path else None,
         "notes": format_notes(info, notes_extra),
-    }
+    })
 
 
 TOOLS = [

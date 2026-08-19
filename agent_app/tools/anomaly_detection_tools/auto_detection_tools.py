@@ -22,6 +22,7 @@ import pandas as pd
 from langchain.tools import ToolRuntime, tool
 
 from agent_app.tools._tool_guard import tool_guard
+from agent_app.tools.anomaly_detection_tools._result_limits import limit_anomaly_result
 from agent_app.tools.anomaly_detection_tools._common import (
     format_notes,
     prepare_feature_matrix,
@@ -156,7 +157,7 @@ def auto_detect_anomalies(
         if consensus_scores is not None else {}
     )
 
-    return {
+    return limit_anomaly_result({
         "task_type": "anomaly_detection",
         "tool_name": "auto_detect_anomalies",
         "summary": (
@@ -177,7 +178,7 @@ def auto_detect_anomalies(
             "data_type=%s, priority=%s；可用 priority 切换 accuracy/speed/"
             "explainability 重新跑。" % (data_type, priority)
         ]),
-    }
+    })
 
 
 @tool("recommend_detectors")

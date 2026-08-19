@@ -312,6 +312,8 @@ export interface AnomalyScoresChart {
   feature_columns: string[];
   downsampled?: boolean;
   original_n_samples?: number;
+  /** Original row offset when the backend returns only a tail window. */
+  returned_window_start?: number;
 }
 
 export interface AnomalyEvaluationMetrics {

@@ -98,6 +98,52 @@ app.add_middleware(
 # Initialize the agent system
 agent = IndustrialTimeSeriesAgent()
 
+# Keep graph executions alive when the HTTP consumer disappears (browser
+# refresh, Stop button, laptop network transition, ...).  Cancelling a
+# LangGraph ``astream`` between checkpoint writes can leave a thread with
+# pending tasks but no real ``interrupt()`` payload.  The next turn then sees
+# an incomplete run and either resumes the wrong node or closes without a
+# terminal event.  A running asyncio task is cheap to retain here, and the
+# done callback removes it as soon as the graph reaches a durable terminal or
+# business-interrupt checkpoint.
+_detached_query_tasks: set[asyncio.Task[Any]] = set()
+_detached_query_tasks_by_session: dict[str, set[asyncio.Task[Any]]] = {}
+
+
+def _retain_detached_query_task(task: asyncio.Task[Any], session_id: str) -> None:
+    """Retain and observe a query task after its client disconnects."""
+    _detached_query_tasks.add(task)
+    _detached_query_tasks_by_session.setdefault(session_id, set()).add(task)
+
+    def _finished(done: asyncio.Task[Any]) -> None:
+        _detached_query_tasks.discard(done)
+        session_tasks = _detached_query_tasks_by_session.get(session_id)
+        if session_tasks is not None:
+            session_tasks.discard(done)
+            if not session_tasks:
+                _detached_query_tasks_by_session.pop(session_id, None)
+        try:
+            done.result()
+        except asyncio.CancelledError:
+            logger.warning("Detached query task was cancelled [%s]", session_id)
+        except Exception:
+            logger.exception("Detached query task failed [%s]", session_id)
+
+    task.add_done_callback(_finished)
+
+
+async def _wait_for_detached_query_tasks(session_id: str) -> None:
+    """Serialize a new turn behind a disconnected turn for one session."""
+    pending = tuple(_detached_query_tasks_by_session.get(session_id, ()))
+    if not pending:
+        return
+    logger.info(
+        "Waiting for %d detached query task(s) before next turn [%s]",
+        len(pending),
+        session_id,
+    )
+    await asyncio.gather(*pending, return_exceptions=True)
+
 
 class StandardResponse(BaseModel):
     """Standard response model."""
@@ -309,6 +355,11 @@ async def process_query(
 
             async def produce_events() -> None:
                 try:
+                    # A user can press Stop and immediately submit another
+                    # message.  Let the disconnected turn reach its durable
+                    # checkpoint before opening a second writer for the same
+                    # LangGraph thread.
+                    await _wait_for_detached_query_tasks(session_id)
                     async for event in agent.process_query(
                             query=query or "",
                             session_id=session_id,
@@ -358,10 +409,17 @@ async def process_query(
                     yield encode(item)
             finally:
                 if not producer.done():
-                    logger.warning("Query stream client disconnected [%s]", session_id)
-                    producer.cancel()
-                with contextlib.suppress(asyncio.CancelledError):
-                    await producer
+                    logger.warning(
+                        "Query stream client disconnected; graph will finish in background [%s]",
+                        session_id,
+                    )
+                    _retain_detached_query_task(producer, session_id)
+                else:
+                    # Retrieve a completed task's result here so asyncio never
+                    # reports an unobserved exception. ``produce_events``
+                    # converts ordinary failures to an in-stream error event.
+                    with contextlib.suppress(asyncio.CancelledError):
+                        producer.result()
                 logger.info("Query stream closed [%s]", session_id)
 
         return StreamingResponse(

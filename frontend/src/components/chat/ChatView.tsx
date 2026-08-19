@@ -162,8 +162,8 @@ export function ChatView() {
 function EmptyState({ onPick }: { onPick: (prompt: string) => void }) {
   const suggestions = [
     '分析这份传感器数据的整体趋势',
-    '检测温度列中的异常点并给出原因',
-    '预测未来 12 小时的压力值',
+    '检测该烘箱温度的异常时间段',
+    '预测该气缸未来12个采样点的压力值',
   ];
   return (
     <div className="mt-10 flex flex-col items-center text-center animate-fade-in">

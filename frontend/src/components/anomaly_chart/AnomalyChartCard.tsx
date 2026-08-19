@@ -43,7 +43,7 @@ const ANOMALY_FILL = '#ef4444';
 const INTERVAL_FILL = 'rgba(239, 68, 68, 0.12)';
 
 interface ChartPoint {
-  x: number;
+  x: string | number;
   score: number;
   isAnomaly: boolean;
 }
@@ -245,11 +245,11 @@ function Body({ chart }: { chart: AnomalyScoresChart }) {
   const data: ChartPoint[] = useMemo(
     () =>
       chart.scores.map((score, i) => ({
-        x: i,
+        x: chart.x_values?.[i] ?? i,
         score,
         isAnomaly: anomalySet.has(i),
       })),
-    [chart.scores, anomalySet],
+    [chart.scores, chart.x_values, anomalySet],
   );
 
   const yDomain = useMemo<[number, number] | undefined>(() => {

@@ -29,6 +29,7 @@ import pandas as pd
 from langchain.tools import ToolRuntime, tool
 
 from agent_app.tools._tool_guard import tool_guard
+from agent_app.tools.anomaly_detection_tools._result_limits import limit_anomaly_result
 from agent_app.tools.anomaly_detection_tools._common import (
     TS_NATIVE_DETECTORS,
     anomaly_intervals,
@@ -495,7 +496,7 @@ def detect_with_model(
             % (mode, detector_name_resolved, n_samples_out, n_anomalies_total)
         )
 
-    return {
+    return limit_anomaly_result({
         "task_type": "anomaly_detection",
         "tool_name": "detect_with_model",
         "mode": mode,
@@ -521,7 +522,7 @@ def detect_with_model(
         "n_channels": int(ts_info["n_channels"]) if is_ts else None,
         "window_size": window_size_used if is_ts else None,
         **result_extra,
-    }
+    })
 
 
 @tool("list_saved_detectors")

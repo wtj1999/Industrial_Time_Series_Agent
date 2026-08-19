@@ -40,10 +40,9 @@ _CHARTABLE_TOOLS = {
     "detect_ts_anomalies",  # legacy, pre-merge payloads
 }
 
-# Cap the per-chart score array so we never ship a 100k-point JSON
-# payload to the browser. When the series is longer than this we
-# downsample by strided sampling; ``anomaly_indices`` and ``top_anomalies``
-# are always preserved in full so no anomalies are silently dropped.
+# Cap the per-chart score array so we never ship a large JSON payload to the
+# browser. Anomaly tools already retain only their last 1500 row-aligned
+# points; this remains a defensive cap for legacy/session payloads.
 _MAX_CHART_POINTS = 1500
 
 
@@ -117,14 +116,18 @@ def _build_anomaly_scores_chart(result: Dict[str, Any]) -> Optional[Dict[str, An
 
     # Downsample scores + anomaly_indices together when the series is
     # huge; top_anomalies / intervals are always kept intact.
-    scores, anomaly_indices, _sampled_positions = _maybe_downsample(
+    scores, anomaly_indices, sampled_positions = _maybe_downsample(
         scores_raw, anomaly_indices_orig, _MAX_CHART_POINTS,
     )
+    score_window = ((result.get("series_windows") or {}).get("scores") or {})
+    window_start = int(score_window.get("start_index") or 0)
     n_samples = len(scores_raw)
 
+    # scores_summary is computed before tail truncation, so prefer its total
+    # over the number of anomalies visible inside the returned window.
     n_anomalies = (
-        len(anomaly_indices_orig)
-        or ((result.get("scores_summary") or {}).get("n_above_threshold"))
+        ((result.get("scores_summary") or {}).get("n_above_threshold"))
+        or len(anomaly_indices_orig)
         or 0
     )
 
@@ -140,15 +143,16 @@ def _build_anomaly_scores_chart(result: Dict[str, Any]) -> Optional[Dict[str, An
         "n_samples": int(result.get("n_samples") or result.get("n_timestamps") or n_samples),
         "n_anomalies": int(n_anomalies),
         "x_label": "样本序号",
-        "x_values": None,
+        "x_values": [window_start + int(pos) for pos in sampled_positions],
         "scores": scores,
         "threshold": threshold,
         "anomaly_indices": anomaly_indices,
         "anomaly_intervals": None,
         "top_anomalies": _sanitise_top_anomalies(result.get("top_anomalies")),
         "feature_columns": list(result.get("feature_columns") or []),
-        "downsampled": len(scores_raw) > _MAX_CHART_POINTS,
-        "original_n_samples": n_samples,
+        "downsampled": bool(score_window.get("truncated")) or len(scores_raw) > _MAX_CHART_POINTS,
+        "original_n_samples": int(result.get("n_samples") or n_samples),
+        "returned_window_start": window_start,
     }
 
     # Time-series runs (merged ``detect_with_model`` or legacy
