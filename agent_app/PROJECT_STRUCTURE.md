@@ -295,10 +295,10 @@ config.settings
 
 ### `.env` 文件
 ```bash
-# LLM 配置
-LLM_PROVIDER=openai
-LLM_MODEL_NAME=gpt-4
-LLM_API_KEY=your-key
+# OpenAI 兼容模型接口配置
+MODEL_NAME=Qwen3-235B-A22B
+BASE_URL=http://your-openai-compatible-api:8000/v1
+API_KEY=your-key
 
 # 数据库配置
 DB_BACKEND=sqlite

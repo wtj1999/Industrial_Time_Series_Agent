@@ -48,7 +48,7 @@ cd agent_app
 pip install -r requirements.txt
 
 # 配置环境变量
-cp .env.example .env
+cp .env .env
 # 编辑 .env 文件，设置 API密钥等配置
 ```
 
@@ -57,15 +57,12 @@ cp .env.example .env
 编辑 `.env` 文件：
 
 ```bash
-# LLM 配置
-LLM_PROVIDER=openai
-LLM_MODEL_NAME=gpt-4
-LLM_API_KEY=your-api-key-here
-
-# 或使用 Anthropic Claude
-LLM_PROVIDER=anthropic
-LLM_MODEL_NAME=claude-3-sonnet-20240229
-LLM_API_KEY=your-anthropic-api-key-here
+# OpenAI 兼容模型接口配置
+MODEL_NAME=Qwen3-235B-A22B
+BASE_URL=http://your-openai-compatible-api:8000/v1
+API_KEY=your-api-key-here
+TEMPERATURE=0.7
+TIMEOUT=600
 
 # 数据库配置（可选）
 DB_BACKEND=sqlite
@@ -287,7 +284,7 @@ class LLMConfig(BaseModel):
 
 **Q: API 密钥无效**
 ```
-A: 检查 .env 文件中的 LLM_API_KEY 配置
+A: 检查 .env 文件中的 API_KEY、BASE_URL 和 MODEL_NAME 配置
 ```
 
 **Q: 文件加载失败**

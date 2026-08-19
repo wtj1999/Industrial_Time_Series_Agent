@@ -27,7 +27,7 @@ import uvicorn
 
 from main import IndustrialTimeSeriesAgent
 from config.settings import settings
-from utils.helpers import validate_file_path
+from utils.helpers import validate_existing_file_name, validate_file_path
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -232,8 +232,8 @@ async def process_query(
             #
             # Three layers of defence against path traversal / cross-user
             # access:
-            #   1. character whitelist (compatible with the on-disk naming)
-            #   2. ``basename`` strips any caller-supplied prefix
+            #   1. reject path syntax while allowing Unicode filenames
+            #   2. ``basename`` is retained as defence in depth
             #   3. ``realpath`` boundary check ensures the resolved path
             #      stays inside ``uploads/<user_id>/`` (blocks symlinks
             #      and any residual ``..`` tricks).
@@ -244,12 +244,13 @@ async def process_query(
                     detail="existing_file_name must not be empty",
                 )
 
-            base_name = os.path.basename(raw_name)
-            if not re.match(r"^[A-Za-z0-9._-]+$", base_name):
+            is_valid_name, name_error = validate_existing_file_name(raw_name)
+            if not is_valid_name:
                 raise HTTPException(
                     status_code=400,
-                    detail="existing_file_name contains invalid characters",
+                    detail=name_error,
                 )
+            base_name = os.path.basename(raw_name)
 
             uploads_dir = "uploads"
             user_uploads_dir = os.path.join(uploads_dir, user_id)

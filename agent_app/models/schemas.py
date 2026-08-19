@@ -57,8 +57,6 @@ class IntentRouterResult(BaseModel):
         default=False,
         description=(
             "True 表示用户已经在本轮 query 中明确指出了要执行的任务类型与对象，"
-            "可以跳过 ProposalAgent / choose_path，直接走 parse_intent。"
-            "默认 False，歧义场景必须保持 False 以走完整流程。"
             "仅 intent=industrial 时有效；其他 intent 必须保持 False。"
         ),
     )

@@ -11,15 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class LLMConfig(BaseModel):
-    """LLM configuration."""
-    provider: str = Field(default="openai", description="LLM provider: openai, anthropic, etc.")
-    model_name: str = Field(default="gpt-4", description="Model name")
-    temperature: float = Field(default=0.7, description="Temperature for generation")
-    max_tokens: int = Field(default=200000, description="Maximum tokens for generation")
-    api_key: Optional[str] = Field(default=None, description="API key for the provider")
-
-
 class DatabaseConfig(BaseModel):
     """Database configuration for session storage."""
     backend: str = Field(default="sqlite", description="Database backend: sqlite, postgresql, redis")
@@ -41,17 +32,6 @@ class Settings(BaseModel):
     API_KEY: str = Field(default=os.getenv("API_KEY", "EMPTY"), description="API key")
     TEMPERATURE: float = Field(default=float(os.getenv("TEMPERATURE", "0.7")), description="Temperature for generation")
     TIMEOUT: int = Field(default=int(os.getenv("TIMEOUT", "600")), description="Request timeout in seconds")
-
-    # LLM Configuration
-    llm: LLMConfig = Field(
-        default_factory=lambda: LLMConfig(
-            provider=os.getenv("LLM_PROVIDER", "openai"),
-            model_name=os.getenv("LLM_MODEL_NAME", "gpt-4"),
-            temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
-            max_tokens=int(os.getenv("LLM_MAX_TOKENS", "20000")),
-            api_key=os.getenv("LLM_API_KEY")
-        )
-    )
 
     # Database Configuration
     database: DatabaseConfig = Field(

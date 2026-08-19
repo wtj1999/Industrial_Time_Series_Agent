@@ -86,39 +86,23 @@ intent 分为两组：
 
 ## 三、skip_proposal 判定（仅当 intent=industrial 时有效）
 
-`skip_proposal` 用于把"用户已经把任务说得很明确"的请求快速通道到 `parse_intent`，省掉一次 ProposalAgent 文本生成 + 一次人机路径选择往返。
+`skip_proposal` 用于把"用户已经把任务说得很明确"的请求快速通道到 `parse_intent`
 
-### skip_proposal = true 的判据（**全部满足**才置 true）
+### skip_proposal = true 的判据
 
-1. 用户问题中**明确出现动词**指向某一类具体任务（异常检测 / 预测 / 分析）。
-2. 用户问题中**明确给出任务对象或范围**（如：某列、某些点位、整份数据、某段时间），或对象可由后续 CSV 画像推断而无需事先用 ProposalAgent 澄清。
-3. 不存在"我希望你帮我看看怎么做"这类**方案咨询型**语气。
+1. 只要用户问题中**明确出现动词**指向某一类具体简单任务（数据分析 / 异常检测 / 预测）或者 **明确给出任务对象或范围**（如：某列、某些点位、整份数据、某段时间），
+2. 仅当用户没有明确任务类型，例如提及一些工艺问题如何解决的时候， 才设置 skip_proposal=false。
 
 ### skip_proposal = true 的典型示例
 
-| 用户问题 | task_type_hint |
-|---|---|
+| 用户问题              | task_type_hint |
+|-------------------|---|
+| 帮我对数据做一下分析        | `analysis` |
 | 用 IForest 检测这份数据的异常 | `anomaly_detection` |
 | 帮我用 LOF 跑一下温度列的异常检测 | `anomaly_detection` |
-| 预测未来 7 天的温度走势 | `prediction` |
-| 分析温度和压力的相关性 | `analysis` |
-| 比较白班和夜班的产量差异 | `analysis` |
-| 帮我做一份这周产线的分析报告 | `analysis` |
-| 解释一下昨天 14 点产量突降的原因 | `analysis` |
+| 预测未来 7 天的温度走势     | `prediction` |
 
-这些请求的共同特征：动词明确、对象具体，无需 ProposalAgent 再"规划多个候选方案"。
 
-### skip_proposal = false 的典型示例（**保持 false 走完整流程**）
-
-| 用户问题 | 原因 |
-|---|---|
-| 这份数据有什么值得分析的？ | 没有明确任务动词 |
-| 帮我看看这批数据 | 任务类型不明 |
-| 数据里有几个列，你觉得哪个最重要？ | 开放式探索 |
-| 给我一些建议 | 方案咨询型 |
-| 帮我看看工艺有什么问题 | 对象和任务都不够具体 |
-
-> **判据总结**：宁可保守地走完整流程，也不要把歧义问题误判为明确。**有任何犹豫 → `skip_proposal=false`**。
 
 ---
 
@@ -134,7 +118,7 @@ intent 分为两组：
 
 - `prediction`：时间序列预测、未来值预测
 - `anomaly_detection`：异常检测、离群点识别、异常区间
-- `analysis`：趋势 / 分布 / 稳定性 / 周期性 / 变点等通用分析（兜底）
+- `analysis`：分析 / 趋势 / 分布 / 稳定性 / 周期性 / 变点等通用分析
 - `monitoring`：状态监控、阈值告警
 
 ---
@@ -204,4 +188,3 @@ intent 分为两组：
 - [ ] `change_task` 时，`task_type_hint` 是否填写了新的任务类型？
 - [ ] `skip_proposal=true` 时，`task_type_hint` 是否非空且为合法枚举值？
 - [ ] `skip_proposal=false` 且 intent 属于 B 组或 industrial-完整流程 时，`task_type_hint` 是否为 `null`？
-- [ ] 是否存在任何犹豫？有 → 强制把 `skip_proposal` 改回 `false`，必要时改回 `industrial`。

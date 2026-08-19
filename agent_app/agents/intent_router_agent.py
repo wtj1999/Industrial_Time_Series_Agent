@@ -57,7 +57,7 @@ class IntentRouterAgent(BaseAgent):
 
         parts.append(
             "[LAST_USER_QUERY]\n"
-            + "\n".join(user_query)
+            + user_query
             + "\n[/LAST_USER_QUERY]"
         )
         return "\n\n".join(parts)

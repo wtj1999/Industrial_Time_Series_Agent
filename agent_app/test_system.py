@@ -253,8 +253,9 @@ class TestConfiguration(unittest.TestCase):
 
     def test_llm_configuration(self):
         """Test LLM configuration."""
-        self.assertIsNotNone(settings.llm)
-        self.assertEqual(settings.llm.provider, "openai")  # Default value
+        self.assertIsNotNone(settings.MODEL_NAME)
+        self.assertIsNotNone(settings.BASE_URL)
+        self.assertIsNotNone(settings.API_KEY)
 
 
 class TestUtilities(unittest.TestCase):

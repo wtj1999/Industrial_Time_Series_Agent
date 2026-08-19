@@ -91,7 +91,6 @@ export function Sidebar({
   const {
     sessionInfo,
     sessionId,
-    initNewSession,
     items,
     streaming,
     sessions,
@@ -145,8 +144,13 @@ export function Sidebar({
           size="md"
           className="w-full"
           onClick={() => {
-            initNewSession();
-            navigate('/chat', { replace: true });
+            // Let ChatRoute create the session after /chat is active. Updating
+            // SessionContext while the old /chat/:sessionId URL is still
+            // mounted can make its URL-sync effect reload the old thread.
+            navigate('/chat', {
+              replace: true,
+              state: { startNewSession: true },
+            });
           }}
           disabled={streaming}
         >

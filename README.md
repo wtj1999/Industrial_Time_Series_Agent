@@ -341,8 +341,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # 配置环境变量
-cp .env.example .env
-# 编辑 .env，填入你的 LLM_API_KEY 等配置
+cp .env .env
+# 编辑 .env，填入 MODEL_NAME、BASE_URL、API_KEY 等配置
 
 # 启动 API 服务（默认监听 8000 端口）
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -359,7 +359,7 @@ cd frontend
 npm install
 
 # 配置环境变量（开发模式下可留空，自动走 Vite 代理）
-cp .env.example .env.local
+cp .env .env.local
 
 # 启动开发服务器
 npm run dev
@@ -383,10 +383,11 @@ npm run preview     # 本地预览生产构建
 
 | 变量 | 说明 | 默认值 |
 | :--- | :--- | :--- |
-| `LLM_PROVIDER` | LLM 提供方（`openai` / `anthropic`） | `openai` |
-| `LLM_MODEL_NAME` | 模型名称 | `gpt-4` |
-| `LLM_API_KEY` | **必填** · LLM API Key | — |
-| `LLM_TEMPERATURE` | 采样温度 | `0.7` |
+| `MODEL_NAME` | OpenAI 兼容接口的模型名称 | `Qwen3-235B-A22B` |
+| `BASE_URL` | OpenAI 兼容接口地址 | `http://10.2.131.172:8000/v1` |
+| `API_KEY` | 接口密钥 | `EMPTY` |
+| `TEMPERATURE` | 采样温度 | `0.7` |
+| `TIMEOUT` | 模型请求超时（秒） | `600` |
 | `DB_BACKEND` | 状态持久化后端（`sqlite` / `postgresql` / `redis`） | `sqlite` |
 | `DB_CONNECTION_STRING` | 数据库连接串 | `sqlite:///sessions.db` |
 | `MAX_CONVERSATION_HISTORY` | 对话历史最大轮数 | `50` |
@@ -395,7 +396,7 @@ npm run preview     # 本地预览生产构建
 | `MAX_FILE_SIZE_MB` | 上传文件大小上限（MB） | `100` |
 | `API_HOST` / `API_PORT` | 服务监听地址 / 端口 | `0.0.0.0` / `8000` |
 
-完整变量见 [`agent_app/.env.example`](agent_app/.env.example)。
+完整变量见 [`agent_app/.env.example`](agent_app/.env)。
 
 ### 前端环境变量（`frontend/.env.local`）
 

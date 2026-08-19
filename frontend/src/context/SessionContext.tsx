@@ -128,6 +128,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const abortRef = useRef<AbortController | null>(null);
   const pendingRef = useRef<PendingAssistant | null>(null);
+  // Invalidates slower history requests when the user switches threads or
+  // starts a new conversation before an earlier request has completed.
+  const loadRequestRef = useRef(0);
 
   const pushItem = useCallback((item: ConversationItem) => {
     setItems((prev) => [...prev, item]);
@@ -163,6 +166,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const initNewSession = useCallback(
     (id?: string) => {
       abortRef.current?.abort();
+      loadRequestRef.current += 1;
       pendingRef.current = null;
       setSessionId(id ?? genSessionId());
       setItems([]);
@@ -177,6 +181,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const loadSession = useCallback(
     async (targetSessionId: string) => {
       if (!targetSessionId) return;
+      const requestId = ++loadRequestRef.current;
       // Abort any in-flight stream before switching — otherwise tokens
       // from the old session could leak into the new transcript.
       abortRef.current?.abort();
@@ -305,8 +310,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        if (loadRequestRef.current !== requestId) return;
         setItems(nextItems);
       } catch (err) {
+        if (loadRequestRef.current !== requestId) return;
         setError(err instanceof Error ? err.message : '加载历史对话失败');
       }
 
@@ -314,7 +321,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       // the sidebar "当前会话" card reflects the correct stage/task.
       api
         .getSessionInfo(targetSessionId)
-        .then(setSessionInfo)
+        .then((info) => {
+          if (loadRequestRef.current === requestId) setSessionInfo(info);
+        })
         .catch(() => {
           /* ignore — thread may not have a checkpoint yet */
         });

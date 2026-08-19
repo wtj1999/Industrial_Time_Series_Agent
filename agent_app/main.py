@@ -236,8 +236,8 @@ class IndustrialTimeSeriesAgent:
                 'timeout_minutes': settings.session_timeout_minutes
             },
             'configuration': {
-                'llm_provider': settings.llm.provider,
-                'llm_model': settings.llm.model_name,
+                'llm_provider': 'openai-compatible',
+                'llm_model': settings.MODEL_NAME,
                 'max_prediction_steps': settings.max_prediction_steps,
                 'supported_tasks': settings.supported_tasks
             }

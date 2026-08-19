@@ -8,8 +8,8 @@
  * can inject text into the composer.
  */
 
-import { useEffect } from 'react';
-import { useOutletContext, useParams } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { useLocation, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatView } from '@/components/chat/ChatView';
 import type { ChatOutletContext } from '@/components/layout/AppLayout';
@@ -18,8 +18,11 @@ import { useSession } from '@/context/SessionContext';
 export function ChatRoute() {
   const { pendingExample, onConsumeInjected, sendQuery, streaming, stop } =
     useOutletContext<ChatOutletContext>();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { sessionId: urlSessionId } = useParams<{ sessionId?: string }>();
-  const { sessionId, loadSession } = useSession();
+  const { sessionId, initNewSession, loadSession } = useSession();
+  const handledNewSessionKeyRef = useRef<string | null>(null);
 
   // URL → SessionContext sync.
   // Only load when the URL carries a sessionId that differs from the one
@@ -27,10 +30,32 @@ export function ChatRoute() {
   // existing / freshly-generated session untouched — the sidebar's "新建对话"
   // button is responsible for calling initNewSession() in that case.
   useEffect(() => {
+    const navigationState = location.state as { startNewSession?: boolean } | null;
+    if (navigationState?.startNewSession) {
+      // React StrictMode re-runs effects in development. Key the action to
+      // the location so one click still creates exactly one session id.
+      if (handledNewSessionKeyRef.current !== location.key) {
+        handledNewSessionKeyRef.current = location.key;
+        initNewSession();
+      }
+      // Consume the one-shot intent so refresh/back cannot create another
+      // session from the same history entry.
+      navigate('/chat', { replace: true, state: null });
+      return;
+    }
+
     if (urlSessionId && urlSessionId !== sessionId) {
       void loadSession(urlSessionId);
     }
-  }, [urlSessionId, sessionId, loadSession]);
+  }, [
+    location.key,
+    location.state,
+    urlSessionId,
+    sessionId,
+    initNewSession,
+    loadSession,
+    navigate,
+  ]);
 
   return (
     <>

@@ -77,6 +77,28 @@ def validate_file_path(file_path: str) -> tuple[bool, Optional[str]]:
     return True, None
 
 
+def validate_existing_file_name(file_name: str) -> tuple[bool, Optional[str]]:
+    """Validate an on-disk upload filename supplied for file reuse.
+
+    Uploaded files retain their original Unicode names, so validation must
+    reject path syntax rather than restrict names to ASCII.  The caller still
+    performs a resolved-path boundary check before opening the file.
+    """
+    if not file_name:
+        return False, "existing_file_name must not be empty"
+
+    if file_name in {".", ".."}:
+        return False, "existing_file_name must be a file name"
+
+    if "/" in file_name or "\\" in file_name:
+        return False, "existing_file_name must not contain path separators"
+
+    if any(ord(char) < 32 or ord(char) == 127 for char in file_name):
+        return False, "existing_file_name contains control characters"
+
+    return True, None
+
+
 def create_response_structure(
     response_type: str,
     content: Any,
