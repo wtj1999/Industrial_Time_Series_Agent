@@ -4,6 +4,7 @@ import { AuthPage } from '@/components/auth/AuthPage';
 import { ChatRoute } from '@/components/chat/ChatRoute';
 import { MyDataView } from '@/components/views/MyDataView';
 import { MyModelsView } from '@/components/views/MyModelsView';
+import { MyAgentsView } from '@/components/views/MyAgentsView';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { SessionProvider } from '@/context/SessionContext';
 import { Spinner } from '@/components/ui/Spinner';
@@ -31,6 +32,7 @@ export default function App() {
  *   /chat/:sessionId   — open a past session
  *   /datasets          — my datasets
  *   /models            — my models
+ *   /agents            — my agents
  */
 function Root() {
   const { user, initializing } = useAuth();
@@ -63,6 +65,7 @@ function Root() {
           <Route path="chat/:sessionId" element={<ChatRoute />} />
           <Route path="datasets" element={<DataRoute />} />
           <Route path="models" element={<ModelsRoute />} />
+          <Route path="agents" element={<AgentsRoute />} />
         </Route>
         <Route path="*" element={<Navigate to="/chat" replace />} />
       </Routes>
@@ -80,4 +83,9 @@ function DataRoute() {
 function ModelsRoute() {
   const navigate = useNavigate();
   return <MyModelsView onBack={() => navigate('/chat')} />;
+}
+
+function AgentsRoute() {
+  const navigate = useNavigate();
+  return <MyAgentsView onBack={() => navigate('/chat')} />;
 }

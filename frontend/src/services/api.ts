@@ -230,6 +230,8 @@ async function postJson<T>(
 export interface QueryParams {
   sessionId: string;
   query?: string;
+  applicationId?: string;
+  applicationParams?: Record<string, unknown>;
   file?: File | null;
   /**
    * On-disk filename within uploads/<user_id>/ to re-use instead of
@@ -267,11 +269,22 @@ export interface QueryCallbacks {
  * multipart, so we drive a `ReadableStream` reader manually.
  */
 export async function streamQuery(params: QueryParams, cb: QueryCallbacks): Promise<void> {
-  const { sessionId, query, file, resumeValue, signal, existingFileName } = params;
+  const {
+    sessionId,
+    query,
+    applicationId,
+    applicationParams,
+    file,
+    resumeValue,
+    signal,
+    existingFileName,
+  } = params;
 
   const form = new FormData();
   form.append('session_id', sessionId);
   if (query) form.append('query', query);
+  if (applicationId) form.append('application_id', applicationId);
+  if (applicationParams) form.append('application_params', JSON.stringify(applicationParams));
   if (file) form.append('file', file);
   // ``file`` takes precedence — only send existing_file_name when no new
   // upload is attached. The backend enforces the same precedence, but we

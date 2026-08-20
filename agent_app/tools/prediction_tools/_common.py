@@ -204,6 +204,12 @@ def resolve_model(model_name: str) -> Tuple[str, Dict[str, Any]]:
     if not model_name or not isinstance(model_name, str):
         raise ValueError("model_name 不能为空。")
 
+    aliases = {
+        "moirai-2.0": "moirai-2.0-R-small",
+        "tirex-1.1": "tirex-1.1-gifteval",
+    }
+    model_name = aliases.get(model_name.lower(), model_name)
+
     if model_name in MODEL_REGISTRY:
         return model_name, MODEL_REGISTRY[model_name]
 

@@ -93,7 +93,19 @@ interface SessionContextValue extends SessionState {
   /** Switch to a past session: clear current items, load transcript. */
   loadSession: (sessionId: string) => Promise<void>;
   /** Send a fresh user query. */
-  sendQuery: (query: string, file?: File | null) => Promise<void>;
+  sendQuery: (
+    query: string,
+    file?: File | null,
+    existingFileName?: string,
+  ) => Promise<void>;
+  /** Submit a validated structured task through a business application adapter. */
+  sendAgentTask: (
+    applicationId: string,
+    params: Record<string, unknown>,
+    displayMessage: string,
+    file?: File | null,
+    existingFileName?: string,
+  ) => Promise<void>;
   /** Resume the current interrupt with a user-provided payload. */
   resumeQuery: (
     resumeValue: ResumeValue,
@@ -646,15 +658,48 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }
 
   const sendQuery = useCallback(
-    async (query: string, file: File | null = null) => {
-      if (!query.trim() && !file) return;
+    async (
+      query: string,
+      file: File | null = null,
+      existingFileName?: string,
+    ) => {
+      if (!query.trim() && !file && !existingFileName) return;
       pushItem({
         kind: 'message',
         id: genId(),
         message: { role: 'user', content: query || `📎 ${file?.name ?? ''}`.trim(), timestamp: new Date().toISOString() },
       });
       setInterrupt(null);
-      await runStream({ sessionId, query, file });
+      await runStream({ sessionId, query, file, existingFileName });
+    },
+    [pushItem, runStream, sessionId],
+  );
+
+  const sendAgentTask = useCallback(
+    async (
+      applicationId: string,
+      params: Record<string, unknown>,
+      displayMessage: string,
+      file: File | null = null,
+      existingFileName?: string,
+    ) => {
+      pushItem({
+        kind: 'message',
+        id: genId(),
+        message: {
+          role: 'user',
+          content: displayMessage,
+          timestamp: new Date().toISOString(),
+        },
+      });
+      setInterrupt(null);
+      await runStream({
+        sessionId,
+        applicationId,
+        applicationParams: params,
+        file,
+        existingFileName,
+      });
     },
     [pushItem, runStream, sessionId],
   );
@@ -720,6 +765,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       initNewSession,
       loadSession,
       sendQuery,
+      sendAgentTask,
       resumeQuery,
       resetTask,
       removeSession,
@@ -740,6 +786,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       initNewSession,
       loadSession,
       sendQuery,
+      sendAgentTask,
       resumeQuery,
       resetTask,
       removeSession,

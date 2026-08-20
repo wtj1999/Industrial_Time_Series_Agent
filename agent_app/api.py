@@ -204,6 +204,12 @@ async def index():
 @app.post("/api/query")
 async def process_query(
     query: Optional[str] = Form(None, description="User's query in natural language"),
+    application_id: Optional[str] = Form(
+        None, description="Optional structured agent-application identifier",
+    ),
+    application_params: Optional[str] = Form(
+        None, description="JSON parameters for the selected agent application",
+    ),
     file: UploadFile | None = File(None, description="CSV file to upload for analysis"),
     existing_file_name: Optional[str] = Form(
         None,
@@ -224,6 +230,22 @@ async def process_query(
         file_path = None
         parsed_resume_value: Any = None
         user_id = _sanitize_user_id(x_user_id)
+
+        if application_id:
+            try:
+                from applications import build_application_query
+
+                raw_application_params = (
+                    json.loads(application_params) if application_params else {}
+                )
+                if not isinstance(raw_application_params, dict):
+                    raise ValueError("application_params must be a JSON object")
+                query = build_application_query(application_id, raw_application_params)
+            except (json.JSONDecodeError, ValueError) as exc:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid agent application request: {exc}",
+                ) from exc
 
         if resume_value:
             try:

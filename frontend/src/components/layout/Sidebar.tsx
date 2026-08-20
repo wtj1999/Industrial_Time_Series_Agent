@@ -54,7 +54,7 @@ const EXAMPLES: ExamplePrompt[] = [
 
 /** Top-level view the main panel is currently rendering. Derived from the
  *  URL so the sidebar highlight always matches react-router. */
-type AppView = 'chat' | 'datasets' | 'models';
+type AppView = 'chat' | 'datasets' | 'models' | 'agents';
 
 interface NavEntry {
   view: AppView;
@@ -78,6 +78,13 @@ const NAV_ENTRIES: NavEntry[] = [
     icon: Boxes,
     label: '我的模型',
     hint: '训练保存的检测模型',
+  },
+  {
+    view: 'agents',
+    path: '/agents',
+    icon: Bot,
+    label: '我的智能体',
+    hint: '创建和管理专属智能体',
   },
 ];
 
@@ -108,6 +115,8 @@ export function Sidebar({
     ? 'datasets'
     : pathname.startsWith('/models')
       ? 'models'
+      : pathname.startsWith('/agents')
+        ? 'agents'
       : 'chat';
 
   // Open a past thread by navigating to /chat/:sessionId — ChatRoute's

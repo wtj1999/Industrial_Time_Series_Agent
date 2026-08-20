@@ -52,7 +52,7 @@ function PredictionChartCard({ chart }: { chart: PredictionChart }) {
   }
 }
 
-export function ChatView() {
+export function ChatView({ showEmptyState = true }: { showEmptyState?: boolean }) {
   const { items, streaming, sendQuery } = useSession();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const stickToBottomRef = useRef(true);
@@ -84,7 +84,7 @@ export function ChatView() {
       className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6"
     >
       <div className="mx-auto w-full max-w-3xl">
-        {!hasItems && <EmptyState onPick={(p) => void sendQuery(p)} />}
+        {!hasItems && showEmptyState && <EmptyState onPick={(p) => void sendQuery(p)} />}
 
         <div className="space-y-5">
           {items.map((item) => {
