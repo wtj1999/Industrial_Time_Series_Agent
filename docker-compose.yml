@@ -1,0 +1,59 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
+    restart: unless-stopped
+    env_file:
+      - path: ./agent_app/.env
+        required: false
+    environment:
+      DEBUG: "false"
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      API_WORKERS: ${API_WORKERS:-1}
+    command:
+      - sh
+      - -c
+      - exec uvicorn agent_app.api:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      # Mount source code so Python changes trigger Uvicorn reload.
+      - ./agent_app:/app/agent_app
+      - ./uploads:/app/uploads
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend-build
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
+        VITE_API_BASE_URL: ""
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    environment:
+      VITE_API_BASE_URL: ""
+      VITE_PROXY_TARGET: http://backend:8000
+    volumes:
+      # Mount editable source while keeping Linux dependencies in Docker.
+      - ./frontend:/frontend
+      - frontend_node_modules:/frontend/node_modules
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+
+volumes:
+  frontend_node_modules:
