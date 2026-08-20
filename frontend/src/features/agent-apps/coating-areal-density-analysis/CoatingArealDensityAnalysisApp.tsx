@@ -30,10 +30,11 @@ export function CoatingArealDensityAnalysisApp() {
   const [started, setStarted] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [task, setTask] = useState<CoatingAnalysisTask>({
-    analysisMode: '稳定性评估',
+    analysisMode: 'SPC控制状态分析',
     coatingScopes: ['A面分区', 'A+B双面分区'],
     window: 30,
     subgroupSize: 1,
+    periodSteps: null,
     lsl: null,
     target: null,
     usl: null,
@@ -101,8 +102,20 @@ export function CoatingArealDensityAnalysisApp() {
       setFormError('控制图子组大小必须是 1 到 1000 之间的整数');
       return;
     }
-    if (task.analysisMode === '过程能力' && task.lsl === null && task.usl === null) {
+    if (task.analysisMode === '过程能力分析' && task.lsl === null && task.usl === null) {
       setFormError('过程能力分析必须填写规格下限或规格上限');
+      return;
+    }
+    if (task.analysisMode === '趋势与周期分解' && task.periodSteps === null) {
+      setFormError('趋势与周期分解必须填写周期采样点数');
+      return;
+    }
+    const periodSteps = task.periodSteps;
+    if (
+      task.analysisMode === '趋势与周期分解'
+      && (periodSteps === null || !Number.isInteger(periodSteps) || periodSteps < 2 || periodSteps > 1500)
+    ) {
+      setFormError('周期采样点数必须是 2 到 1500 之间的整数');
       return;
     }
     if (task.lsl !== null && task.usl !== null && task.lsl >= task.usl) {
@@ -118,6 +131,7 @@ export function CoatingArealDensityAnalysisApp() {
         coating_scopes: task.coatingScopes,
         window: task.window,
         subgroup_size: task.subgroupSize,
+        period_steps: task.periodSteps,
         lsl: task.lsl,
         target: task.target,
         usl: task.usl,
@@ -175,6 +189,7 @@ export function CoatingArealDensityAnalysisApp() {
 
           <FormSection number="3" title="设置分析参数" description="窗口按采样点计数；规格参数主要用于过程能力分析。">
             <div className="grid gap-3 sm:grid-cols-2"><Field label="滚动窗口（采样点）"><input type="number" min={2} max={5000} value={task.window} onChange={(event) => setTask({ ...task, window: Number(event.target.value) })} className={fieldClass} /></Field><Field label="控制图子组大小"><input type="number" min={1} max={1000} value={task.subgroupSize} onChange={(event) => setTask({ ...task, subgroupSize: Number(event.target.value) })} className={fieldClass} /></Field></div>
+            {task.analysisMode === '趋势与周期分解' && <div className="mt-3"><Field label="周期采样点数（2–1500）"><input type="number" min={2} max={1500} value={task.periodSteps ?? ''} onChange={(event) => setTask({ ...task, periodSteps: parseOptionalNumber(event.target.value) })} placeholder="例如：120" className={fieldClass} /></Field></div>}
             <div className="mt-3 grid gap-3 sm:grid-cols-3"><Field label="规格下限 LSL"><input type="number" step="any" value={task.lsl ?? ''} onChange={(event) => setTask({ ...task, lsl: parseOptionalNumber(event.target.value) })} placeholder="可选" className={fieldClass} /></Field><Field label="目标值"><input type="number" step="any" value={task.target ?? ''} onChange={(event) => setTask({ ...task, target: parseOptionalNumber(event.target.value) })} placeholder="可选" className={fieldClass} /></Field><Field label="规格上限 USL"><input type="number" step="any" value={task.usl ?? ''} onChange={(event) => setTask({ ...task, usl: parseOptionalNumber(event.target.value) })} placeholder="可选" className={fieldClass} /></Field></div>
           </FormSection>
 
