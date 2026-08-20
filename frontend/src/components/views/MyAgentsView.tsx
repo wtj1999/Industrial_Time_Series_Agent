@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
+  Activity,
   BatteryCharging,
   Bot,
   ChartSpline,
@@ -16,11 +17,13 @@ import { BatteryInstallationForecastApp } from '@/features/agent-apps/battery-in
 import { BATTERY_INSTALLATION_AGENT } from '@/features/agent-apps/battery-installation-forecast/config';
 import { NewEnergyVehicleSalesApp } from '@/features/agent-apps/new-energy-vehicle-sales/NewEnergyVehicleSalesApp';
 import { NEW_ENERGY_VEHICLE_SALES_AGENT } from '@/features/agent-apps/new-energy-vehicle-sales/config';
+import { CoatingArealDensityAnalysisApp } from '@/features/agent-apps/coating-areal-density-analysis/CoatingArealDensityAnalysisApp';
+import { COATING_AREAL_DENSITY_AGENT } from '@/features/agent-apps/coating-areal-density-analysis/config';
 
 type AgentDomain = 'equipment' | 'production' | 'market';
 
 const DOMAIN_COUNTS: Record<AgentDomain, number> = {
-  equipment: 0,
+  equipment: 1,
   production: 0,
   market: 2,
 };
@@ -71,7 +74,7 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
   const [activeDomain, setActiveDomain] = useState<AgentDomain | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const activeMeta = activeDomain ? DOMAIN_META[activeDomain] : null;
-  const visibleCount = activeDomain ? DOMAIN_COUNTS[activeDomain] : 2;
+  const visibleCount = activeDomain ? DOMAIN_COUNTS[activeDomain] : 3;
 
   const handleBack = () => {
     if (activeAgent) {
@@ -93,9 +96,16 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(NEW_ENERGY_VEHICLE_SALES_AGENT.id);
   };
 
+  const openCoatingAgent = () => {
+    initNewSession();
+    setActiveAgent(COATING_AREAL_DENSITY_AGENT.id);
+  };
+
   const activeAgentName = activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
     ? NEW_ENERGY_VEHICLE_SALES_AGENT.name
-    : BATTERY_INSTALLATION_AGENT.name;
+    : activeAgent === COATING_AREAL_DENSITY_AGENT.id
+      ? COATING_AREAL_DENSITY_AGENT.name
+      : BATTERY_INSTALLATION_AGENT.name;
 
   return (
     <div className="flex h-full flex-col">
@@ -104,7 +114,9 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
           type="button"
           onClick={handleBack}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-steel-600 transition-colors hover:bg-steel-100 hover:text-steel-900"
-          title={activeAgent ? '返回市场域' : activeDomain ? '返回智能体分类' : '返回对话'}
+          title={activeAgent
+            ? `返回${activeDomain === 'equipment' ? '设备域' : '市场域'}`
+            : activeDomain ? '返回智能体分类' : '返回对话'}
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -126,7 +138,9 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
       {activeAgent ? (
         activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
           ? <NewEnergyVehicleSalesApp />
-          : <BatteryInstallationForecastApp />
+          : activeAgent === COATING_AREAL_DENSITY_AGENT.id
+            ? <CoatingArealDensityAnalysisApp />
+            : <BatteryInstallationForecastApp />
       ) : (
         <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
           <div className="mx-auto w-full max-w-5xl">
@@ -135,6 +149,8 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
               onOpenBatteryAgent={openBatteryAgent}
               onOpenVehicleSalesAgent={openVehicleSalesAgent}
             />
+          ) : activeDomain === 'equipment' ? (
+            <EquipmentAgents onOpenCoatingAgent={openCoatingAgent} />
           ) : activeDomain ? (
             <DomainEmptyState domain={activeDomain} />
           ) : (
@@ -143,6 +159,32 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function EquipmentAgents({ onOpenCoatingAgent }: { onOpenCoatingAgent: () => void }) {
+  return (
+    <div>
+      <p className="mb-4 text-xs text-steel-500">{DOMAIN_META.equipment.description}</p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <button
+          type="button"
+          onClick={onOpenCoatingAgent}
+          className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-cyan-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-cyan-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-cyan-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700"><Activity className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电涂布面密度分析智能体</h3>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[9px] font-medium text-cyan-700"><ChartSpline className="h-3 w-3" />时序分析</span>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-steel-500">分析涂布面密度的稳定性、控制状态、过程能力、漂移、变点与分区关联。</p>
+          <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-cyan-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+        </button>
+      </div>
     </div>
   );
 }
