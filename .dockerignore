@@ -1,0 +1,17 @@
+.git
+.gitignore
+.env
+**/.env
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/node_modules
+frontend/dist
+agent_app/*.db
+agent_app/*.db-shm
+agent_app/*.db-wal
+agent_app/artifacts
+uploads
+*.png
+nul
+
