@@ -32,7 +32,23 @@ export interface CoatingAnalysisTask {
   coatingScopes: string[];
   window: number;
   subgroupSize: number;
+  sigmaWidth: number;
+  maxChangePoints: number;
+  minSegmentLength: number;
+  correlationMethod: 'pearson' | 'spearman' | 'kendall';
+  minAbsCorrelation: number;
+  histogramBins: number;
+  binStrategy: 'equal_width' | 'quantile';
+  maxLag: number;
+  ciLevel: number;
   periodSteps: number | null;
+  decompositionModel: 'additive' | 'multiplicative';
+  decompositionMethod: 'stl' | 'classical';
+  driftThreshold: number;
+  trendMethod: '稳健线性趋势' | 'CUSUM持续漂移';
+  cusumThreshold: number;
+  cusumDrift: number;
+  varianceRatioThreshold: number;
   lsl: number | null;
   target: number | null;
   usl: number | null;
@@ -65,13 +81,31 @@ export function buildCoatingAnalysisQuery(task: CoatingAnalysisTask): string {
     '请执行锂电涂布面密度时序分析任务。',
     `主分析目标：${task.analysisMode}；${intent[task.analysisMode]}`,
     `分析范围：${scopes}。`,
-    `滚动窗口：${task.window} 个采样点；控制图子组大小：${task.subgroupSize}。`,
   ];
-  if (task.analysisMode === '趋势与周期分解') {
-    lines.push(`周期采样点数：${task.periodSteps}。`);
-  }
-  if (task.analysisMode === '过程能力分析' || [task.lsl, task.target, task.usl].some((value) => value !== null)) {
+  if (task.analysisMode === 'SPC控制状态分析') {
+    lines.push(`分析参数：控制限宽度=${task.sigmaWidth}σ；控制图子组大小=${task.subgroupSize}；应用标准 Western Electric 规则。`);
+  } else if (task.analysisMode === '均值变点定位') {
+    lines.push(`分析参数：最大变点数=${task.maxChangePoints}；最小分段长度=${task.minSegmentLength} 个采样点。`);
+  } else if (task.analysisMode === '分区相关性分析') {
+    lines.push(`分析参数：相关方法=${task.correlationMethod}；最小绝对相关系数=${task.minAbsCorrelation}。`);
+  } else if (task.analysisMode === '面密度分布分析') {
+    lines.push(`分析参数：分箱数量=${task.histogramBins}；分箱策略=${task.binStrategy}。`);
+  } else if (task.analysisMode === '自相关与周期结构分析') {
+    lines.push(`分析参数：最大滞后阶数=${task.maxLag}；置信水平=${task.ciLevel}。`);
+  } else if (task.analysisMode === '趋势与周期分解') {
+    lines.push(`分析参数：周期采样点数=${task.periodSteps}；分解模型=${task.decompositionModel}；分解方法=${task.decompositionMethod}；稳健分解=true。`);
+  } else if (task.analysisMode === '过程稳定性评估') {
+    lines.push(`分析参数：滚动窗口=${task.window} 个采样点；漂移阈值=${task.driftThreshold}。`);
+  } else if (task.analysisMode === '过程能力分析') {
     lines.push(`规格参数：LSL=${formatNumber(task.lsl)}；目标值=${formatNumber(task.target)}；USL=${formatNumber(task.usl)}。`);
+  } else if (task.analysisMode === '长期趋势与持续漂移') {
+    lines.push(task.trendMethod === 'CUSUM持续漂移'
+      ? `分析参数：趋势方法=CUSUM持续漂移；触发阈值=${task.cusumThreshold}；容忍漂移=${task.cusumDrift}；最小分段长度=${task.minSegmentLength}。`
+      : '分析参数：趋势方法=稳健线性趋势；robust=true。');
+  } else if (task.analysisMode === '波动突变分析') {
+    lines.push(`分析参数：滚动窗口=${task.window} 个采样点；最大变点数=${task.maxChangePoints}；波动比阈值=${task.varianceRatioThreshold}。`);
+  } else {
+    lines.push(`分析参数：综合诊断参考窗口=${task.window} 个采样点。`);
   }
   lines.push(`补充要求：${extra}。`);
   return lines.join('\n');

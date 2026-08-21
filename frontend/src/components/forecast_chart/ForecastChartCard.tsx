@@ -155,6 +155,26 @@ function getNum(row: ChartRow | undefined, key: string): number | undefined {
   return typeof v === 'number' ? v : undefined;
 }
 
+/** Compute the axis from visible absolute series only. Stacked band deltas
+ * start at zero internally and must not force an industrial signal axis to 0. */
+function visibleYDomain(rows: ChartRow[], modelNames: string[]): [number, number] {
+  const keys = [
+    'history',
+    ...(Q_KEYS as readonly QKey[]).map((q) => `abs_${q}`),
+    ...modelNames.map((model) => `p50_${model}`),
+  ];
+  const values = rows.flatMap((row) => keys
+    .map((key) => getNum(row, key))
+    .filter((value): value is number => value !== undefined && Number.isFinite(value)));
+  if (values.length === 0) return [0, 1];
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const padding = min === max
+    ? Math.max(Math.abs(min) * 0.05, 1)
+    : (max - min) * 0.05;
+  return [min - padding, max + padding];
+}
+
 /**
  * Build the row-per-step dataset from the history array and the
  * selected model's quantile forecast, plus every model's p50 overlay.
@@ -287,6 +307,10 @@ export function ForecastChartCard({ chart }: { chart: ForecastChart }) {
     () => (colData ? buildRows(colData, effectiveActiveModel) : { rows: [], nHistory: 0, horizon: 0 }),
     [colData, effectiveActiveModel],
   );
+  const yDomain = useMemo(
+    () => visibleYDomain(rows, chart.model_names),
+    [rows, chart.model_names],
+  );
 
   const downsampled = colData?.history_downsampled ?? false;
   const nHistoryFull = colData?.n_history_full ?? nHistory;
@@ -363,7 +387,8 @@ export function ForecastChartCard({ chart }: { chart: ForecastChart }) {
               minTickGap={40}
             />
             <YAxis
-              domain={['auto', 'auto']}
+              domain={yDomain}
+              allowDataOverflow
               tick={{ fontSize: 9, fill: '#8493ab' }}
               tickLine={false}
               axisLine={false}

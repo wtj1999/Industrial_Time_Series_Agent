@@ -164,6 +164,7 @@ function EmptyState({ onPick }: { onPick: (prompt: string) => void }) {
     '分析这份传感器数据的整体趋势',
     '检测该烘箱温度的异常时间段',
     '预测该气缸未来12个采样点的压力值',
+    '涂布均匀性波动调控：箔材涂布厚度不均匀导致电池片性能不稳定，如何挖掘分析受其影响的关键参数？',
   ];
   return (
     <div className="mt-10 flex flex-col items-center text-center animate-fade-in">

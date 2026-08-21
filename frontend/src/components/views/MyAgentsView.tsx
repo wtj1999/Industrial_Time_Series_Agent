@@ -9,6 +9,7 @@ import {
   Factory,
   CarFront,
   Store,
+  ScanSearch,
   Wrench,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
@@ -19,11 +20,13 @@ import { NewEnergyVehicleSalesApp } from '@/features/agent-apps/new-energy-vehic
 import { NEW_ENERGY_VEHICLE_SALES_AGENT } from '@/features/agent-apps/new-energy-vehicle-sales/config';
 import { CoatingArealDensityAnalysisApp } from '@/features/agent-apps/coating-areal-density-analysis/CoatingArealDensityAnalysisApp';
 import { COATING_AREAL_DENSITY_AGENT } from '@/features/agent-apps/coating-areal-density-analysis/config';
+import { CoatingArealDensityAnomalyDetectionApp } from '@/features/agent-apps/coating-areal-density-anomaly-detection/CoatingArealDensityAnomalyDetectionApp';
+import { COATING_AREAL_DENSITY_ANOMALY_AGENT } from '@/features/agent-apps/coating-areal-density-anomaly-detection/config';
 
 type AgentDomain = 'equipment' | 'production' | 'market';
 
 const DOMAIN_COUNTS: Record<AgentDomain, number> = {
-  equipment: 1,
+  equipment: 2,
   production: 0,
   market: 2,
 };
@@ -74,7 +77,9 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
   const [activeDomain, setActiveDomain] = useState<AgentDomain | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const activeMeta = activeDomain ? DOMAIN_META[activeDomain] : null;
-  const visibleCount = activeDomain ? DOMAIN_COUNTS[activeDomain] : 3;
+  const visibleCount = activeDomain
+    ? DOMAIN_COUNTS[activeDomain]
+    : Object.values(DOMAIN_COUNTS).reduce((total, count) => total + count, 0);
 
   const handleBack = () => {
     if (activeAgent) {
@@ -101,10 +106,17 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(COATING_AREAL_DENSITY_AGENT.id);
   };
 
+  const openCoatingAnomalyAgent = () => {
+    initNewSession();
+    setActiveAgent(COATING_AREAL_DENSITY_ANOMALY_AGENT.id);
+  };
+
   const activeAgentName = activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
     ? NEW_ENERGY_VEHICLE_SALES_AGENT.name
     : activeAgent === COATING_AREAL_DENSITY_AGENT.id
       ? COATING_AREAL_DENSITY_AGENT.name
+      : activeAgent === COATING_AREAL_DENSITY_ANOMALY_AGENT.id
+        ? COATING_AREAL_DENSITY_ANOMALY_AGENT.name
       : BATTERY_INSTALLATION_AGENT.name;
 
   return (
@@ -140,6 +152,8 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
           ? <NewEnergyVehicleSalesApp />
           : activeAgent === COATING_AREAL_DENSITY_AGENT.id
             ? <CoatingArealDensityAnalysisApp />
+            : activeAgent === COATING_AREAL_DENSITY_ANOMALY_AGENT.id
+              ? <CoatingArealDensityAnomalyDetectionApp />
             : <BatteryInstallationForecastApp />
       ) : (
         <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
@@ -150,7 +164,7 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
               onOpenVehicleSalesAgent={openVehicleSalesAgent}
             />
           ) : activeDomain === 'equipment' ? (
-            <EquipmentAgents onOpenCoatingAgent={openCoatingAgent} />
+            <EquipmentAgents onOpenCoatingAgent={openCoatingAgent} onOpenCoatingAnomalyAgent={openCoatingAnomalyAgent} />
           ) : activeDomain ? (
             <DomainEmptyState domain={activeDomain} />
           ) : (
@@ -163,7 +177,7 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
   );
 }
 
-function EquipmentAgents({ onOpenCoatingAgent }: { onOpenCoatingAgent: () => void }) {
+function EquipmentAgents({ onOpenCoatingAgent, onOpenCoatingAnomalyAgent }: { onOpenCoatingAgent: () => void; onOpenCoatingAnomalyAgent: () => void }) {
   return (
     <div>
       <p className="mb-4 text-xs text-steel-500">{DOMAIN_META.equipment.description}</p>
@@ -183,6 +197,22 @@ function EquipmentAgents({ onOpenCoatingAgent }: { onOpenCoatingAgent: () => voi
           </div>
           <p className="relative mt-4 text-xs leading-5 text-steel-500">分析涂布面密度的稳定性、控制状态、过程能力、漂移、变点与分区关联。</p>
           <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-cyan-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenCoatingAnomalyAgent}
+          className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-violet-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-violet-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-violet-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><ScanSearch className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电涂布面密度异常检测智能体</h3>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[9px] font-medium text-violet-700"><Activity className="h-3 w-3" />异常检测</span>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-steel-500">检测涂布面密度的异常时间点、连续异常区间及主要异常分区。</p>
+          <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-violet-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
         </button>
       </div>
     </div>

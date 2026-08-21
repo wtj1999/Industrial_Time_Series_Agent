@@ -34,7 +34,23 @@ export function CoatingArealDensityAnalysisApp() {
     coatingScopes: ['A面分区', 'A+B双面分区'],
     window: 30,
     subgroupSize: 1,
+    sigmaWidth: 3,
+    maxChangePoints: 5,
+    minSegmentLength: 10,
+    correlationMethod: 'pearson',
+    minAbsCorrelation: 0.3,
+    histogramBins: 20,
+    binStrategy: 'equal_width',
+    maxLag: 40,
+    ciLevel: 0.95,
     periodSteps: null,
+    decompositionModel: 'additive',
+    decompositionMethod: 'stl',
+    driftThreshold: 0.1,
+    trendMethod: '稳健线性趋势',
+    cusumThreshold: 5,
+    cusumDrift: 0.5,
+    varianceRatioThreshold: 1.5,
     lsl: null,
     target: null,
     usl: null,
@@ -86,8 +102,6 @@ export function CoatingArealDensityAnalysisApp() {
     }));
   };
 
-  const parseOptionalNumber = (value: string): number | null => value === '' ? null : Number(value);
-
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!upload && !selectedFileName) {
@@ -131,7 +145,23 @@ export function CoatingArealDensityAnalysisApp() {
         coating_scopes: task.coatingScopes,
         window: task.window,
         subgroup_size: task.subgroupSize,
+        sigma_width: task.sigmaWidth,
+        max_change_points: task.maxChangePoints,
+        min_segment_length: task.minSegmentLength,
+        correlation_method: task.correlationMethod,
+        min_abs_correlation: task.minAbsCorrelation,
+        histogram_bins: task.histogramBins,
+        bin_strategy: task.binStrategy,
+        max_lag: task.maxLag,
+        ci_level: task.ciLevel,
         period_steps: task.periodSteps,
+        decomposition_model: task.decompositionModel,
+        decomposition_method: task.decompositionMethod,
+        drift_threshold: task.driftThreshold,
+        trend_method: task.trendMethod,
+        cusum_threshold: task.cusumThreshold,
+        cusum_drift: task.cusumDrift,
+        variance_ratio_threshold: task.varianceRatioThreshold,
         lsl: task.lsl,
         target: task.target,
         usl: task.usl,
@@ -187,10 +217,8 @@ export function CoatingArealDensityAnalysisApp() {
             <div className="mt-4"><p className="mb-2 text-[11px] font-medium text-steel-600">面密度范围</p><div className="flex flex-wrap gap-2">{COATING_SCOPES.map((scope) => <button key={scope} type="button" onClick={() => toggleScope(scope)} className={cn('rounded-full border px-3 py-1.5 text-xs transition-colors', task.coatingScopes.includes(scope) ? 'border-cyan-400 bg-cyan-50 font-medium text-cyan-800' : 'border-steel-200 bg-white text-steel-600 hover:border-cyan-300')}>{scope}</button>)}</div></div>
           </FormSection>
 
-          <FormSection number="3" title="设置分析参数" description="窗口按采样点计数；规格参数主要用于过程能力分析。">
-            <div className="grid gap-3 sm:grid-cols-2"><Field label="滚动窗口（采样点）"><input type="number" min={2} max={5000} value={task.window} onChange={(event) => setTask({ ...task, window: Number(event.target.value) })} className={fieldClass} /></Field><Field label="控制图子组大小"><input type="number" min={1} max={1000} value={task.subgroupSize} onChange={(event) => setTask({ ...task, subgroupSize: Number(event.target.value) })} className={fieldClass} /></Field></div>
-            {task.analysisMode === '趋势与周期分解' && <div className="mt-3"><Field label="周期采样点数（2–1500）"><input type="number" min={2} max={1500} value={task.periodSteps ?? ''} onChange={(event) => setTask({ ...task, periodSteps: parseOptionalNumber(event.target.value) })} placeholder="例如：120" className={fieldClass} /></Field></div>}
-            <div className="mt-3 grid gap-3 sm:grid-cols-3"><Field label="规格下限 LSL"><input type="number" step="any" value={task.lsl ?? ''} onChange={(event) => setTask({ ...task, lsl: parseOptionalNumber(event.target.value) })} placeholder="可选" className={fieldClass} /></Field><Field label="目标值"><input type="number" step="any" value={task.target ?? ''} onChange={(event) => setTask({ ...task, target: parseOptionalNumber(event.target.value) })} placeholder="可选" className={fieldClass} /></Field><Field label="规格上限 USL"><input type="number" step="any" value={task.usl ?? ''} onChange={(event) => setTask({ ...task, usl: parseOptionalNumber(event.target.value) })} placeholder="可选" className={fieldClass} /></Field></div>
+          <FormSection number="3" title="设置分析参数" description="仅显示当前主分析目标实际使用的常用参数。">
+            <AnalysisParameters task={task} onChange={setTask} />
           </FormSection>
 
           <FormSection number="4" title="补充要求（可选）" description="可指定关注分区、时段、设备事件或结果口径。"><textarea value={task.additionalRequirements} onChange={(event) => setTask({ ...task, additionalRequirements: event.target.value })} rows={3} maxLength={500} className="w-full resize-y rounded-xl border border-steel-200 bg-white px-3 py-2.5 text-xs leading-5 text-steel-700 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100" /></FormSection>
@@ -208,4 +236,36 @@ function FormSection({ number, title, description, children }: { number: string;
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="block"><span className="mb-1.5 block text-[11px] font-medium text-steel-600">{label}</span>{children}</label>;
+}
+
+function AnalysisParameters({ task, onChange }: { task: CoatingAnalysisTask; onChange: React.Dispatch<React.SetStateAction<CoatingAnalysisTask>> }) {
+  const update = <K extends keyof CoatingAnalysisTask>(key: K, value: CoatingAnalysisTask[K]) => onChange((current) => ({ ...current, [key]: value }));
+  const numberInput = (key: keyof CoatingAnalysisTask, min: number, max: number, step: number | 'any' = 1) => (
+    <input type="number" min={min} max={max} step={step} value={String(task[key] ?? '')} onChange={(event) => update(key, Number(event.target.value) as never)} className={fieldClass} />
+  );
+
+  switch (task.analysisMode) {
+    case 'SPC控制状态分析':
+      return <div className="grid gap-3 sm:grid-cols-2"><Field label="控制限宽度（σ）">{numberInput('sigmaWidth', 0.5, 6, 0.1)}</Field><Field label="控制图子组大小">{numberInput('subgroupSize', 1, 1000)}</Field></div>;
+    case '均值变点定位':
+      return <div className="grid gap-3 sm:grid-cols-2"><Field label="最大变点数">{numberInput('maxChangePoints', 1, 20)}</Field><Field label="最小分段长度（采样点）">{numberInput('minSegmentLength', 2, 10000)}</Field></div>;
+    case '分区相关性分析':
+      return <div className="grid gap-3 sm:grid-cols-2"><Field label="相关方法"><select value={task.correlationMethod} onChange={(event) => update('correlationMethod', event.target.value as CoatingAnalysisTask['correlationMethod'])} className={fieldClass}><option value="pearson">Pearson（线性）</option><option value="spearman">Spearman（单调）</option><option value="kendall">Kendall（秩相关）</option></select></Field><Field label="最小绝对相关系数">{numberInput('minAbsCorrelation', 0, 1, 0.05)}</Field></div>;
+    case '面密度分布分析':
+      return <div className="grid gap-3 sm:grid-cols-2"><Field label="分箱数量">{numberInput('histogramBins', 5, 100)}</Field><Field label="分箱策略"><select value={task.binStrategy} onChange={(event) => update('binStrategy', event.target.value as CoatingAnalysisTask['binStrategy'])} className={fieldClass}><option value="equal_width">等宽分箱</option><option value="quantile">等频分箱</option></select></Field></div>;
+    case '自相关与周期结构分析':
+      return <div className="grid gap-3 sm:grid-cols-2"><Field label="最大滞后阶数">{numberInput('maxLag', 1, 500)}</Field><Field label="置信水平">{numberInput('ciLevel', 0.8, 0.999, 0.01)}</Field></div>;
+    case '趋势与周期分解':
+      return <div className="grid gap-3 sm:grid-cols-3"><Field label="周期采样点数（2–1500）"><input type="number" min={2} max={1500} value={task.periodSteps ?? ''} onChange={(event) => update('periodSteps', event.target.value === '' ? null : Number(event.target.value))} placeholder="例如：120" className={fieldClass} /></Field><Field label="分解模型"><select value={task.decompositionModel} onChange={(event) => update('decompositionModel', event.target.value as CoatingAnalysisTask['decompositionModel'])} className={fieldClass}><option value="additive">加法模型</option><option value="multiplicative">乘法模型</option></select></Field><Field label="分解方法"><select value={task.decompositionMethod} onChange={(event) => update('decompositionMethod', event.target.value as CoatingAnalysisTask['decompositionMethod'])} className={fieldClass}><option value="stl">STL</option><option value="classical">经典分解</option></select></Field></div>;
+    case '过程稳定性评估':
+      return <div className="grid gap-3 sm:grid-cols-2"><Field label="滚动窗口（采样点）">{numberInput('window', 2, 5000)}</Field><Field label="漂移阈值">{numberInput('driftThreshold', 0.01, 1, 0.01)}</Field></div>;
+    case '过程能力分析':
+      return <div className="grid gap-3 sm:grid-cols-3"><Field label="规格下限 LSL"><input type="number" step="any" value={task.lsl ?? ''} onChange={(event) => update('lsl', event.target.value === '' ? null : Number(event.target.value))} placeholder="至少填写一个规格限" className={fieldClass} /></Field><Field label="目标值"><input type="number" step="any" value={task.target ?? ''} onChange={(event) => update('target', event.target.value === '' ? null : Number(event.target.value))} placeholder="可选" className={fieldClass} /></Field><Field label="规格上限 USL"><input type="number" step="any" value={task.usl ?? ''} onChange={(event) => update('usl', event.target.value === '' ? null : Number(event.target.value))} placeholder="至少填写一个规格限" className={fieldClass} /></Field></div>;
+    case '长期趋势与持续漂移':
+      return <div><Field label="趋势分析方法"><select value={task.trendMethod} onChange={(event) => update('trendMethod', event.target.value as CoatingAnalysisTask['trendMethod'])} className={fieldClass}><option>稳健线性趋势</option><option>CUSUM持续漂移</option></select></Field>{task.trendMethod === 'CUSUM持续漂移' && <div className="mt-3 grid gap-3 sm:grid-cols-3"><Field label="CUSUM 触发阈值">{numberInput('cusumThreshold', 0.1, 100, 0.1)}</Field><Field label="容忍漂移">{numberInput('cusumDrift', 0, 10, 0.1)}</Field><Field label="最小分段长度">{numberInput('minSegmentLength', 2, 10000)}</Field></div>}</div>;
+    case '波动突变分析':
+      return <div className="grid gap-3 sm:grid-cols-3"><Field label="滚动窗口（采样点）">{numberInput('window', 5, 5000)}</Field><Field label="最大变点数">{numberInput('maxChangePoints', 1, 20)}</Field><Field label="波动比阈值">{numberInput('varianceRatioThreshold', 1, 20, 0.1)}</Field></div>;
+    default:
+      return <div className="grid gap-3 sm:grid-cols-2"><Field label="综合诊断参考窗口">{numberInput('window', 2, 5000)}</Field><div className="rounded-xl bg-cyan-50 px-3 py-2.5 text-[11px] leading-5 text-cyan-800">其他参数由智能体依据数据画像和实际选择的分析工具自动确定。</div></div>;
+  }
 }

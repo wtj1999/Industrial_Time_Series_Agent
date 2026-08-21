@@ -158,6 +158,27 @@ function getNum(row: ChartRow | undefined, key: string): number | undefined {
   return typeof v === 'number' ? v : undefined;
 }
 
+/** Derive the axis from visible absolute values, excluding stacked deltas
+ * whose zero baseline would otherwise flatten high-offset sensor series. */
+function visibleYDomain(rows: ChartRow[], modelNames: string[]): [number, number] {
+  const keys = [
+    'history',
+    'actual',
+    ...(Q_KEYS as readonly QKey[]).map((q) => `abs_${q}`),
+    ...modelNames.flatMap((model) => [`p_${model}`, `p50_${model}`]),
+  ];
+  const values = rows.flatMap((row) => keys
+    .map((key) => getNum(row, key))
+    .filter((value): value is number => value !== undefined && Number.isFinite(value)));
+  if (values.length === 0) return [0, 1];
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const padding = min === max
+    ? Math.max(Math.abs(min) * 0.05, 1)
+    : (max - min) * 0.05;
+  return [min - padding, max + padding];
+}
+
 /**
  * Build the per-step dataset.
  *
@@ -295,6 +316,10 @@ export function BacktestChartCard({ chart }: { chart: BacktestChart }) {
   const nHistoryFull = colData?.n_history_full ?? nHistory;
   const isMulti = chart.is_multi_model;
   const modelNames = chart.model_names;
+  const yDomain = useMemo(
+    () => visibleYDomain(rows, modelNames),
+    [rows, modelNames],
+  );
 
   if (!colData || rows.length === 0) {
     return (
@@ -347,7 +372,8 @@ export function BacktestChartCard({ chart }: { chart: BacktestChart }) {
               minTickGap={40}
             />
             <YAxis
-              domain={['auto', 'auto']}
+              domain={yDomain}
+              allowDataOverflow
               tick={{ fontSize: 9, fill: '#8493ab' }}
               tickLine={false}
               axisLine={false}
