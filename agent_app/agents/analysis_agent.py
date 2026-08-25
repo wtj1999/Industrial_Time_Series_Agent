@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, List, Optional
 import pandas as pd
 from dataclasses import dataclass
 
-from models.schemas import TaskSpec, TechPath, CSVProfile, Message
+from models.schemas import ModelRef, TaskSpec, TechPath, CSVProfile, Message
 
 from agents.base_agent import BaseAgent, extract_tool_calls
 from charts import extract_analysis_chart
@@ -42,6 +42,10 @@ class AnalysisContext:
     thread_id: Optional[str] = None
     file_path: Optional[str] = None
     stream_writer: Optional[Callable[[Any], None]] = None
+    model_save_name: Optional[str] = None
+    model_thread_id: Optional[str] = None
+    model_source_file: Optional[str] = None
+    model_category: Optional[str] = None
 
 
 class AnalysisAgent(BaseAgent):
@@ -64,6 +68,7 @@ class AnalysisAgent(BaseAgent):
             user_id: Optional[str] = None,
             dialogue_history: Optional[List[Message]] = None,
             stream_writer: Optional[Callable[[Any], None]] = None,
+            selected_model_ref: Optional[ModelRef] = None,
     ) -> Dict[str, Any]:
         """Run the analysis sub-agent.
 
@@ -94,6 +99,10 @@ class AnalysisAgent(BaseAgent):
             thread_id=thread_id,
             file_path=file_path,
             stream_writer=stream_writer,
+            model_save_name=selected_model_ref.save_name if selected_model_ref else None,
+            model_thread_id=selected_model_ref.thread_id if selected_model_ref else None,
+            model_source_file=selected_model_ref.source_file if selected_model_ref else None,
+            model_category=selected_model_ref.category if selected_model_ref else None,
         )
 
         # 历史对话由 orchestrator 的 SessionState(checkpointer 落盘)传
@@ -104,6 +113,15 @@ class AnalysisAgent(BaseAgent):
             f"[{getattr(m, 'role', '?')}] {getattr(m, 'content', '')}"
             for m in recent_history
         ) or "(无)"
+
+        model_hint = (
+            "【用户指定复用分析模型】已选择数据分析模型 "
+            f"`{selected_model_ref.save_name}`。请直接调用 "
+            "analyze_root_causes_catboost；工具会从 runtime context 安全加载权重，"
+            "忽略训练参数并对当前数据预测，不要重新训练模型。"
+            if selected_model_ref and selected_model_ref.category == "data_analysis"
+            else "（用户未选择复用分析模型；根因分析任务将训练并保存新模型。）"
+        )
 
         user_prompt = f"""
             你现在要执行工业数据分析任务。
@@ -122,6 +140,8 @@ class AnalysisAgent(BaseAgent):
 
                CSV画像：
                {csv_profile.model_dump_json(indent=2, ensure_ascii=False) if csv_profile else "None"}
+
+               {model_hint}
 
                请据此选择工具并输出结构化结果。
         """

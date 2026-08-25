@@ -33,8 +33,9 @@ export function CatBoostRootCauseCard({ chart }: { chart: CatBoostRootCauseChart
       title={column.title}
       badges={[
         { label: 'CatBoost' },
-        { label: `Train ${column.n_train}`, tone: 'info' },
-        { label: `Val ${column.n_validation} · Test ${column.n_test}` },
+        ...(column.mode === 'load'
+          ? [{ label: '已加载模型', tone: 'info' as const }, { label: `预测 ${column.n_predictions} 行` }]
+          : [{ label: `Train ${column.n_train}`, tone: 'info' as const }, { label: `Val ${column.n_validation} · Test ${column.n_test}` }]),
       ]}
     />
 
@@ -59,7 +60,21 @@ export function CatBoostRootCauseCard({ chart }: { chart: CatBoostRootCauseChart
       </div>
       <MetricRow label="验证集" values={column.validation_metrics} />
       <MetricRow label="测试集" values={column.test_metrics} />
+      {column.current_metrics && <MetricRow label="当前数据" values={column.current_metrics} />}
     </section>
+
+    {column.mode === 'load' && column.prediction_summary && <div className="mt-3 grid grid-cols-5 gap-2 rounded-xl border border-steel-200/80 bg-steel-50/40 p-2.5">
+      {([
+        ['预测行数', column.prediction_summary.count],
+        ['最小值', column.prediction_summary.min],
+        ['最大值', column.prediction_summary.max],
+        ['均值', column.prediction_summary.mean],
+        ['标准差', column.prediction_summary.std],
+      ] as const).map(([label, value]) => <div key={label} className="text-center">
+        <div className="text-[9px] text-steel-400">{label}</div>
+        <div className="mt-0.5 font-mono text-[10px] font-medium text-steel-700">{formatNumber(value)}</div>
+      </div>)}
+    </div>}
 
     <div className="mt-4 grid gap-4 lg:grid-cols-2">
       <section className="rounded-xl border border-steel-200/80 p-3">
@@ -86,8 +101,10 @@ export function CatBoostRootCauseCard({ chart }: { chart: CatBoostRootCauseChart
     </div>
 
     <Footer>
-      最佳迭代：{column.best_iteration ?? '—'}；切分方式：{chart.split_strategy === 'chronological' ? '按原始顺序' : '随机'}
-      {chart.split_ratios.length === 3 ? `（${chart.split_ratios.map((value) => `${Math.round(value * 100)}%`).join(' / ')}）` : ''}。
+      {column.mode === 'load'
+        ? `已加载训练模型并对当前数据完成预测${column.current_metrics ? '及指标评估' : ''}。`
+        : <>最佳迭代：{column.best_iteration ?? '—'}；切分方式：{chart.split_strategy === 'chronological' ? '按原始顺序' : '随机'}
+          {chart.split_ratios.length === 3 ? `（${chart.split_ratios.map((value) => `${Math.round(value * 100)}%`).join(' / ')}）` : ''}。</>}
       SHAP 表示模型预测贡献，不等同于已经证明的物理因果关系。
     </Footer>
   </Bubble>;

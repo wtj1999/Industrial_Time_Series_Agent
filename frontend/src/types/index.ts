@@ -547,8 +547,10 @@ export interface RegressionMetricBlock {
 
 export interface CatBoostRootCauseColumn {
   title: string;
+  mode: 'train' | 'load';
   validation_metrics: RegressionMetricBlock;
   test_metrics: RegressionMetricBlock;
+  current_metrics?: RegressionMetricBlock | null;
   feature_importance: { feature: string; importance: number }[];
   shap_summary: {
     feature: string;
@@ -561,12 +563,15 @@ export interface CatBoostRootCauseColumn {
   n_train: number;
   n_validation: number;
   n_test: number;
+  n_predictions: number;
+  prediction_summary?: { count: number; min: number; max: number; mean: number; std: number } | null;
 }
 
 export interface CatBoostRootCauseChart {
   chart_type: 'catboost_root_cause';
   tool_name: string;
   summary?: string | null;
+  mode: 'train' | 'load';
   active_column: string;
   columns: Record<string, CatBoostRootCauseColumn>;
   save_name?: string | null;
@@ -721,7 +726,7 @@ export interface UploadCsvInterruptData {
   message: string;
   hint?: string;
   /** True 时在 CSV 上传卡片内额外渲染「复用已训练模型」选择器。
-   *  后端仅在异常检测任务下置 true；其它任务保持 undefined 以维持
+   *  后端在分析、异常检测和预测任务下置 true；其它任务保持 undefined 以维持
    *  向后兼容（旧会话回放不会携带此字段）。 */
   allow_model?: boolean;
   /** 当前任务类型字符串（如 'anomaly_detection'），用于 UI 提示。

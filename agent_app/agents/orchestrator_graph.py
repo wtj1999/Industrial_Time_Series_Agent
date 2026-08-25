@@ -1085,9 +1085,9 @@ class OrchestratorAgent:
         )
 
     async def _node_await_csv_upload(self, state: SessionState):
-        # 异常检测与预测均可选择各自类别的已训练模型。
+        # 分析、异常检测与预测均可选择各自类别的已训练模型。
         allow_model = state.task_type in (
-            TaskType.ANOMALY_DETECTION, TaskType.PREDICTION
+            TaskType.ANALYSIS, TaskType.ANOMALY_DETECTION, TaskType.PREDICTION
         )
 
         uploaded = interrupt({
@@ -1217,6 +1217,7 @@ class OrchestratorAgent:
                 user_id=user_id,
                 dialogue_history=state.dialogue_history,
                 stream_writer=stream_writer,
+                selected_model_ref=state.selected_model_ref,
             )
 
             if isinstance(result, dict):

@@ -36,7 +36,7 @@ export function CsvUploadPanel({
   const [dragging, setDragging] = useState(false);
 
   // Optional reuse-model picker. Only rendered when the backend signals
-  // ``allow_model=true`` (anomaly-detection task). The choice is purely
+  // ``allow_model=true`` (analysis/anomaly/prediction task). The choice is purely
   // additive — it does NOT replace the dataset selection above; the user
   // must always pick a file (new upload or history entry) to proceed.
   const [pickedModel, setPickedModel] = useState<ModelEntry | null>(null);

@@ -445,8 +445,10 @@ def _build_catboost_root_cause(envelope: Dict[str, Any]) -> Optional[Dict[str, A
         shap_summary = entry.get("shap_summary") or []
         columns[str(target)] = {
             "title": entry.get("title") or f"{target} 根因分析",
+            "mode": entry.get("mode") or metrics.get("mode") or "train",
             "validation_metrics": json_safe(entry.get("validation_metrics") or {}),
             "test_metrics": json_safe(entry.get("test_metrics") or {}),
+            "current_metrics": json_safe(entry.get("current_metrics")),
             "feature_importance": json_safe(importance),
             "shap_summary": json_safe(shap_summary),
             "training_history": json_safe(entry.get("training_history") or []),
@@ -454,6 +456,8 @@ def _build_catboost_root_cause(envelope: Dict[str, Any]) -> Optional[Dict[str, A
             "n_train": int(entry.get("n_train") or 0),
             "n_validation": int(entry.get("n_validation") or 0),
             "n_test": int(entry.get("n_test") or 0),
+            "n_predictions": int(entry.get("n_predictions") or 0),
+            "prediction_summary": json_safe(entry.get("prediction_summary")),
         }
     if not columns:
         return None
@@ -463,6 +467,7 @@ def _build_catboost_root_cause(envelope: Dict[str, Any]) -> Optional[Dict[str, A
         "chart_type": "catboost_root_cause",
         "tool_name": "analyze_root_causes_catboost",
         "summary": envelope.get("summary"),
+        "mode": metrics.get("mode") or envelope.get("mode") or "train",
         "active_column": active_column,
         "columns": columns,
         "save_name": envelope.get("save_name"),

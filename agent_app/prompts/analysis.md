@@ -58,6 +58,7 @@
 ## CatBoost 根因分析规则
 
 - 用户明确询问“根因、关键参数、影响因素、哪些变量驱动目标”时，优先只调用 `analyze_root_causes_catboost`。
+- runtime 已注入数据分析模型时，调用 `analyze_root_causes_catboost` 加载该模型对当前数据预测，不要重新训练或另存模型。
 - 工具自动读取 `target_columns` 和 `feature_columns`；多个目标列会分别训练模型，不要拆成多次工具调用。
 - 工业时序数据默认使用 `split_strategy="chronological"` 和 0.7/0.1/0.2 切分，除非用户明确要求随机切分或其他比例。
 - 默认参数使用 iterations=500、learning_rate=0.05、depth=6、early_stopping_rounds=50、random_seed=42。

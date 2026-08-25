@@ -27,8 +27,8 @@ class Settings(BaseModel):
     debug: bool = True
 
     # LLM Configuration (flat format)
-    MODEL_NAME: str = Field(default=os.getenv("MODEL_NAME", "Qwen3-235B-A22B"), description="Model name")
-    BASE_URL: Optional[str] = Field(default=os.getenv("BASE_URL", "http://10.2.131.172:8000/v1"), description="Base URL for API")
+    MODEL_NAME: str = Field(default=os.getenv("MODEL_NAME", "DeepSeek-V4-Flash"), description="Model name")
+    BASE_URL: Optional[str] = Field(default=os.getenv("BASE_URL", "http://10.2.131.184:3304/v1"), description="Base URL for API")
     API_KEY: str = Field(default=os.getenv("API_KEY", "EMPTY"), description="API key")
     TEMPERATURE: float = Field(default=float(os.getenv("TEMPERATURE", "0.7")), description="Temperature for generation")
     TIMEOUT: int = Field(default=int(os.getenv("TIMEOUT", "600")), description="Request timeout in seconds")

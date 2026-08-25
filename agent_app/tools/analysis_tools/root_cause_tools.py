@@ -43,6 +43,22 @@ def _artifact_path(runtime: ToolRuntime, save_name: Optional[str]) -> Path:
     return folder / f"{name}.joblib"
 
 
+def _selected_artifact_path(runtime: ToolRuntime) -> Optional[Path]:
+    """Resolve a selected model from trusted runtime coordinates."""
+    ctx = runtime.context
+    save_name = getattr(ctx, "model_save_name", None)
+    if not save_name:
+        return None
+    category = getattr(ctx, "model_category", None)
+    if category and category != "data_analysis":
+        raise ValueError("所选模型不是数据分析模型")
+    user = _safe_segment(getattr(ctx, "user_id", None), "anonymous")
+    thread = _safe_segment(getattr(ctx, "model_thread_id", None), "default")
+    source = _safe_segment(getattr(ctx, "model_source_file", None), "dataset")
+    name = _safe_segment(save_name, "analysis_model")
+    return ANALYSIS_MODEL_ROOT / user / thread / f"{source}_analysis" / f"{name}.joblib"
+
+
 def _progress_emitter(injected_writer=None):
     operation_id = uuid.uuid4().hex
     writer = injected_writer
@@ -147,12 +163,17 @@ def _metric_block(y_true: np.ndarray, y_pred: np.ndarray) -> Dict[str, Optional[
     }
 
 
-def _prepare_features(frame: pd.DataFrame, feature_columns: List[str]) -> Tuple[pd.DataFrame, List[int]]:
+def _prepare_features(
+    frame: pd.DataFrame,
+    feature_columns: List[str],
+    categorical_columns: Optional[List[str]] = None,
+) -> Tuple[pd.DataFrame, List[int]]:
     X = frame[feature_columns].copy()
     categorical_indices: List[int] = []
+    forced_categorical = set(categorical_columns or [])
     for idx, column in enumerate(feature_columns):
         series = X[column]
-        if pd.api.types.is_numeric_dtype(series):
+        if column not in forced_categorical and pd.api.types.is_numeric_dtype(series):
             numeric = pd.to_numeric(series, errors="coerce")
             median = numeric.median()
             X[column] = numeric.fillna(float(median) if pd.notna(median) else 0.0)
@@ -160,6 +181,55 @@ def _prepare_features(frame: pd.DataFrame, feature_columns: List[str]) -> Tuple[
             categorical_indices.append(idx)
             X[column] = series.astype("string").fillna("<MISSING>").astype(str)
     return X, categorical_indices
+
+
+def _model_explanations(
+    model: Any,
+    X: pd.DataFrame,
+    features: List[str],
+    cat_indices: List[int],
+    Pool: Any,
+    top_n_features: int,
+    shap_sample_size: int,
+    rng: np.random.RandomState,
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    feature_importance = np.asarray(model.get_feature_importance(type="FeatureImportance"), dtype=float)
+    order = np.argsort(np.abs(feature_importance))[::-1][: min(top_n_features, len(features))]
+    shap_source = X.reset_index(drop=True)
+    effective_samples = min(int(shap_sample_size), 300)
+    if len(shap_source) > effective_samples:
+        positions = np.sort(rng.choice(len(shap_source), effective_samples, replace=False))
+        shap_source = shap_source.iloc[positions].reset_index(drop=True)
+    shap_values = np.asarray(
+        model.get_feature_importance(Pool(shap_source, cat_features=cat_indices), type="ShapValues"),
+        dtype=float,
+    )[:, : len(features)]
+    mean_abs_shap = np.mean(np.abs(shap_values), axis=0)
+    shap_summary: List[Dict[str, Any]] = []
+    for feature_index in order[: min(10, len(order))]:
+        column = features[int(feature_index)]
+        raw_values = shap_source[column].tolist()
+        labels = [str(value) for value in raw_values]
+        if int(feature_index) in cat_indices:
+            mapping = {label: idx for idx, label in enumerate(sorted(set(labels)))}
+            color_values = [float(mapping[label]) for label in labels]
+        else:
+            color_values = [float(value) for value in raw_values]
+        shap_summary.append({
+            "feature": column,
+            "importance": float(feature_importance[feature_index]),
+            "mean_abs_shap": float(mean_abs_shap[feature_index]),
+            "points": [{
+                "shap_value": float(shap_values[row_index, feature_index]),
+                "feature_value": color_values[row_index],
+                "display_value": labels[row_index],
+            } for row_index in range(len(shap_source))],
+        })
+    importance = [
+        {"feature": features[int(i)], "importance": float(feature_importance[i])}
+        for i in order
+    ]
+    return importance, shap_summary
 
 
 def _split_positions(n: int, train_ratio: float, validation_ratio: float) -> Tuple[slice, slice, slice]:
@@ -214,6 +284,104 @@ def analyze_root_causes_catboost(
     except ImportError as exc:
         raise ImportError("根因分析需要 catboost，请先安装项目 requirements.txt 中的 catboost 依赖") from exc
 
+    ctx = runtime.context
+    df: pd.DataFrame = ctx.df
+    selected_path = _selected_artifact_path(runtime)
+    if selected_path is not None:
+        if not selected_path.is_file():
+            raise FileNotFoundError(f"所选数据分析模型不存在：{selected_path.name}")
+        emit = _progress_emitter(getattr(ctx, "stream_writer", None))
+        emit("preparing", percent=5.0, message="正在加载已训练的数据分析模型")
+        try:
+            bundle = joblib.load(selected_path)
+        except Exception as exc:
+            emit("failed", message=f"数据分析模型加载失败：{exc}")
+            raise ValueError(f"无法加载所选数据分析模型：{exc}") from exc
+        if (
+            not isinstance(bundle, dict)
+            or bundle.get("_analysis_model_version") != ANALYSIS_MODEL_VERSION
+            or not isinstance(bundle.get("models"), dict)
+            or not isinstance(bundle.get("metadata"), dict)
+        ):
+            raise ValueError("所选文件不是兼容的数据分析模型")
+        metadata = bundle["metadata"]
+        models = bundle["models"]
+        features = list(metadata.get("feature_columns") or [])
+        missing = [column for column in features if column not in df.columns]
+        if not features or missing:
+            detail = f"，缺少：{', '.join(missing)}" if missing else ""
+            raise ValueError(f"当前数据不满足模型所需特征列{detail}")
+        categorical_columns = list(metadata.get("categorical_columns") or [])
+        X, cat_indices = _prepare_features(df, features, categorical_columns)
+        rng = np.random.RandomState(int(random_seed))
+        per_target: Dict[str, Any] = {}
+        strongest: List[str] = []
+        emit("evaluating", percent=30.0, message="正在预测并计算当前数据的 TreeSHAP")
+        for target, model in models.items():
+            predictions = np.asarray(model.predict(X), dtype=float)
+            importance, shap_summary = _model_explanations(
+                model, X, features, cat_indices, Pool,
+                top_n_features, shap_sample_size, rng,
+            )
+            current_metrics = None
+            if target in df.columns:
+                actual = pd.to_numeric(df[target], errors="coerce").to_numpy(dtype=float)
+                valid = np.isfinite(actual) & np.isfinite(predictions)
+                if valid.any():
+                    current_metrics = _metric_block(actual[valid], predictions[valid])
+            saved_target = (metadata.get("targets") or {}).get(target, {})
+            per_target[target] = {
+                "title": f"{target} 根因分析预测",
+                "mode": "load",
+                "validation_metrics": saved_target.get("validation_metrics"),
+                "test_metrics": saved_target.get("test_metrics"),
+                "current_metrics": current_metrics,
+                "feature_importance": importance,
+                "shap_summary": shap_summary,
+                "training_history": [],
+                "best_iteration": saved_target.get("best_iteration"),
+                "n_train": saved_target.get("n_train", 0),
+                "n_validation": saved_target.get("n_validation", 0),
+                "n_test": saved_target.get("n_test", 0),
+                "n_predictions": len(predictions),
+                "prediction_summary": {
+                    "count": len(predictions),
+                    "min": float(np.min(predictions)),
+                    "max": float(np.max(predictions)),
+                    "mean": float(np.mean(predictions)),
+                    "std": float(np.std(predictions)),
+                },
+                "prediction_preview": [
+                    {"row": int(i) + 1, "prediction": float(value)}
+                    for i, value in enumerate(predictions[:20])
+                ],
+            }
+            if importance:
+                strongest.append(f"{target} 的首要影响特征为 {importance[0]['feature']}")
+        if not per_target:
+            raise ValueError("所选数据分析模型中没有可用于预测的目标模型")
+        targets = list(per_target)
+        emit("completed", percent=100.0, message="已完成模型加载、预测与解释")
+        return make_envelope(
+            tool_name="catboost_root_cause",
+            summary=f"已加载训练模型并完成 {len(df)} 行数据、{len(targets)} 个目标的预测。",
+            key_findings=strongest,
+            metrics={
+                "mode": "load",
+                "active_column": targets[0],
+                "per_target": per_target,
+                "feature_columns": features,
+            },
+            recommendations=["结合 SHAP 方向与工艺机理复核关键参数，不将模型关联性直接解释为确定因果关系。"],
+            notes=["当前数据包含目标列时会同时计算预测指标；不包含目标列时仅输出预测与解释结果。"],
+            extra={
+                "mode": "load",
+                "model_path": str(selected_path),
+                "save_name": selected_path.stem,
+                "model_metadata": metadata,
+            },
+        )
+
     ratios = [float(train_ratio), float(validation_ratio), float(test_ratio)]
     if any(value <= 0 for value in ratios) or not math.isclose(sum(ratios), 1.0, abs_tol=1e-8):
         raise ValueError("train_ratio、validation_ratio、test_ratio 必须均大于 0 且总和为 1")
@@ -224,8 +392,6 @@ def analyze_root_causes_catboost(
     if top_n_features < 1 or shap_sample_size < 1:
         raise ValueError("top_n_features 和 shap_sample_size 必须为正整数")
 
-    ctx = runtime.context
-    df: pd.DataFrame = ctx.df
     targets = [column for column in (ctx.target_columns or []) if column in df.columns]
     features = [
         column for column in (ctx.feature_columns or [])
@@ -241,6 +407,7 @@ def analyze_root_causes_catboost(
     per_target: Dict[str, Any] = {}
     models: Dict[str, Any] = {}
     metadata_targets: Dict[str, Any] = {}
+    categorical_columns: List[str] = []
     rng = np.random.RandomState(random_seed)
 
     for target_index, target in enumerate(targets):
@@ -257,6 +424,7 @@ def analyze_root_causes_catboost(
             target_values = target_values.iloc[order].reset_index(drop=True)
 
         X, cat_indices = _prepare_features(frame, features)
+        categorical_columns = [features[index] for index in cat_indices]
         train_slice, val_slice, test_slice = _split_positions(len(X), train_ratio, validation_ratio)
         X_train, y_train = X.iloc[train_slice], target_values.iloc[train_slice]
         X_val, y_val = X.iloc[val_slice], target_values.iloc[val_slice]
@@ -343,6 +511,7 @@ def analyze_root_causes_catboost(
         best_iteration = int(model.get_best_iteration()) if model.get_best_iteration() is not None else None
         per_target[target] = {
             "title": f"{target} 根因分析",
+            "mode": "train",
             "validation_metrics": _metric_block(y_val.to_numpy(), val_pred),
             "test_metrics": _metric_block(y_test.to_numpy(), test_pred),
             "feature_importance": [
@@ -361,6 +530,9 @@ def analyze_root_causes_catboost(
             "best_iteration": best_iteration,
             "validation_metrics": per_target[target]["validation_metrics"],
             "test_metrics": per_target[target]["test_metrics"],
+            "n_train": len(X_train),
+            "n_validation": len(X_val),
+            "n_test": len(X_test),
         }
 
     emit("saving", percent=96.0, message="正在持久化 CatBoost 分析模型")
@@ -373,6 +545,7 @@ def analyze_root_causes_catboost(
         "save_name": artifact_path.stem,
         "target_columns": targets,
         "feature_columns": features,
+        "categorical_columns": categorical_columns,
         "n_targets": len(targets),
         "n_features": len(features),
         "n_samples": len(df),
@@ -416,6 +589,7 @@ def analyze_root_causes_catboost(
         summary=f"已针对 {len(targets)} 个目标列分别训练 CatBoost 根因分析模型。",
         key_findings=strongest,
         metrics={
+            "mode": "train",
             "active_column": targets[0],
             "per_target": per_target,
             "feature_columns": features,
@@ -425,6 +599,7 @@ def analyze_root_causes_catboost(
         recommendations=["结合 SHAP 方向与工艺机理复核关键参数，不将模型关联性直接解释为确定因果关系。"],
         notes=["默认按原始行顺序切分以避免时序数据未来信息泄漏。"],
         extra={
+            "mode": "train",
             "model_path": str(artifact_path),
             "save_name": artifact_path.stem,
             "model_metadata": metadata,

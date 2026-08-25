@@ -832,7 +832,7 @@ class TaskSpec(BaseTaskSpec):
 
 
 class ModelRef(BaseModel):
-    """A user-selected reference to a previously trained anomaly detector.
+    """A user-selected reference to a previously trained model.
 
     Populated in ``SessionState.selected_model_ref`` when the user picks an
     existing model from the CSV-upload breakpoint's model picker. The
@@ -888,7 +888,7 @@ class SessionState(BaseModel):
         default=None,
         description=(
             "用户在 CSV 上传断点显式选择复用的已训练模型引用。"
-            "在异常检测或预测任务下可能非空；为 None 时由 LLM 自由决策"
+            "在分析、异常检测或预测任务下可能非空；为 None 时由 LLM 自由决策"
             "（训练新模型或复用当前作用域内的模型）。"
             "跨会话复用时 thread_id / source_file 指向模型原始作用域，"
             "user_id 始终绑定当前用户，前端无法伪造。"

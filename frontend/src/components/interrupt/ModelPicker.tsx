@@ -1,8 +1,8 @@
 /**
  * ModelPicker — collapsible single-select list of the user's persisted
- * anomaly-detection models. Rendered inside CsvUploadPanel when the
- * backend interrupt payload sets ``allow_model = true`` (anomaly-
- * detection task only).
+ * persisted models for the current task type. Rendered inside
+ * CsvUploadPanel when the backend interrupt payload sets
+ * ``allow_model = true``.
  *
  * Selection is OPTIONAL: clicking a row selects it, clicking it again
  * deselects it (clearing the choice). The parent form still requires a
@@ -51,7 +51,11 @@ export function ModelPicker({ selected, onPick, disabled, taskType }: ModelPicke
     setError(null);
     try {
       const res = await api.listModels();
-      const expected = taskType === 'prediction' ? 'prediction' : 'anomaly_detection';
+      const expected = taskType === 'prediction'
+        ? 'prediction'
+        : taskType === 'analysis'
+          ? 'analysis'
+          : 'anomaly_detection';
       setModels((res.models ?? []).filter((model) =>
         (model.task_type ?? 'anomaly_detection') === expected
       ));
@@ -238,7 +242,11 @@ export function ModelPicker({ selected, onPick, disabled, taskType }: ModelPicke
               <p className="truncate text-[11px] text-violet-600/80">
                 {selected.source_file
                   ? `基于数据集 ${selected.source_file}`
-                  : '将复用此模型打分'}
+                  : taskType === 'analysis'
+                    ? '将复用此模型预测并分析'
+                    : taskType === 'prediction'
+                      ? '将复用此模型预测'
+                      : '将复用此模型打分'}
               </p>
             </div>
           </div>

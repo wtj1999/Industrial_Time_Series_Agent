@@ -32,7 +32,7 @@
 | 统计极值 | `detect_univariate_outliers` / `detect_multivariate_outliers` / `analyze_extreme_values` |
 | 稳定性 / SPC | `analyze_stability` / `analyze_process_capability`(需 USL/LSL) / `analyze_control_chart` |
 | 分组对比 | `compare_group_statistics` / `compare_group_distributions` / `compare_two_groups`(需 group_column) |
-| 模型化根因分析 | `analyze_root_causes_catboost`：用 feature_columns 分别预测每个 target_column，输出验证/测试指标、特征重要性与 TreeSHAP，并持久化模型 |
+| 模型化根因分析 | `analyze_root_causes_catboost`：用 feature_columns 分别预测每个 target_column，输出验证/测试指标、特征重要性与 TreeSHAP，并持久化模型；runtime 注入已训练模型时直接加载并预测当前数据 |
 
 ## 输入 / 输出
 
