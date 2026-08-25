@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, LoaderCircle } from 'lucide-react';
-import type { AnomalyTrainingProgress, PredictionFinetuningProgress } from '@/types';
+import type { AnalysisTrainingProgress, AnomalyTrainingProgress, PredictionFinetuningProgress } from '@/types';
 import { cn } from '@/utils/cn';
 
-type TrainingProgress = AnomalyTrainingProgress | PredictionFinetuningProgress;
+type TrainingProgress = AnomalyTrainingProgress | PredictionFinetuningProgress | AnalysisTrainingProgress;
 
 const stageLabels: Record<TrainingProgress['stage'], string> = {
   preparing: '准备训练数据与模型',
   training: '训练模型',
-  evaluating: '回测基础模型与微调模型',
+  evaluating: '评估模型与生成解释',
   scoring: '计算异常分数',
   saving: '保存模型与元数据',
   completed: '执行完成',
@@ -134,6 +134,8 @@ const metricLabels: Record<string, string> = {
   learning_rate: 'LR',
   epoch_seconds: 'Time',
   throughput_per_second: 'Throughput',
+  train_rmse: 'Train RMSE',
+  validation_rmse: 'Val RMSE',
 };
 
 function metricLabel(name: string): string {

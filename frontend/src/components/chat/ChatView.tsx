@@ -12,12 +12,13 @@ import { DecompositionChartCard } from '@/components/analysis_chart/Decompositio
 import { ControlChartCard } from '@/components/analysis_chart/ControlChartCard';
 import { ChangePointChartCard } from '@/components/analysis_chart/ChangePointChartCard';
 import { AcfChartCard } from '@/components/analysis_chart/AcfChartCard';
+import { CatBoostRootCauseCard } from '@/components/analysis_chart/CatBoostRootCauseCard';
 import { ForecastChartCard } from '@/components/forecast_chart/ForecastChartCard';
 import { BacktestChartCard } from '@/components/forecast_chart/BacktestChartCard';
 import type { AnalysisChart, PredictionChart } from '@/types';
 import { cn } from '@/utils/cn';
 
-/** Dispatch the 6 Tier-1 analysis-chart variants on ``chart_type``. */
+/** Dispatch analysis-chart variants on ``chart_type``. */
 function AnalysisChartCard({ chart }: { chart: AnalysisChart }) {
   switch (chart.chart_type) {
     case 'correlation_heatmap':
@@ -32,6 +33,8 @@ function AnalysisChartCard({ chart }: { chart: AnalysisChart }) {
       return <ChangePointChartCard chart={chart} />;
     case 'acf':
       return <AcfChartCard chart={chart} />;
+    case 'catboost_root_cause':
+      return <CatBoostRootCauseCard chart={chart} />;
     default:
       // Exhaustiveness guard — should never fire for a valid Tier-1 payload.
       return null;
@@ -116,6 +119,15 @@ export function ChatView({ showEmptyState = true }: { showEmptyState?: boolean }
               );
             }
             if (item.kind === 'prediction_finetuning_progress') {
+              return (
+                <TrainingProgressCard
+                  key={item.id}
+                  progress={item.progress}
+                  history={item.history}
+                />
+              );
+            }
+            if (item.kind === 'analysis_training_progress') {
               return (
                 <TrainingProgressCard
                   key={item.id}

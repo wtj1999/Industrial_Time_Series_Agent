@@ -1,10 +1,10 @@
 /**
- * "我的模型" — full-page list of every persisted anomaly-detection
- * model across all sessions. Backed by ``GET /api/models``.
+ * "我的模型" — data-analysis, anomaly-detection and prediction models
+ * persisted across all sessions. Backed by ``GET /api/models``.
  *
- * Anomaly cards surface detector statistics; prediction cards surface
- * foundation-model and fine-tuning metadata. Remote prediction weights
- * are represented by local JSON indexes, so index-file size is omitted.
+ * Cards adapt their metadata to each category. Remote prediction weights
+ * are represented by local JSON indexes, while analysis/anomaly models
+ * are stored as local joblib envelopes.
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -17,6 +17,7 @@ import {
   Cpu,
   Database,
   Layers,
+  GitBranch,
   RefreshCw,
   Target,
   Train,
@@ -30,12 +31,18 @@ import {
   shortId,
 } from '@/utils/format';
 
-type ModelCategory = 'anomaly_detection' | 'time_series_prediction';
+type ModelCategory = 'data_analysis' | 'anomaly_detection' | 'time_series_prediction';
 
 const CATEGORY_META: Record<
   ModelCategory,
-  { title: string; description: string; accent: 'violet' | 'blue'; icon: typeof Activity }
+  { title: string; description: string; accent: 'emerald' | 'violet' | 'blue'; icon: typeof Activity }
 > = {
+  data_analysis: {
+    title: '数据分析',
+    description: '挖掘设备、工艺与传感器数据中的规律、关系与关键影响因素',
+    accent: 'emerald',
+    icon: GitBranch,
+  },
   anomaly_detection: {
     title: '异常检测',
     description: '识别设备、工艺与传感器数据中的异常模式',
@@ -59,6 +66,9 @@ export function MyModelsView({ onBack }: { onBack: () => void }) {
 
   const groupedModels = useMemo(
     () => ({
+      data_analysis: models.filter(
+        (model) => getModelCategory(model) === 'data_analysis',
+      ),
       anomaly_detection: models.filter(
         (model) => getModelCategory(model) === 'anomaly_detection',
       ),
@@ -173,6 +183,10 @@ function getModelCategory(model: ModelEntry): ModelCategory {
     .join(' ')
     .toLowerCase();
 
+  if (marker.includes('data_analysis') || marker.includes('catboost') || model.task_type === 'analysis') {
+    return 'data_analysis';
+  }
+
   return marker.includes('prediction') || marker.includes('forecast')
     ? 'time_series_prediction'
     : 'anomaly_detection';
@@ -199,12 +213,18 @@ function CategoryGrid({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {(Object.keys(CATEGORY_META) as ModelCategory[]).map((category) => {
           const meta = CATEGORY_META[category];
           const Icon = meta.icon;
           const count = groupedModels[category].length;
-          const isViolet = meta.accent === 'violet';
+          const cardClasses = meta.accent === 'emerald'
+            ? 'border-emerald-200/80 hover:border-emerald-400 hover:shadow-soft focus-visible:ring-emerald-500'
+            : meta.accent === 'violet'
+              ? 'border-violet-200/80 hover:border-violet-400 hover:shadow-soft focus-visible:ring-violet-500'
+              : 'border-blue-200/80 hover:border-blue-400 hover:shadow-soft focus-visible:ring-blue-500';
+          const orbClass = meta.accent === 'emerald' ? 'bg-emerald-50' : meta.accent === 'violet' ? 'bg-violet-50' : 'bg-blue-50';
+          const iconClass = meta.accent === 'emerald' ? 'bg-emerald-100 text-emerald-700' : meta.accent === 'violet' ? 'bg-violet-100 text-violet-700' : 'bg-blue-100 text-blue-700';
 
           return (
             <button
@@ -214,16 +234,14 @@ function CategoryGrid({
               className={cn(
                 'group relative min-h-[190px] overflow-hidden rounded-2xl border bg-white p-5 text-left shadow-sm transition-all',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                isViolet
-                  ? 'border-violet-200/80 hover:border-violet-400 hover:shadow-soft focus-visible:ring-violet-500'
-                  : 'border-blue-200/80 hover:border-blue-400 hover:shadow-soft focus-visible:ring-blue-500',
+                cardClasses,
               )}
             >
               <span
                 aria-hidden="true"
                 className={cn(
                   'absolute -right-10 -top-12 h-36 w-36 rounded-full opacity-60 transition-transform duration-300 group-hover:scale-110',
-                  isViolet ? 'bg-violet-50' : 'bg-blue-50',
+                  orbClass,
                 )}
               />
               <div className="relative flex h-full flex-col">
@@ -231,9 +249,7 @@ function CategoryGrid({
                   <span
                     className={cn(
                       'flex h-11 w-11 items-center justify-center rounded-xl',
-                      isViolet
-                        ? 'bg-violet-100 text-violet-700'
-                        : 'bg-blue-100 text-blue-700',
+                      iconClass,
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -259,8 +275,9 @@ function CategoryGrid({
 function ModelCard({ m }: { m: ModelEntry }) {
   const category = getModelCategory(m);
   const isPrediction = category === 'time_series_prediction';
-  const detector = isPrediction
-    ? (m.model_type || '时序预测模型')
+  const isAnalysis = category === 'data_analysis';
+  const detector = isPrediction || isAnalysis
+    ? (m.model_type || (isAnalysis ? '数据分析模型' : '时序预测模型'))
     : (m.detector_name || m.model_class || '未知检测器');
   const trainedAt = m.trained_at || m.saved_at;
   const isTransductive = m.transductive === true;
@@ -270,12 +287,12 @@ function ModelCard({ m }: { m: ModelEntry }) {
     <div
       className={cn(
         'group relative flex flex-col rounded-2xl border border-steel-200/80 bg-white p-4 shadow-sm transition-all',
-        'hover:border-violet-300 hover:shadow-soft',
+        isAnalysis ? 'hover:border-emerald-300 hover:shadow-soft' : 'hover:border-violet-300 hover:shadow-soft',
       )}
     >
       {/* Header */}
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+        <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', isAnalysis ? 'bg-emerald-100 text-emerald-700' : 'bg-violet-100 text-violet-700')}>
           <Cpu className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
@@ -295,7 +312,7 @@ function ModelCard({ m }: { m: ModelEntry }) {
             </p>
           )}
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <span className="rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[9px] font-bold tracking-wide text-violet-700">
+            <span className={cn('rounded-full border px-1.5 py-0.5 text-[9px] font-bold tracking-wide', isAnalysis ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-violet-200 bg-violet-50 text-violet-700')}>
               {detector}
             </span>
             {isTransductive && (
@@ -339,6 +356,11 @@ function ModelCard({ m }: { m: ModelEntry }) {
                 : '—'}
             />
           </>
+        ) : isAnalysis ? (
+          <>
+            <Stat icon={Target} label="目标列" value={m.n_targets != null ? String(m.n_targets) : '—'} />
+            <Stat icon={Train} label="迭代次数" value={m.training?.iterations != null ? m.training.iterations.toLocaleString() : '—'} />
+          </>
         ) : (
           <>
             <Stat
@@ -369,6 +391,15 @@ function ModelCard({ m }: { m: ModelEntry }) {
         </div>
       )}
 
+      {isAnalysis && (
+        <div className="mt-2 flex items-center justify-between rounded-lg border border-emerald-100 bg-emerald-50/50 px-2.5 py-2 text-[10px]">
+          <span className="text-steel-500">数据切分</span>
+          <span className="font-medium text-emerald-700">
+            {m.split?.strategy === 'chronological' ? '按顺序' : '随机'} · {Math.round((m.split?.train_ratio ?? 0.7) * 100)} / {Math.round((m.split?.validation_ratio ?? 0.1) * 100)} / {Math.round((m.split?.test_ratio ?? 0.2) * 100)}
+          </span>
+        </div>
+      )}
+
       {/* Feature columns */}
       {m.feature_columns && m.feature_columns.length > 0 && (
         <div className="mt-3 border-t border-steel-100 pt-2.5">
@@ -390,6 +421,12 @@ function ModelCard({ m }: { m: ModelEntry }) {
               </span>
             )}
           </div>
+        </div>
+      )}
+
+      {isAnalysis && m.target_columns && m.target_columns.length > 0 && (
+        <div className="mt-2 text-[10px] text-steel-500">
+          预测目标：<span className="text-steel-700">{m.target_columns.join('、')}</span>
         </div>
       )}
 

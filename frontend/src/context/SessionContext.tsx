@@ -32,6 +32,7 @@ import type {
   AnomalyChart,
   AnomalyTrainingProgress,
   PredictionFinetuningProgress,
+  AnalysisTrainingProgress,
   AnalysisChart,
   CompletedEvent,
   CSVPreview,
@@ -62,6 +63,12 @@ export type ConversationItem =
       id: string;
       progress: PredictionFinetuningProgress;
       history: PredictionFinetuningProgress[];
+    }
+  | {
+      kind: 'analysis_training_progress';
+      id: string;
+      progress: AnalysisTrainingProgress;
+      history: AnalysisTrainingProgress[];
     }
   | { kind: 'analysis_chart'; id: string; chart: AnalysisChart }
   | { kind: 'prediction_chart'; id: string; chart: PredictionChart }
@@ -447,6 +454,30 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           });
           break;
         }
+        case 'analysis_training_progress': {
+          const progress = ev.data;
+          setItems((prev) => {
+            const index = prev.findIndex(
+              (item) => item.kind === 'analysis_training_progress' &&
+                item.progress.operation_id === progress.operation_id,
+            );
+            if (index < 0) {
+              return [...prev, {
+                kind: 'analysis_training_progress' as const,
+                id: `analysis-training-${progress.operation_id}`,
+                progress,
+                history: [progress],
+              }];
+            }
+            const next = [...prev];
+            const current = next[index];
+            if (current.kind === 'analysis_training_progress') {
+              next[index] = { ...current, progress, history: [...current.history, progress] };
+            }
+            return next;
+          });
+          break;
+        }
         case 'interrupt': {
           const payload = ev.data;
           pendingRef.current = null;
@@ -560,6 +591,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         ),
         onPredictionFinetuningProgress: (p) => handleEvent(
           { type: 'prediction_finetuning_progress', data: p }, assistantId,
+        ),
+        onAnalysisTrainingProgress: (p) => handleEvent(
+          { type: 'analysis_training_progress', data: p }, assistantId,
         ),
         onInterrupt: (ev) => handleEvent(ev as InterruptEvent, assistantId),
         onCsvPreview: (p) => handleEvent({ type: 'csv_preview', data: p }, assistantId),

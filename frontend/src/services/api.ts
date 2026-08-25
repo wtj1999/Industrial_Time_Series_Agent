@@ -248,6 +248,7 @@ export interface QueryCallbacks {
   onUpdate?: (data: Record<string, unknown>) => void;
   onAnomalyTrainingProgress?: (progress: import('@/types').AnomalyTrainingProgress) => void;
   onPredictionFinetuningProgress?: (progress: import('@/types').PredictionFinetuningProgress) => void;
+  onAnalysisTrainingProgress?: (progress: import('@/types').AnalysisTrainingProgress) => void;
   onInterrupt?: (data: StreamEvent) => void;
   onCompleted?: (data: Record<string, unknown>) => void;
   /** Fired the moment the profiling node finishes building the CSV preview. */
@@ -413,6 +414,9 @@ function dispatchEvent(evt: StreamEvent, cb: QueryCallbacks): void {
       break;
     case 'prediction_finetuning_progress':
       cb.onPredictionFinetuningProgress?.(evt.data);
+      break;
+    case 'analysis_training_progress':
+      cb.onAnalysisTrainingProgress?.(evt.data);
       break;
     case 'interrupt':
       cb.onInterrupt?.(evt);

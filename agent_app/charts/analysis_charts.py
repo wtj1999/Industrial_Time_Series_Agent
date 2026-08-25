@@ -13,7 +13,7 @@ The frontend dispatches on ``chart_type`` via a registry (see
 2. register it in :data:`_CHART_BUILDERS`
 3. add a TS type + a React component on the frontend
 
-Currently covers Tier-1 (6 charts):
+Currently covers Tier-1 charts plus model-based root-cause analysis:
 
 - ``correlation_heatmap``  ← analyze_correlation_matrix
 - ``histogram``            ← analyze_histogram
@@ -21,6 +21,7 @@ Currently covers Tier-1 (6 charts):
 - ``control_chart``        ← analyze_control_chart
 - ``changepoint``          ← detect_mean_change_points
 - ``acf``                  ← analyze_autocorrelation
+- ``catboost_root_cause``  ← analyze_root_causes_catboost
 
 Multi-column contract
 ---------------------
@@ -432,6 +433,44 @@ def _build_acf(envelope: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     }
 
 
+def _build_catboost_root_cause(envelope: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """CatBoost root-cause result → metrics + importance + SHAP card."""
+    metrics = envelope.get("metrics") or {}
+    per_target = metrics.get("per_target") or {}
+    columns: Dict[str, Dict[str, Any]] = {}
+    for target, entry in per_target.items():
+        if not isinstance(entry, dict):
+            continue
+        importance = entry.get("feature_importance") or []
+        shap_summary = entry.get("shap_summary") or []
+        columns[str(target)] = {
+            "title": entry.get("title") or f"{target} 根因分析",
+            "validation_metrics": json_safe(entry.get("validation_metrics") or {}),
+            "test_metrics": json_safe(entry.get("test_metrics") or {}),
+            "feature_importance": json_safe(importance),
+            "shap_summary": json_safe(shap_summary),
+            "training_history": json_safe(entry.get("training_history") or []),
+            "best_iteration": json_safe(entry.get("best_iteration")),
+            "n_train": int(entry.get("n_train") or 0),
+            "n_validation": int(entry.get("n_validation") or 0),
+            "n_test": int(entry.get("n_test") or 0),
+        }
+    if not columns:
+        return None
+    requested_active = metrics.get("active_column")
+    active_column = requested_active if requested_active in columns else next(iter(columns))
+    return {
+        "chart_type": "catboost_root_cause",
+        "tool_name": "analyze_root_causes_catboost",
+        "summary": envelope.get("summary"),
+        "active_column": active_column,
+        "columns": columns,
+        "save_name": envelope.get("save_name"),
+        "split_strategy": metrics.get("split_strategy"),
+        "split_ratios": json_safe(metrics.get("split_ratios") or []),
+    }
+
+
 # ---------------------------------------------------------------------- #
 # Builder registry — placed AFTER the builders so we can reference the
 # functions directly instead of going through ``globals()[name]``.
@@ -444,4 +483,5 @@ _CHART_BUILDERS = {
     "control_chart": _build_control_chart,
     "mean_change_point": _build_changepoint,
     "autocorrelation": _build_acf,
+    "catboost_root_cause": _build_catboost_root_cause,
 }

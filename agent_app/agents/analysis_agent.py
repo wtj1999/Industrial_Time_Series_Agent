@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 import pandas as pd
 from dataclasses import dataclass
 
@@ -17,11 +17,15 @@ logger = logging.getLogger(__name__)
 class AnalysisContext:
     """Context injected into every analysis tool via ``runtime.context``.
 
-    Tools read ONLY these three fields directly from the context:
+    Analysis functions read these three data fields from the context:
 
         ctx.df                # pandas.DataFrame
         ctx.target_columns    # List[str]  (CSV column names)
         ctx.feature_columns   # List[str]  (CSV column names)
+
+    Framework metadata (``user_id`` / ``thread_id`` / ``file_path`` /
+    ``stream_writer``) is available only for model persistence and progress
+    streaming; it is not selected or controlled by the LLM.
 
     Note: the upstream ``TaskSpec`` schema carries only ``target_columns``
     and ``feature_columns`` (each a list of ``ColumnMapping``). There is
@@ -35,6 +39,9 @@ class AnalysisContext:
     target_columns: List[str]
     feature_columns: List[str]
     user_id: Optional[str] = None
+    thread_id: Optional[str] = None
+    file_path: Optional[str] = None
+    stream_writer: Optional[Callable[[Any], None]] = None
 
 
 class AnalysisAgent(BaseAgent):
@@ -56,6 +63,7 @@ class AnalysisAgent(BaseAgent):
             csv_profile: Optional[CSVProfile],
             user_id: Optional[str] = None,
             dialogue_history: Optional[List[Message]] = None,
+            stream_writer: Optional[Callable[[Any], None]] = None,
     ) -> Dict[str, Any]:
         """Run the analysis sub-agent.
 
@@ -83,6 +91,9 @@ class AnalysisAgent(BaseAgent):
                 if c.csv_column
             ],
             user_id=user_id,
+            thread_id=thread_id,
+            file_path=file_path,
+            stream_writer=stream_writer,
         )
 
         # 历史对话由 orchestrator 的 SessionState(checkpointer 落盘)传

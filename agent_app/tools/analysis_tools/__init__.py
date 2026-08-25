@@ -156,6 +156,13 @@ from agent_app.tools.analysis_tools.quality_tools import (  # noqa: F401
     analyze_missing_values,
 )
 
+# ----------------------------------------------------------------------
+# Model-based root-cause analysis
+# ----------------------------------------------------------------------
+from agent_app.tools.analysis_tools.root_cause_tools import (  # noqa: F401
+    analyze_root_causes_catboost,
+)
+
 
 # Canonical tool list, in the suggested registration order:
 #   1) Quality (always run first to know what's usable)
@@ -213,6 +220,9 @@ TOOLS = [
     compare_group_statistics,
     compare_group_distributions,
     compare_two_groups,
+
+    # Model-based root-cause analysis
+    analyze_root_causes_catboost,
 ]
 
 
@@ -283,4 +293,5 @@ __all__ = [
     "analyze_missing_values",
     "analyze_duplicates",
     "analyze_constant_or_low_variance_columns",
+    "analyze_root_causes_catboost",
 ]

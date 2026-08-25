@@ -217,6 +217,23 @@ export interface PredictionFinetuningProgressEvent {
   data: PredictionFinetuningProgress;
 }
 
+export interface AnalysisTrainingProgress {
+  event: 'analysis_training_progress';
+  operation_id: string;
+  model_name: string;
+  stage: 'preparing' | 'training' | 'evaluating' | 'saving' | 'completed' | 'failed';
+  current?: number;
+  total?: number;
+  percent?: number;
+  message?: string;
+  metrics?: Record<string, number>;
+}
+
+export interface AnalysisTrainingProgressEvent {
+  type: 'analysis_training_progress';
+  data: AnalysisTrainingProgress;
+}
+
 export interface CompletedEvent {
   type: 'completed';
   data: Record<string, unknown>;
@@ -355,7 +372,7 @@ export interface AnomalyChartEvent {
 
 /* ------------------------------------------------------------------ *
  * Analysis charts (emitted by execute_task when an analysis sub-agent
- * ran a Tier-1 visualisable tool). Six chart types in Tier 1; the
+ * ran a visualisable analysis tool). The
  * registry in ChatView dispatches on ``chart_type``.
  * ------------------------------------------------------------------ */
 
@@ -365,7 +382,8 @@ export type AnalysisChartType =
   | 'decomposition'
   | 'control_chart'
   | 'changepoint'
-  | 'acf';
+  | 'acf'
+  | 'catboost_root_cause';
 
 /** Union of all Tier-1 analysis-chart payloads. Discriminated by
  *  ``chart_type`` so the React component registry can pick the right
@@ -376,7 +394,8 @@ export type AnalysisChart =
   | DecompositionChart
   | ControlChart
   | ChangePointChart
-  | AcfChart;
+  | AcfChart
+  | CatBoostRootCauseChart;
 
 export interface CorrelationHeatmapChart {
   chart_type: 'correlation_heatmap';
@@ -515,6 +534,44 @@ export interface AcfColumn {
   significant_pacf_lags: number[];
   lag_1_autocorr: number | null;
   n_valid: number;
+}
+
+export interface RegressionMetricBlock {
+  mse: number | null;
+  rmse: number | null;
+  mae: number | null;
+  r2: number | null;
+  mape: number | null;
+  smape: number | null;
+}
+
+export interface CatBoostRootCauseColumn {
+  title: string;
+  validation_metrics: RegressionMetricBlock;
+  test_metrics: RegressionMetricBlock;
+  feature_importance: { feature: string; importance: number }[];
+  shap_summary: {
+    feature: string;
+    importance: number;
+    mean_abs_shap: number;
+    points: { shap_value: number; feature_value: number; display_value: string }[];
+  }[];
+  training_history: { iteration: number; train_rmse: number | null; validation_rmse: number | null }[];
+  best_iteration: number | null;
+  n_train: number;
+  n_validation: number;
+  n_test: number;
+}
+
+export interface CatBoostRootCauseChart {
+  chart_type: 'catboost_root_cause';
+  tool_name: string;
+  summary?: string | null;
+  active_column: string;
+  columns: Record<string, CatBoostRootCauseColumn>;
+  save_name?: string | null;
+  split_strategy?: string | null;
+  split_ratios: number[];
 }
 
 export interface AnalysisChartEvent {
@@ -690,6 +747,7 @@ export type StreamEvent =
   | UpdateEvent
   | AnomalyTrainingProgressEvent
   | PredictionFinetuningProgressEvent
+  | AnalysisTrainingProgressEvent
   | CompletedEvent
   | ErrorEvent
   | CsvPreviewEvent
@@ -792,7 +850,7 @@ export interface DatasetsResponse {
 
 export interface ModelEntry {
   /** Persisted model family. Older anomaly-model records omit this field. */
-  category?: 'anomaly_detection' | 'time_series_prediction' | string | null;
+  category?: 'data_analysis' | 'anomaly_detection' | 'time_series_prediction' | string | null;
   task_type?: 'anomaly_detection' | 'prediction' | string | null;
   model_type?: string | null;
   model_path?: string | null;
@@ -803,6 +861,16 @@ export interface ModelEntry {
     context_length?: number | null;
     num_steps?: number | null;
     finetune_mode?: 'full' | 'lora' | string | null;
+    iterations?: number | null;
+    learning_rate?: number | null;
+    depth?: number | null;
+    early_stopping_rounds?: number | null;
+  } | null;
+  split?: {
+    strategy?: string | null;
+    train_ratio?: number | null;
+    validation_ratio?: number | null;
+    test_ratio?: number | null;
   } | null;
   save_name: string;
   file_name: string;
@@ -811,7 +879,9 @@ export interface ModelEntry {
   contamination?: number | null;
   n_samples?: number | null;
   n_features?: number | null;
+  n_targets?: number | null;
   feature_columns?: string[];
+  target_columns?: string[];
   source?: string | null;
   n_anomalies?: number | null;
   threshold?: number | null;

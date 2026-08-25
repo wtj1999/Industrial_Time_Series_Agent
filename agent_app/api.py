@@ -844,6 +844,14 @@ def _prediction_models_root() -> Path:
         return Path(__file__).resolve().parent / "artifacts" / "prediction_models"
 
 
+def _analysis_models_root() -> Path:
+    try:
+        from tools.analysis_tools.root_cause_tools import ANALYSIS_MODEL_ROOT
+        return ANALYSIS_MODEL_ROOT
+    except Exception:
+        return Path(__file__).resolve().parent / "artifacts" / "analysis_models"
+
+
 @app.get("/api/datasets", response_model=Dict[str, Any])
 async def list_datasets(
     x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
@@ -900,7 +908,7 @@ async def list_datasets(
 async def list_models(
     x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
 ):
-    """List every anomaly and fine-tuned prediction model the user owns.
+    """List every data-analysis, anomaly and prediction model the user owns.
 
     Walks ``artifacts/anomaly_detection/<user_id>/`` and reads each
     ``.joblib`` envelope's metadata **without** unpickling the model
@@ -996,6 +1004,40 @@ async def list_models(
                     record.setdefault("file_name", fp.name)
                     record["size_bytes"] = int(fp.stat().st_size)
                     entries.append(record)
+                except Exception as exc:
+                    failed.append({
+                        "file_name": fp.name,
+                        "error": "%s: %s" % (type(exc).__name__, exc),
+                    })
+
+        analysis_root = _analysis_models_root() / user_id
+        if analysis_root.exists():
+            for fp in analysis_root.glob("**/*.joblib"):
+                try:
+                    obj = joblib.load(fp, mmap_mode="r")
+                    if not isinstance(obj, dict) or "_analysis_model_version" not in obj:
+                        raise ValueError("invalid analysis model envelope")
+                    meta = obj.get("metadata") or {}
+                    stat = fp.stat()
+                    entries.append({
+                        "category": "data_analysis",
+                        "task_type": "analysis",
+                        "model_type": meta.get("model_type") or "CatBoostRegressor",
+                        "save_name": meta.get("save_name") or fp.stem,
+                        "file_name": fp.name,
+                        "n_samples": meta.get("n_samples"),
+                        "n_features": meta.get("n_features"),
+                        "n_targets": meta.get("n_targets"),
+                        "feature_columns": meta.get("feature_columns", []),
+                        "target_columns": meta.get("target_columns", []),
+                        "trained_at": meta.get("trained_at"),
+                        "saved_at": meta.get("saved_at"),
+                        "thread_id": meta.get("thread_id"),
+                        "source_file": meta.get("source_file"),
+                        "training": meta.get("training"),
+                        "split": meta.get("split"),
+                        "size_bytes": int(stat.st_size),
+                    })
                 except Exception as exc:
                     failed.append({
                         "file_name": fp.name,

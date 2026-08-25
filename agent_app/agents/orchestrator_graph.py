@@ -372,6 +372,11 @@ class OrchestratorAgent:
                             "type": "prediction_finetuning_progress",
                             "data": chunk,
                         }
+                    elif isinstance(chunk, dict) and chunk.get("event") == "analysis_training_progress":
+                        yield {
+                            "type": "analysis_training_progress",
+                            "data": chunk,
+                        }
 
                 elif mode == "messages":
                     message, metadata = chunk
@@ -1200,6 +1205,8 @@ class OrchestratorAgent:
         # 任务路由
         new_tool_calls: List[Dict[str, Any]] = []
         if task_type == TaskType.ANALYSIS:
+            from langgraph.config import get_stream_writer
+            stream_writer = get_stream_writer()
             result = await self.analysis_agent.execute_analysis(
                 file_path=file_path,
                 thread_id=session_id,
@@ -1209,6 +1216,7 @@ class OrchestratorAgent:
                 csv_profile=state.csv_profile,
                 user_id=user_id,
                 dialogue_history=state.dialogue_history,
+                stream_writer=stream_writer,
             )
 
             if isinstance(result, dict):

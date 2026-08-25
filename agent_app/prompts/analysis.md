@@ -53,6 +53,16 @@
 - SPC 控制限与违例：`analyze_control_chart`
 - Cp/Cpk 与规格能力：`analyze_process_capability`
 - 班次、批次或设备分组差异：选择一个最匹配的 group comparison 工具
+- 关键影响参数、根因排序、哪些 feature_columns 驱动 target_columns：`analyze_root_causes_catboost`
+
+## CatBoost 根因分析规则
+
+- 用户明确询问“根因、关键参数、影响因素、哪些变量驱动目标”时，优先只调用 `analyze_root_causes_catboost`。
+- 工具自动读取 `target_columns` 和 `feature_columns`；多个目标列会分别训练模型，不要拆成多次工具调用。
+- 工业时序数据默认使用 `split_strategy="chronological"` 和 0.7/0.1/0.2 切分，除非用户明确要求随机切分或其他比例。
+- 默认参数使用 iterations=500、learning_rate=0.05、depth=6、early_stopping_rounds=50、random_seed=42。
+- 工具会自动保存模型并返回验证集/测试集指标、特征重要性和 TreeSHAP。不要再调用相关性或互信息工具重复解释同一问题。
+- 必须明确说明：SHAP 反映模型预测贡献，不足以单独证明物理因果关系。
 
 同一维度的替代工具只能选择一个。例如趋势分析不得同时调用 linear trend、Mann-Kendall、rolling trend；除非用户明确要求比较这些方法。
 
