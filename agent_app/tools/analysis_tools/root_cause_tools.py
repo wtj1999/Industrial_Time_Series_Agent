@@ -248,7 +248,7 @@ def analyze_root_causes_catboost(
     validation_ratio: float = 0.1,
     test_ratio: float = 0.2,
     split_strategy: str = "chronological",
-    iterations: int = 500,
+    iterations: int = 5000,
     learning_rate: float = 0.05,
     depth: int = 6,
     early_stopping_rounds: int = 50,

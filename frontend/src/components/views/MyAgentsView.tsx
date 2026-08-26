@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Activity,
   BatteryCharging,
+  BatteryWarning,
   Bot,
   ChartSpline,
   Factory,
@@ -22,11 +23,13 @@ import { CoatingArealDensityAnalysisApp } from '@/features/agent-apps/coating-ar
 import { COATING_AREAL_DENSITY_AGENT } from '@/features/agent-apps/coating-areal-density-analysis/config';
 import { CoatingArealDensityAnomalyDetectionApp } from '@/features/agent-apps/coating-areal-density-anomaly-detection/CoatingArealDensityAnomalyDetectionApp';
 import { COATING_AREAL_DENSITY_ANOMALY_AGENT } from '@/features/agent-apps/coating-areal-density-anomaly-detection/config';
+import { CellCapacityRootCauseApp } from '@/features/agent-apps/cell-capacity-root-cause/CellCapacityRootCauseApp';
+import { CELL_CAPACITY_ROOT_CAUSE_AGENT } from '@/features/agent-apps/cell-capacity-root-cause/config';
 
 type AgentDomain = 'equipment' | 'production' | 'market';
 
 const DOMAIN_COUNTS: Record<AgentDomain, number> = {
-  equipment: 2,
+  equipment: 3,
   production: 0,
   market: 2,
 };
@@ -111,13 +114,20 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(COATING_AREAL_DENSITY_ANOMALY_AGENT.id);
   };
 
+  const openCellCapacityRootCauseAgent = () => {
+    initNewSession();
+    setActiveAgent(CELL_CAPACITY_ROOT_CAUSE_AGENT.id);
+  };
+
   const activeAgentName = activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
     ? NEW_ENERGY_VEHICLE_SALES_AGENT.name
     : activeAgent === COATING_AREAL_DENSITY_AGENT.id
       ? COATING_AREAL_DENSITY_AGENT.name
       : activeAgent === COATING_AREAL_DENSITY_ANOMALY_AGENT.id
         ? COATING_AREAL_DENSITY_ANOMALY_AGENT.name
-      : BATTERY_INSTALLATION_AGENT.name;
+        : activeAgent === CELL_CAPACITY_ROOT_CAUSE_AGENT.id
+          ? CELL_CAPACITY_ROOT_CAUSE_AGENT.name
+          : BATTERY_INSTALLATION_AGENT.name;
 
   return (
     <div className="flex h-full flex-col">
@@ -154,7 +164,9 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
             ? <CoatingArealDensityAnalysisApp />
             : activeAgent === COATING_AREAL_DENSITY_ANOMALY_AGENT.id
               ? <CoatingArealDensityAnomalyDetectionApp />
-            : <BatteryInstallationForecastApp />
+              : activeAgent === CELL_CAPACITY_ROOT_CAUSE_AGENT.id
+                ? <CellCapacityRootCauseApp />
+                : <BatteryInstallationForecastApp />
       ) : (
         <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
           <div className="mx-auto w-full max-w-5xl">
@@ -164,7 +176,11 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
               onOpenVehicleSalesAgent={openVehicleSalesAgent}
             />
           ) : activeDomain === 'equipment' ? (
-            <EquipmentAgents onOpenCoatingAgent={openCoatingAgent} onOpenCoatingAnomalyAgent={openCoatingAnomalyAgent} />
+            <EquipmentAgents
+              onOpenCoatingAgent={openCoatingAgent}
+              onOpenCoatingAnomalyAgent={openCoatingAnomalyAgent}
+              onOpenCellCapacityRootCauseAgent={openCellCapacityRootCauseAgent}
+            />
           ) : activeDomain ? (
             <DomainEmptyState domain={activeDomain} />
           ) : (
@@ -177,7 +193,15 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
   );
 }
 
-function EquipmentAgents({ onOpenCoatingAgent, onOpenCoatingAnomalyAgent }: { onOpenCoatingAgent: () => void; onOpenCoatingAnomalyAgent: () => void }) {
+function EquipmentAgents({
+  onOpenCoatingAgent,
+  onOpenCoatingAnomalyAgent,
+  onOpenCellCapacityRootCauseAgent,
+}: {
+  onOpenCoatingAgent: () => void;
+  onOpenCoatingAnomalyAgent: () => void;
+  onOpenCellCapacityRootCauseAgent: () => void;
+}) {
   return (
     <div>
       <p className="mb-4 text-xs text-steel-500">{DOMAIN_META.equipment.description}</p>
@@ -213,6 +237,22 @@ function EquipmentAgents({ onOpenCoatingAgent, onOpenCoatingAnomalyAgent }: { on
           </div>
           <p className="relative mt-4 text-xs leading-5 text-steel-500">检测涂布面密度的异常时间点、连续异常区间及主要异常分区。</p>
           <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-violet-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenCellCapacityRootCauseAgent}
+          className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-rose-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-rose-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-rose-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700"><BatteryWarning className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电分容容量偏低根因分析智能体</h3>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[9px] font-medium text-rose-700"><ScanSearch className="h-3 w-3" />根因分析</span>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-steel-500">基于分容容量与全流程工艺参数，定位容量偏低的关键影响因素并提供验证建议。</p>
+          <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-rose-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
         </button>
       </div>
     </div>
