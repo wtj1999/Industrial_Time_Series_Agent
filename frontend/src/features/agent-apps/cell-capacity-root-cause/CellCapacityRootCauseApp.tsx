@@ -158,7 +158,7 @@ export function CellCapacityRootCauseApp() {
           </div>
           <div className="mt-3 grid gap-3 sm:grid-cols-3">
             <NumberField label="最大迭代次数" value={task.iterations} min={10} max={5000} onChange={(value) => setTask({ ...task, iterations: value })} />
-            <NumberField label="学习率" value={task.learningRate} min={0.001} max={1} step={0.01} onChange={(value) => setTask({ ...task, learningRate: value })} />
+            <NumberField label="学习率" value={task.learningRate} min={0.001} max={1} step={0.001} onChange={(value) => setTask({ ...task, learningRate: value })} />
             <NumberField label="树深度" value={task.depth} min={2} max={16} onChange={(value) => setTask({ ...task, depth: value })} />
           </div>
         </FormSection>

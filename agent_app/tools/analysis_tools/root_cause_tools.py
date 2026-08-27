@@ -251,7 +251,7 @@ def analyze_root_causes_catboost(
     iterations: int = 5000,
     learning_rate: float = 0.05,
     depth: int = 6,
-    early_stopping_rounds: int = 50,
+    early_stopping_rounds: int = 100,
     random_seed: int = 42,
     top_n_features: int = 15,
     shap_sample_size: int = 300,
