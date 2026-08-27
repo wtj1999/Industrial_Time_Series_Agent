@@ -5,6 +5,7 @@ import {
   Activity,
   BatteryCharging,
   BatteryWarning,
+  Boxes,
   Bot,
   ChartSpline,
   Factory,
@@ -12,6 +13,7 @@ import {
   Store,
   ScanSearch,
   Wrench,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useSession } from '@/context/SessionContext';
@@ -25,12 +27,18 @@ import { CoatingArealDensityAnomalyDetectionApp } from '@/features/agent-apps/co
 import { COATING_AREAL_DENSITY_ANOMALY_AGENT } from '@/features/agent-apps/coating-areal-density-anomaly-detection/config';
 import { CellCapacityRootCauseApp } from '@/features/agent-apps/cell-capacity-root-cause/CellCapacityRootCauseApp';
 import { CELL_CAPACITY_ROOT_CAUSE_AGENT } from '@/features/agent-apps/cell-capacity-root-cause/config';
+import { CellProductionForecastApp } from '@/features/agent-apps/cell-production-forecast/CellProductionForecastApp';
+import { CELL_PRODUCTION_FORECAST_AGENT } from '@/features/agent-apps/cell-production-forecast/config';
+import { PackProductionForecastApp } from '@/features/agent-apps/pack-production-forecast/PackProductionForecastApp';
+import { PACK_PRODUCTION_FORECAST_AGENT } from '@/features/agent-apps/pack-production-forecast/config';
+import { FactoryEnergyForecastApp } from '@/features/agent-apps/factory-energy-forecast/FactoryEnergyForecastApp';
+import { FACTORY_ENERGY_FORECAST_AGENT } from '@/features/agent-apps/factory-energy-forecast/config';
 
 type AgentDomain = 'equipment' | 'production' | 'market';
 
 const DOMAIN_COUNTS: Record<AgentDomain, number> = {
   equipment: 3,
-  production: 0,
+  production: 3,
   market: 2,
 };
 
@@ -119,6 +127,21 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(CELL_CAPACITY_ROOT_CAUSE_AGENT.id);
   };
 
+  const openCellProductionForecastAgent = () => {
+    initNewSession();
+    setActiveAgent(CELL_PRODUCTION_FORECAST_AGENT.id);
+  };
+
+  const openPackProductionForecastAgent = () => {
+    initNewSession();
+    setActiveAgent(PACK_PRODUCTION_FORECAST_AGENT.id);
+  };
+
+  const openFactoryEnergyForecastAgent = () => {
+    initNewSession();
+    setActiveAgent(FACTORY_ENERGY_FORECAST_AGENT.id);
+  };
+
   const activeAgentName = activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
     ? NEW_ENERGY_VEHICLE_SALES_AGENT.name
     : activeAgent === COATING_AREAL_DENSITY_AGENT.id
@@ -127,7 +150,13 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
         ? COATING_AREAL_DENSITY_ANOMALY_AGENT.name
         : activeAgent === CELL_CAPACITY_ROOT_CAUSE_AGENT.id
           ? CELL_CAPACITY_ROOT_CAUSE_AGENT.name
-          : BATTERY_INSTALLATION_AGENT.name;
+          : activeAgent === CELL_PRODUCTION_FORECAST_AGENT.id
+            ? CELL_PRODUCTION_FORECAST_AGENT.name
+            : activeAgent === PACK_PRODUCTION_FORECAST_AGENT.id
+              ? PACK_PRODUCTION_FORECAST_AGENT.name
+              : activeAgent === FACTORY_ENERGY_FORECAST_AGENT.id
+                ? FACTORY_ENERGY_FORECAST_AGENT.name
+                : BATTERY_INSTALLATION_AGENT.name;
 
   return (
     <div className="flex h-full flex-col">
@@ -137,7 +166,7 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
           onClick={handleBack}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-steel-600 transition-colors hover:bg-steel-100 hover:text-steel-900"
           title={activeAgent
-            ? `返回${activeDomain === 'equipment' ? '设备域' : '市场域'}`
+            ? `返回${activeMeta?.title ?? '智能体列表'}`
             : activeDomain ? '返回智能体分类' : '返回对话'}
         >
           <ArrowLeft className="h-4 w-4" />
@@ -166,7 +195,13 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
               ? <CoatingArealDensityAnomalyDetectionApp />
               : activeAgent === CELL_CAPACITY_ROOT_CAUSE_AGENT.id
                 ? <CellCapacityRootCauseApp />
-                : <BatteryInstallationForecastApp />
+                : activeAgent === CELL_PRODUCTION_FORECAST_AGENT.id
+                  ? <CellProductionForecastApp />
+                  : activeAgent === PACK_PRODUCTION_FORECAST_AGENT.id
+                    ? <PackProductionForecastApp />
+                    : activeAgent === FACTORY_ENERGY_FORECAST_AGENT.id
+                      ? <FactoryEnergyForecastApp />
+                      : <BatteryInstallationForecastApp />
       ) : (
         <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
           <div className="mx-auto w-full max-w-5xl">
@@ -181,8 +216,12 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
               onOpenCoatingAnomalyAgent={openCoatingAnomalyAgent}
               onOpenCellCapacityRootCauseAgent={openCellCapacityRootCauseAgent}
             />
-          ) : activeDomain ? (
-            <DomainEmptyState domain={activeDomain} />
+          ) : activeDomain === 'production' ? (
+            <ProductionAgents
+              onOpenCellProductionForecastAgent={openCellProductionForecastAgent}
+              onOpenPackProductionForecastAgent={openPackProductionForecastAgent}
+              onOpenFactoryEnergyForecastAgent={openFactoryEnergyForecastAgent}
+            />
           ) : (
             <DomainGrid onSelect={setActiveDomain} />
           )}
@@ -191,6 +230,70 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
       )}
     </div>
   );
+}
+
+function ProductionAgents({
+  onOpenCellProductionForecastAgent,
+  onOpenPackProductionForecastAgent,
+  onOpenFactoryEnergyForecastAgent,
+}: {
+  onOpenCellProductionForecastAgent: () => void;
+  onOpenPackProductionForecastAgent: () => void;
+  onOpenFactoryEnergyForecastAgent: () => void;
+}) {
+  return <div>
+    <p className="mb-4 text-xs text-steel-500">{DOMAIN_META.production.description}</p>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <button
+        type="button"
+        onClick={onOpenCellProductionForecastAgent}
+        className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-emerald-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-emerald-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+      >
+        <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-emerald-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+        <div className="relative flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"><Factory className="h-5 w-5" /></span>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电电芯产量预测智能体</h3>
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] font-medium text-emerald-700"><ChartSpline className="h-3 w-3" />时序预测</span>
+          </div>
+        </div>
+        <p className="relative mt-4 text-xs leading-5 text-steel-500">结合历史产量、产线运行与质量数据，预测未来电芯产量及潜在产能缺口。</p>
+        <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-emerald-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+      </button>
+      <button
+        type="button"
+        onClick={onOpenPackProductionForecastAgent}
+        className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-teal-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-teal-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+      >
+        <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-teal-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+        <div className="relative flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700"><Boxes className="h-5 w-5" /></span>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电PACK产量预测智能体</h3>
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-[9px] font-medium text-teal-700"><ChartSpline className="h-3 w-3" />时序预测</span>
+          </div>
+        </div>
+        <p className="relative mt-4 text-xs leading-5 text-steel-500">结合电芯齐套、PACK产线运行与质量数据，预测未来PACK产量及产能缺口。</p>
+        <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-teal-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+      </button>
+      <button
+        type="button"
+        onClick={onOpenFactoryEnergyForecastAgent}
+        className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-amber-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-amber-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+      >
+        <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-amber-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+        <div className="relative flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><Zap className="h-5 w-5" /></span>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电工厂能耗预测智能体</h3>
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-medium text-amber-700"><ChartSpline className="h-3 w-3" />时序预测</span>
+          </div>
+        </div>
+        <p className="relative mt-4 text-xs leading-5 text-steel-500">结合各工段、公共设备和生产负荷数据，预测工厂未来能耗及单位产量能耗变化。</p>
+        <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-amber-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+      </button>
+    </div>
+  </div>;
 }
 
 function EquipmentAgents({
@@ -385,25 +488,6 @@ function MarketAgents({
             配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
           </span>
         </button>
-      </div>
-    </div>
-  );
-}
-
-function DomainEmptyState({ domain }: { domain: AgentDomain }) {
-  const meta = DOMAIN_META[domain];
-  const Icon = meta.icon;
-
-  return (
-    <div className="flex min-h-[360px] items-center justify-center">
-      <div className="max-w-sm text-center">
-        <span className={cn('mx-auto flex h-14 w-14 items-center justify-center rounded-2xl', meta.iconWrap)}>
-          <Icon className="h-6 w-6" />
-        </span>
-        <h2 className="mt-4 text-sm font-semibold text-steel-800">
-          {meta.title}还没有智能体
-        </h2>
-        <p className="mt-1.5 text-xs leading-5 text-steel-500">{meta.description}</p>
       </div>
     </div>
   );

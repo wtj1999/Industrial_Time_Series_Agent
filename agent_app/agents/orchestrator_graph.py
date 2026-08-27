@@ -22,8 +22,6 @@ from agents.profile_agent import ProfileAgent
 from agents.parser_agent import ParserAgent
 from agents.prediction_agent import PredictionAgent
 from agents.anomaly_detection_agent import AnomalyDetectionAgent
-# from agents.explanation_agent import ExplanationAgent
-# from agents.report_agent import ReportAgent
 from agents.analysis_agent import AnalysisAgent
 from agents.tech_proposal_agent import ProposalAgent
 from agents.intent_router_agent import IntentRouterAgent
