@@ -35,10 +35,28 @@ Industrial Time Series Agent 是一个面向工业时序数据的多智能体应
   <img src="./登录页面.png" alt="登录与注册页面" width="90%" />
 </p>
 
-### 对话与资产管理
+### 主对话页面与资产管理
 
 <p align="center">
   <img src="./主页面.png" alt="工业时间序列智能体主页面" width="90%" />
+</p>
+
+### 数据资产管理
+
+<p align="center">
+  <img src="./我的数据.png" alt="数据资产主页面" width="90%" />
+</p>
+
+### 模型资产管理
+
+<p align="center">
+  <img src="./我的模型.png" alt="模型资产主页面" width="90%" />
+</p>
+
+### 智能体资产管理
+
+<p align="center">
+  <img src="./我的智能体.png" alt="数据资产主页面" width="90%" />
 </p>
 
 ## 主要能力
