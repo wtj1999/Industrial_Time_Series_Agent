@@ -307,40 +307,6 @@ docker compose logs -f frontend
 docker compose up -d --force-recreate backend
 ```
 
-该命令选择 Compose 中名为 `backend` 的服务，并不会在命令行里直接指定镜像。
-
-### 使用指定后端镜像
-
-部署已有镜像时，可以在 `docker-compose.yml` 中为后端设置 `image`，并移除或注释 `build`：
-
-```yaml
-services:
-  backend:
-    image: registry.example.com/industrial-ts-agent-backend:1.0.0
-    restart: unless-stopped
-    env_file:
-      - path: ./agent_app/.env
-        required: false
-    volumes:
-      - ./uploads:/app/uploads
-      - ./agent_app/artifacts:/app/agent_app/artifacts
-    ports:
-      - "8000:8000"
-```
-
-然后执行：
-
-```bash
-docker compose pull backend
-docker compose up -d --force-recreate backend
-```
-
-自行构建带标签的后端镜像：
-
-```bash
-docker build --target backend -t industrial-ts-agent-backend:latest .
-```
-
 ### 方案二：本地开发
 
 后端：
@@ -400,18 +366,6 @@ VITE_PROXY_TARGET=http://localhost:8000 npm run dev
 | `API_KEY` | 模型服务密钥 | `EMPTY` |
 | `TEMPERATURE` | 生成温度 | `0.7` |
 | `TIMEOUT` | LLM 请求超时秒数 | `600` |
-
-修改 `.env` 后，仅执行 `docker compose restart` 可能沿用容器创建时的环境变量。建议执行：
-
-```bash
-docker compose up -d --force-recreate backend
-```
-
-可用以下命令确认容器实际读取的配置，但不要在共享终端输出真实密钥：
-
-```bash
-docker compose exec backend sh -lc 'printf "MODEL_NAME=%s\nBASE_URL=%s\n" "$MODEL_NAME" "$BASE_URL"'
-```
 
 ### 会话与文件配置
 
@@ -504,56 +458,6 @@ cd frontend
 npm run lint
 npm run build
 ```
-
-## 扩展指南
-
-### 新增分析工具
-
-1. 在 `agent_app/tools/analysis_tools/` 中实现工具，读取 runtime 注入的 `df`、`target_columns` 和 `feature_columns`。
-2. 使用统一 analysis envelope 返回结果。
-3. 在 `agent_app/tools/analysis_tools/__init__.py` 注册工具。
-4. 更新 `agent_app/prompts/analysis.md` 与 `agent_app/skills/analysis_skill.md`。
-5. 如需图表，在 `agent_app/charts/analysis_charts.py` 增加 builder，并在前端增加对应类型和组件。
-6. 为训练型工具实现用户隔离的模型持久化和 runtime 模型引用解析。
-
-### 新增结构化业务智能体
-
-1. 在 `agent_app/applications/<application_name>/` 创建 Pydantic 参数模型和 `build_query`。
-2. 在 `agent_app/applications/registry.py` 注册唯一 `application_id`。
-3. 在 `frontend/src/features/agent-apps/<application-name>/` 创建配置和页面。
-4. 在 `frontend/src/components/views/MyAgentsView.tsx` 注册领域卡片、数量和页面路由。
-5. 保证前端预览 query 与后端最终生成 query 语义一致，避免当前气泡与历史消息不一致。
-6. 添加参数校验测试和前端构建验证。
-
-## 常见问题
-
-### 修改模型地址后，日志仍请求旧地址
-
-优先检查：
-
-1. 修改的是服务器实际部署目录中的 `agent_app/.env`，而不是本地电脑上的同名文件。
-2. Compose 服务是否通过 `env_file` 读取该文件。
-3. `environment` 是否覆盖了同名变量。
-4. 容器是否使用 `--force-recreate` 重新创建。
-5. 容器内 `MODEL_NAME` 和 `BASE_URL` 的实际值。
-
-### `docker compose up -d --force-recreate backend` 是否指定了镜像
-
-没有直接指定。它选择名为 `backend` 的 Compose 服务，并根据该服务的 `image` 或 `build` 配置确定镜像。要固定镜像版本，应在 Compose 文件中写入带 tag 或 digest 的 `image`。
-
-### 预测请求失败，但对话模型正常
-
-对话 LLM 与时序预测模型是两套服务。确认后端容器能够访问 `prediction_tools/_common.py` 中配置的时序模型端点，并检查对应模型是否被路由到正确服务。
-
-### 加载已训练模型时为什么还要上传数据
-
-模型权重只包含训练结果。系统仍需要当前数据作为待预测、待检测或待解释样本，并校验当前数据是否包含模型需要的特征列。
-
-### 根因分析中的 FeatureImportance 和 TreeSHAP 来自哪里
-
-- FeatureImportance 是已训练 CatBoost 模型的全局重要性。
-- TreeSHAP 在加载模型时会根据当前上传数据重新计算，表示这批样本对模型输出的贡献。
-- 二者反映模型关联，不等同于已经证明的物理因果关系，最终结论应结合工艺机理和验证实验。
 
 ## 生产部署注意事项
 
