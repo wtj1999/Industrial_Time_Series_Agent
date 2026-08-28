@@ -10,6 +10,10 @@ import {
   ChartSpline,
   Factory,
   CarFront,
+  Coins,
+  Disc3,
+  Flame,
+  Gauge,
   Store,
   ScanSearch,
   Wrench,
@@ -33,13 +37,21 @@ import { PackProductionForecastApp } from '@/features/agent-apps/pack-production
 import { PACK_PRODUCTION_FORECAST_AGENT } from '@/features/agent-apps/pack-production-forecast/config';
 import { FactoryEnergyForecastApp } from '@/features/agent-apps/factory-energy-forecast/FactoryEnergyForecastApp';
 import { FACTORY_ENERGY_FORECAST_AGENT } from '@/features/agent-apps/factory-energy-forecast/config';
+import { RawMaterialPriceForecastApp } from '@/features/agent-apps/raw-material-price-forecast/RawMaterialPriceForecastApp';
+import { RAW_MATERIAL_PRICE_FORECAST_AGENT } from '@/features/agent-apps/raw-material-price-forecast/config';
+import { CylinderEquipmentAnomalyDetectionApp } from '@/features/agent-apps/cylinder-equipment-anomaly-detection/CylinderEquipmentAnomalyDetectionApp';
+import { CYLINDER_EQUIPMENT_ANOMALY_AGENT } from '@/features/agent-apps/cylinder-equipment-anomaly-detection/config';
+import { ServoMotorAnomalyDetectionApp } from '@/features/agent-apps/servo-motor-anomaly-detection/ServoMotorAnomalyDetectionApp';
+import { SERVO_MOTOR_ANOMALY_AGENT } from '@/features/agent-apps/servo-motor-anomaly-detection/config';
+import { WeldingEquipmentAnomalyDetectionApp } from '@/features/agent-apps/welding-equipment-anomaly-detection/WeldingEquipmentAnomalyDetectionApp';
+import { WELDING_EQUIPMENT_ANOMALY_AGENT } from '@/features/agent-apps/welding-equipment-anomaly-detection/config';
 
 type AgentDomain = 'equipment' | 'production' | 'market';
 
 const DOMAIN_COUNTS: Record<AgentDomain, number> = {
-  equipment: 3,
+  equipment: 6,
   production: 3,
-  market: 2,
+  market: 3,
 };
 
 const DOMAIN_META: Record<
@@ -112,6 +124,11 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(NEW_ENERGY_VEHICLE_SALES_AGENT.id);
   };
 
+  const openRawMaterialPriceForecastAgent = () => {
+    initNewSession();
+    setActiveAgent(RAW_MATERIAL_PRICE_FORECAST_AGENT.id);
+  };
+
   const openCoatingAgent = () => {
     initNewSession();
     setActiveAgent(COATING_AREAL_DENSITY_AGENT.id);
@@ -120,6 +137,21 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
   const openCoatingAnomalyAgent = () => {
     initNewSession();
     setActiveAgent(COATING_AREAL_DENSITY_ANOMALY_AGENT.id);
+  };
+
+  const openCylinderAnomalyAgent = () => {
+    initNewSession();
+    setActiveAgent(CYLINDER_EQUIPMENT_ANOMALY_AGENT.id);
+  };
+
+  const openServoMotorAnomalyAgent = () => {
+    initNewSession();
+    setActiveAgent(SERVO_MOTOR_ANOMALY_AGENT.id);
+  };
+
+  const openWeldingAnomalyAgent = () => {
+    initNewSession();
+    setActiveAgent(WELDING_EQUIPMENT_ANOMALY_AGENT.id);
   };
 
   const openCellCapacityRootCauseAgent = () => {
@@ -144,10 +176,18 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
 
   const activeAgentName = activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
     ? NEW_ENERGY_VEHICLE_SALES_AGENT.name
+    : activeAgent === RAW_MATERIAL_PRICE_FORECAST_AGENT.id
+      ? RAW_MATERIAL_PRICE_FORECAST_AGENT.name
     : activeAgent === COATING_AREAL_DENSITY_AGENT.id
       ? COATING_AREAL_DENSITY_AGENT.name
       : activeAgent === COATING_AREAL_DENSITY_ANOMALY_AGENT.id
         ? COATING_AREAL_DENSITY_ANOMALY_AGENT.name
+        : activeAgent === CYLINDER_EQUIPMENT_ANOMALY_AGENT.id
+          ? CYLINDER_EQUIPMENT_ANOMALY_AGENT.name
+          : activeAgent === SERVO_MOTOR_ANOMALY_AGENT.id
+            ? SERVO_MOTOR_ANOMALY_AGENT.name
+            : activeAgent === WELDING_EQUIPMENT_ANOMALY_AGENT.id
+              ? WELDING_EQUIPMENT_ANOMALY_AGENT.name
         : activeAgent === CELL_CAPACITY_ROOT_CAUSE_AGENT.id
           ? CELL_CAPACITY_ROOT_CAUSE_AGENT.name
           : activeAgent === CELL_PRODUCTION_FORECAST_AGENT.id
@@ -189,10 +229,18 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
       {activeAgent ? (
         activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
           ? <NewEnergyVehicleSalesApp />
+          : activeAgent === RAW_MATERIAL_PRICE_FORECAST_AGENT.id
+            ? <RawMaterialPriceForecastApp />
           : activeAgent === COATING_AREAL_DENSITY_AGENT.id
             ? <CoatingArealDensityAnalysisApp />
             : activeAgent === COATING_AREAL_DENSITY_ANOMALY_AGENT.id
               ? <CoatingArealDensityAnomalyDetectionApp />
+              : activeAgent === CYLINDER_EQUIPMENT_ANOMALY_AGENT.id
+                ? <CylinderEquipmentAnomalyDetectionApp />
+                : activeAgent === SERVO_MOTOR_ANOMALY_AGENT.id
+                  ? <ServoMotorAnomalyDetectionApp />
+                  : activeAgent === WELDING_EQUIPMENT_ANOMALY_AGENT.id
+                    ? <WeldingEquipmentAnomalyDetectionApp />
               : activeAgent === CELL_CAPACITY_ROOT_CAUSE_AGENT.id
                 ? <CellCapacityRootCauseApp />
                 : activeAgent === CELL_PRODUCTION_FORECAST_AGENT.id
@@ -209,11 +257,15 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
             <MarketAgents
               onOpenBatteryAgent={openBatteryAgent}
               onOpenVehicleSalesAgent={openVehicleSalesAgent}
+              onOpenRawMaterialPriceForecastAgent={openRawMaterialPriceForecastAgent}
             />
           ) : activeDomain === 'equipment' ? (
             <EquipmentAgents
               onOpenCoatingAgent={openCoatingAgent}
               onOpenCoatingAnomalyAgent={openCoatingAnomalyAgent}
+              onOpenCylinderAnomalyAgent={openCylinderAnomalyAgent}
+              onOpenServoMotorAnomalyAgent={openServoMotorAnomalyAgent}
+              onOpenWeldingAnomalyAgent={openWeldingAnomalyAgent}
               onOpenCellCapacityRootCauseAgent={openCellCapacityRootCauseAgent}
             />
           ) : activeDomain === 'production' ? (
@@ -299,10 +351,16 @@ function ProductionAgents({
 function EquipmentAgents({
   onOpenCoatingAgent,
   onOpenCoatingAnomalyAgent,
+  onOpenCylinderAnomalyAgent,
+  onOpenServoMotorAnomalyAgent,
+  onOpenWeldingAnomalyAgent,
   onOpenCellCapacityRootCauseAgent,
 }: {
   onOpenCoatingAgent: () => void;
   onOpenCoatingAnomalyAgent: () => void;
+  onOpenCylinderAnomalyAgent: () => void;
+  onOpenServoMotorAnomalyAgent: () => void;
+  onOpenWeldingAnomalyAgent: () => void;
   onOpenCellCapacityRootCauseAgent: () => void;
 }) {
   return (
@@ -356,6 +414,54 @@ function EquipmentAgents({
           </div>
           <p className="relative mt-4 text-xs leading-5 text-steel-500">基于分容容量与全流程工艺参数，定位容量偏低的关键影响因素并提供验证建议。</p>
           <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-rose-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenCylinderAnomalyAgent}
+          className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-indigo-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-indigo-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-indigo-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700"><Gauge className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电气缸设备异常检测智能体</h3>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[9px] font-medium text-indigo-700"><Activity className="h-3 w-3" />异常检测</span>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-steel-500">监测气缸压力、位移、速度和运行节拍等关键特征，定位异常时段与潜在故障。</p>
+          <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-indigo-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenServoMotorAnomalyAgent}
+          className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-sky-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-sky-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-sky-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700"><Disc3 className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电伺服电机异常检测智能体</h3>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[9px] font-medium text-sky-700"><Activity className="h-3 w-3" />异常检测</span>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-steel-500">监测伺服电机电流、扭矩、转速和位置误差等关键特征，定位运行异常与潜在故障。</p>
+          <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-sky-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenWeldingAnomalyAgent}
+          className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-orange-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-orange-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-orange-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-700"><Flame className="h-5 w-5" /></span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电焊接设备异常检测智能体</h3>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[9px] font-medium text-orange-700"><Activity className="h-3 w-3" />异常检测</span>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-steel-500">监测焊接功率、速度、焦点和熔池温度等关键特征，定位设备异常与潜在焊接缺陷。</p>
+          <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-orange-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
         </button>
       </div>
     </div>
@@ -425,9 +531,11 @@ function DomainGrid({ onSelect }: { onSelect: (domain: AgentDomain) => void }) {
 function MarketAgents({
   onOpenBatteryAgent,
   onOpenVehicleSalesAgent,
+  onOpenRawMaterialPriceForecastAgent,
 }: {
   onOpenBatteryAgent: () => void;
   onOpenVehicleSalesAgent: () => void;
+  onOpenRawMaterialPriceForecastAgent: () => void;
 }) {
   return (
     <div>
@@ -485,6 +593,30 @@ function MarketAgents({
             基于历史销量与市场影响因素，预测新能源汽车未来销量及细分市场趋势。
           </p>
           <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-blue-700">
+            配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenRawMaterialPriceForecastAgent}
+          className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-orange-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-orange-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-orange-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
+              <Coins className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电原材料价格预测智能体</h3>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-orange-200 bg-orange-50 px-2 py-0.5 text-[9px] font-medium text-orange-700">
+                <ChartSpline className="h-3 w-3" />时序预测
+              </span>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-steel-500">
+            结合历史价格与供需、库存和下游需求数据，预测锂电原材料价格走势。
+          </p>
+          <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-orange-700">
             配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
           </span>
         </button>
