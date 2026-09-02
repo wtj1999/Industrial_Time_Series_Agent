@@ -871,6 +871,19 @@ export interface ModelEntry {
     depth?: number | null;
     early_stopping_rounds?: number | null;
   } | null;
+  evaluation?: {
+    test_steps?: number | null;
+    rank_by?: string | null;
+    summary?: Array<{
+      model?: string | null;
+      mae?: number | null;
+      rmse?: number | null;
+      mape?: number | null;
+      smape?: number | null;
+      mase?: number | null;
+      n_columns_ok?: number | null;
+    }>;
+  } | null;
   split?: {
     strategy?: string | null;
     train_ratio?: number | null;

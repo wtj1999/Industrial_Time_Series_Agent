@@ -426,11 +426,6 @@ class OrchestratorAgent:
                         "content": content,
                     }
 
-                # elif mode == "updates":
-                #     yield {
-                #         "type": "update",
-                #         "data": chunk,
-                #     }
                 elif mode == "updates":
                     # The updates stream yields state diffs per node:
                     #   {node_name: {field: value, ...}}

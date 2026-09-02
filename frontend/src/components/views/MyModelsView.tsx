@@ -338,8 +338,10 @@ function ModelCard({ m }: { m: ModelEntry }) {
         />
         <Stat
           icon={Target}
-          label={isPrediction ? '训练序列' : '特征数'}
-          value={m.n_features != null ? String(m.n_features) : '—'}
+          label={isPrediction ? '训练步数' : '特征数'}
+          value={isPrediction
+            ? (m.training?.num_steps != null ? m.training.num_steps.toLocaleString() : '—')
+            : (m.n_features != null ? String(m.n_features) : '—')}
         />
         {isPrediction ? (
           <>
@@ -349,11 +351,9 @@ function ModelCard({ m }: { m: ModelEntry }) {
               value={(m.training?.finetune_mode || '—').toUpperCase()}
             />
             <Stat
-              icon={Cpu}
-              label="训练步数"
-              value={m.training?.num_steps != null
-                ? m.training.num_steps.toLocaleString()
-                : '—'}
+              icon={ChartSpline}
+              label={`回测MAE-${m.evaluation?.test_steps ?? '—'}步`}
+              value={formatPredictionMaePair(m)}
             />
           </>
         ) : isAnalysis ? (
@@ -364,14 +364,13 @@ function ModelCard({ m }: { m: ModelEntry }) {
         ) : (
           <>
             <Stat
-              icon={Train}
-              label="异常数"
-              value={m.n_anomalies != null ? m.n_anomalies.toLocaleString() : '—'}
-              tone={m.n_anomalies != null && m.n_anomalies > 0 ? 'warn' : 'neutral'}
+              icon={Target}
+              label="异常阈值"
+              value={formatThreshold(m.threshold)}
             />
             <Stat
               icon={Cpu}
-              label="污染率"
+              label="异常率"
               value={
                 m.contamination != null
                   ? `${(m.contamination * 100).toFixed(1)}%`
@@ -455,6 +454,35 @@ function ModelCard({ m }: { m: ModelEntry }) {
       </div>
     </div>
   );
+}
+
+function formatThreshold(value: number | null | undefined): string {
+  if (value == null || !Number.isFinite(value)) return '—';
+  const magnitude = Math.abs(value);
+  if (magnitude !== 0 && (magnitude < 0.0001 || magnitude >= 1_000_000)) {
+    return value.toExponential(4);
+  }
+  return new Intl.NumberFormat('zh-CN', {
+    maximumSignificantDigits: 6,
+  }).format(value);
+}
+
+function formatPredictionMaePair(model: ModelEntry): string {
+  const summary = model.evaluation?.summary ?? [];
+  const base = summary.find((row) => row.model?.toLowerCase().includes('(base)'));
+  const finetuned = summary.find((row) => row.model?.toLowerCase().includes('(finetuned)'));
+  return `${formatMetric(base?.mae)} → ${formatMetric(finetuned?.mae)}`;
+}
+
+function formatMetric(value: number | null | undefined): string {
+  if (value == null || !Number.isFinite(value)) return '—';
+  const magnitude = Math.abs(value);
+  if (magnitude !== 0 && (magnitude < 0.001 || magnitude >= 10_000)) {
+    return value.toExponential(2);
+  }
+  return new Intl.NumberFormat('zh-CN', {
+    maximumSignificantDigits: 4,
+  }).format(value);
 }
 
 function Stat({
