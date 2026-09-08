@@ -14,6 +14,7 @@ from .raw_material_price_forecast import build_query as build_raw_material_price
 from .cylinder_equipment_anomaly_detection import build_query as build_cylinder_anomaly_query
 from .servo_motor_anomaly_detection import build_query as build_servo_motor_anomaly_query
 from .welding_equipment_anomaly_detection import build_query as build_welding_anomaly_query
+from .cell_soh_forecast import build_query as build_cell_soh_forecast_query
 
 
 ApplicationBuilder = Callable[[Dict[str, Any]], str]
@@ -31,6 +32,7 @@ _APPLICATION_BUILDERS: Dict[str, ApplicationBuilder] = {
     "cylinder-equipment-anomaly-detection": build_cylinder_anomaly_query,
     "servo-motor-anomaly-detection": build_servo_motor_anomaly_query,
     "welding-equipment-anomaly-detection": build_welding_anomaly_query,
+    "cell-soh-forecast": build_cell_soh_forecast_query,
 }
 
 

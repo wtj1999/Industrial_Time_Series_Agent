@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Activity,
   BatteryCharging,
+  BatteryMedium,
   BatteryWarning,
   Boxes,
   Bot,
@@ -45,13 +46,15 @@ import { ServoMotorAnomalyDetectionApp } from '@/features/agent-apps/servo-motor
 import { SERVO_MOTOR_ANOMALY_AGENT } from '@/features/agent-apps/servo-motor-anomaly-detection/config';
 import { WeldingEquipmentAnomalyDetectionApp } from '@/features/agent-apps/welding-equipment-anomaly-detection/WeldingEquipmentAnomalyDetectionApp';
 import { WELDING_EQUIPMENT_ANOMALY_AGENT } from '@/features/agent-apps/welding-equipment-anomaly-detection/config';
+import { CellSohForecastApp } from '@/features/agent-apps/cell-soh-forecast/CellSohForecastApp';
+import { CELL_SOH_FORECAST_AGENT } from '@/features/agent-apps/cell-soh-forecast/config';
 
 type AgentDomain = 'equipment' | 'production' | 'market';
 
 const DOMAIN_COUNTS: Record<AgentDomain, number> = {
   equipment: 6,
   production: 3,
-  market: 3,
+  market: 4,
 };
 
 const DOMAIN_META: Record<
@@ -129,6 +132,11 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(RAW_MATERIAL_PRICE_FORECAST_AGENT.id);
   };
 
+  const openCellSohForecastAgent = () => {
+    initNewSession();
+    setActiveAgent(CELL_SOH_FORECAST_AGENT.id);
+  };
+
   const openCoatingAgent = () => {
     initNewSession();
     setActiveAgent(COATING_AREAL_DENSITY_AGENT.id);
@@ -178,6 +186,8 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     ? NEW_ENERGY_VEHICLE_SALES_AGENT.name
     : activeAgent === RAW_MATERIAL_PRICE_FORECAST_AGENT.id
       ? RAW_MATERIAL_PRICE_FORECAST_AGENT.name
+      : activeAgent === CELL_SOH_FORECAST_AGENT.id
+        ? CELL_SOH_FORECAST_AGENT.name
     : activeAgent === COATING_AREAL_DENSITY_AGENT.id
       ? COATING_AREAL_DENSITY_AGENT.name
       : activeAgent === COATING_AREAL_DENSITY_ANOMALY_AGENT.id
@@ -231,6 +241,8 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
           ? <NewEnergyVehicleSalesApp />
           : activeAgent === RAW_MATERIAL_PRICE_FORECAST_AGENT.id
             ? <RawMaterialPriceForecastApp />
+            : activeAgent === CELL_SOH_FORECAST_AGENT.id
+              ? <CellSohForecastApp />
           : activeAgent === COATING_AREAL_DENSITY_AGENT.id
             ? <CoatingArealDensityAnalysisApp />
             : activeAgent === COATING_AREAL_DENSITY_ANOMALY_AGENT.id
@@ -258,6 +270,7 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
               onOpenBatteryAgent={openBatteryAgent}
               onOpenVehicleSalesAgent={openVehicleSalesAgent}
               onOpenRawMaterialPriceForecastAgent={openRawMaterialPriceForecastAgent}
+              onOpenCellSohForecastAgent={openCellSohForecastAgent}
             />
           ) : activeDomain === 'equipment' ? (
             <EquipmentAgents
@@ -532,10 +545,12 @@ function MarketAgents({
   onOpenBatteryAgent,
   onOpenVehicleSalesAgent,
   onOpenRawMaterialPriceForecastAgent,
+  onOpenCellSohForecastAgent,
 }: {
   onOpenBatteryAgent: () => void;
   onOpenVehicleSalesAgent: () => void;
   onOpenRawMaterialPriceForecastAgent: () => void;
+  onOpenCellSohForecastAgent: () => void;
 }) {
   return (
     <div>
@@ -617,6 +632,30 @@ function MarketAgents({
             结合历史价格与供需、库存和下游需求数据，预测锂电原材料价格走势。
           </p>
           <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-orange-700">
+            配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenCellSohForecastAgent}
+          className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-teal-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-teal-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-teal-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700">
+              <BatteryMedium className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">锂电电芯SOH预测智能体</h3>
+              <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 text-[9px] font-medium text-teal-700">
+                <ChartSpline className="h-3 w-3" />时序预测
+              </span>
+            </div>
+          </div>
+          <p className="relative mt-4 text-xs leading-5 text-steel-500">
+            根据历史容量衰减序列，预测电芯达到目标SOH所需的循环圈数。
+          </p>
+          <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-teal-700">
             配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
           </span>
         </button>
