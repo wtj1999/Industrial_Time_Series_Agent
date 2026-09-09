@@ -32,6 +32,37 @@ services:
       start_period: 30s
       retries: 3
 
+  bi-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: bi-backend
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
+    restart: unless-stopped
+    env_file:
+      - path: ./bi_app/.env
+        required: false
+    environment:
+      BI_REMOTE_QUERY_URL: ${BI_REMOTE_QUERY_URL:-http://10.11.88.106:19052/api/query}
+      BI_API_WORKERS: ${BI_API_WORKERS:-1}
+    command:
+      - sh
+      - -c
+      - exec uvicorn bi_app.api:app --host 0.0.0.0 --port 8010 --reload
+    volumes:
+      - ./bi_app:/app/bi_app
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
   frontend:
     build:
       context: .
@@ -44,6 +75,7 @@ services:
     environment:
       VITE_API_BASE_URL: ""
       VITE_PROXY_TARGET: http://backend:8000
+      VITE_BI_PROXY_TARGET: http://bi-backend:8010
     volumes:
       # Mount editable source while keeping Linux dependencies in Docker.
       - ./frontend:/frontend
@@ -51,6 +83,8 @@ services:
     restart: unless-stopped
     depends_on:
       backend:
+        condition: service_healthy
+      bi-backend:
         condition: service_healthy
     ports:
       - "${FRONTEND_PORT:-5173}:5173"

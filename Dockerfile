@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM python:3.12-slim AS backend
+FROM python:3.12-slim AS python-deps
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -17,6 +17,8 @@ ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 RUN pip install --index-url "${PIP_INDEX_URL}" --upgrade pip \
     && pip install --index-url "${PIP_INDEX_URL}" -r requirements.txt
 
+FROM python-deps AS backend
+
 COPY agent_app ./agent_app
 
 RUN mkdir -p /app/uploads /app/agent_app/artifacts/anomaly_detection \
@@ -29,6 +31,29 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
     CMD curl -fsS http://localhost:8000/health || exit 1
 
 CMD ["sh", "-c", "exec uvicorn agent_app.api:app --host 0.0.0.0 --port 8000 --workers ${API_WORKERS:-1}"]
+
+
+FROM python:3.12-slim AS bi-backend
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+COPY bi_app/requirements.txt ./requirements.txt
+ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip install --index-url "${PIP_INDEX_URL}" --upgrade pip \
+    && pip install --index-url "${PIP_INDEX_URL}" -r requirements.txt
+
+COPY bi_app ./bi_app
+
+EXPOSE 8010
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=3)" || exit 1
+
+CMD ["sh", "-c", "exec uvicorn bi_app.api:app --host 0.0.0.0 --port 8010 --workers ${BI_API_WORKERS:-1}"]
 
 
 FROM node:20-alpine AS frontend-build

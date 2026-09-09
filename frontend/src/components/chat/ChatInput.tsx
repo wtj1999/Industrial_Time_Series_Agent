@@ -16,6 +16,10 @@ interface Props {
   onConsumeInjected?: () => void;
   onSubmit: (text: string, file: File | null) => void;
   onStop?: () => void;
+  allowFileUpload?: boolean;
+  placeholder?: string;
+  footerText?: string;
+  busyText?: string;
 }
 
 const MAX_FILE_MB = 100;
@@ -27,6 +31,10 @@ export function ChatInput({
   onConsumeInjected,
   onSubmit,
   onStop,
+  allowFileUpload = true,
+  placeholder,
+  footerText,
+  busyText,
 }: Props) {
   const [text, setText] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -116,7 +124,7 @@ export function ChatInput({
           )}
 
           <div className="flex items-end gap-2 px-3 py-2.5">
-            <label
+            {allowFileUpload && <label
               className={cn(
                 'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-steel-500',
                 'hover:bg-steel-100 hover:text-steel-700 transition-colors',
@@ -131,7 +139,7 @@ export function ChatInput({
                 className="hidden"
                 disabled={streaming}
               />
-            </label>
+            </label>}
 
             <textarea
               ref={taRef}
@@ -139,9 +147,7 @@ export function ChatInput({
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder={
-                streaming ? '智能体正在思考…' : '描述你的分析需求，回车发送，Shift+Enter 换行'
-              }
+              placeholder={streaming ? '智能体正在思考…' : (placeholder ?? '描述你的分析需求，回车发送，Shift+Enter 换行')}
               disabled={streaming}
               className={cn(
                 'flex-1 resize-none bg-transparent text-sm text-steel-900 placeholder:text-steel-400',
@@ -180,11 +186,11 @@ export function ChatInput({
             {streaming ? (
               <span className="inline-flex items-center gap-1.5 text-brand-600">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                流式输出中
+                {busyText ?? '流式输出中'}
               </span>
             ) : (
               <span className="hidden sm:inline">
-                支持自然语言提问 · 数据文件可选 · 关键决策将弹出人工确认
+                {footerText ?? '支持自然语言提问 · 数据文件可选 · 关键决策将弹出人工确认'}
               </span>
             )}
           </span>

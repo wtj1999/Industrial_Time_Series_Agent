@@ -6,12 +6,14 @@ import {
   BatteryCharging,
   BatteryMedium,
   BatteryWarning,
+  BarChart3,
   Boxes,
   Bot,
   ChartSpline,
   Factory,
   CarFront,
   Coins,
+  DatabaseZap,
   Disc3,
   Flame,
   Gauge,
@@ -48,12 +50,14 @@ import { WeldingEquipmentAnomalyDetectionApp } from '@/features/agent-apps/weldi
 import { WELDING_EQUIPMENT_ANOMALY_AGENT } from '@/features/agent-apps/welding-equipment-anomaly-detection/config';
 import { CellSohForecastApp } from '@/features/agent-apps/cell-soh-forecast/CellSohForecastApp';
 import { CELL_SOH_FORECAST_AGENT } from '@/features/agent-apps/cell-soh-forecast/config';
+import { ProductionBiAnalysisApp } from '@/features/agent-apps/production-bi-analysis/ProductionBiAnalysisApp';
+import { PRODUCTION_BI_ANALYSIS_AGENT } from '@/features/agent-apps/production-bi-analysis/config';
 
 type AgentDomain = 'equipment' | 'production' | 'market';
 
 const DOMAIN_COUNTS: Record<AgentDomain, number> = {
   equipment: 6,
-  production: 3,
+  production: 4,
   market: 4,
 };
 
@@ -182,7 +186,13 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(FACTORY_ENERGY_FORECAST_AGENT.id);
   };
 
-  const activeAgentName = activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
+  const openProductionBiAnalysisAgent = () => {
+    setActiveAgent(PRODUCTION_BI_ANALYSIS_AGENT.id);
+  };
+
+  const activeAgentName = activeAgent === PRODUCTION_BI_ANALYSIS_AGENT.id
+    ? PRODUCTION_BI_ANALYSIS_AGENT.name
+    : activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
     ? NEW_ENERGY_VEHICLE_SALES_AGENT.name
     : activeAgent === RAW_MATERIAL_PRICE_FORECAST_AGENT.id
       ? RAW_MATERIAL_PRICE_FORECAST_AGENT.name
@@ -237,7 +247,9 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
       </div>
 
       {activeAgent ? (
-        activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
+        activeAgent === PRODUCTION_BI_ANALYSIS_AGENT.id
+          ? <ProductionBiAnalysisApp />
+          : activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
           ? <NewEnergyVehicleSalesApp />
           : activeAgent === RAW_MATERIAL_PRICE_FORECAST_AGENT.id
             ? <RawMaterialPriceForecastApp />
@@ -286,6 +298,7 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
               onOpenCellProductionForecastAgent={openCellProductionForecastAgent}
               onOpenPackProductionForecastAgent={openPackProductionForecastAgent}
               onOpenFactoryEnergyForecastAgent={openFactoryEnergyForecastAgent}
+              onOpenProductionBiAnalysisAgent={openProductionBiAnalysisAgent}
             />
           ) : (
             <DomainGrid onSelect={setActiveDomain} />
@@ -301,10 +314,12 @@ function ProductionAgents({
   onOpenCellProductionForecastAgent,
   onOpenPackProductionForecastAgent,
   onOpenFactoryEnergyForecastAgent,
+  onOpenProductionBiAnalysisAgent,
 }: {
   onOpenCellProductionForecastAgent: () => void;
   onOpenPackProductionForecastAgent: () => void;
   onOpenFactoryEnergyForecastAgent: () => void;
+  onOpenProductionBiAnalysisAgent: () => void;
 }) {
   return <div>
     <p className="mb-4 text-xs text-steel-500">{DOMAIN_META.production.description}</p>
@@ -356,6 +371,22 @@ function ProductionAgents({
         </div>
         <p className="relative mt-4 text-xs leading-5 text-steel-500">结合各工段、公共设备和生产负荷数据，预测工厂未来能耗及单位产量能耗变化。</p>
         <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-amber-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+      </button>
+      <button
+        type="button"
+        onClick={onOpenProductionBiAnalysisAgent}
+        className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-blue-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-blue-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+      >
+        <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-blue-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+        <div className="relative flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><BarChart3 className="h-5 w-5" /></span>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[13px] font-semibold leading-5 text-steel-800">生产BI分析智能体</h3>
+            <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[9px] font-medium text-blue-700"><DatabaseZap className="h-3 w-3" />远程 BI</span>
+          </div>
+        </div>
+        <p className="relative mt-4 text-xs leading-5 text-steel-500">用自然语言查询生产计划、实际产出、工序完成率等经营指标，并交互确认筛选条件。</p>
+        <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-blue-700">开始查询<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
       </button>
     </div>
   </div>;

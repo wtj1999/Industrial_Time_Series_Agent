@@ -5,6 +5,7 @@ import path from 'node:path';
 // In Docker, localhost points back to the frontend container. Use the
 // Compose service name by default; local non-Docker runs can override this.
 const proxyTarget = process.env.VITE_PROXY_TARGET ?? 'http://backend:8000';
+const biProxyTarget = process.env.VITE_BI_PROXY_TARGET ?? 'http://bi-backend:8010';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,6 +19,12 @@ export default defineConfig({
     port: 5173,
     host: true,
     proxy: {
+      '/api/bi': {
+        target: biProxyTarget,
+        changeOrigin: true,
+        timeout: 180_000,
+        proxyTimeout: 180_000,
+      },
       // Proxy API requests to the FastAPI backend
       '/api': {
         target: proxyTarget,
