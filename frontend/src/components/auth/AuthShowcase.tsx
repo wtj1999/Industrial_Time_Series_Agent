@@ -68,7 +68,8 @@ function AgentTiltCard({ agent, index, onLogin }: { agent: Agent; index: number;
   };
 
   const Icon = agent.icon;
-  return <button ref={cardRef} type="button" style={{ '--agent-index': index } as CSSProperties} className={`auth-agent-card auth-agent-${agent.tone}`} onPointerMove={followPointer} onPointerLeave={resetTilt} onPointerCancel={resetTilt} onBlur={resetTilt} onClick={onLogin}>
+  const motion = agent.icon === ScanSearch ? 'scan' : agent.icon === Gauge ? 'gauge' : agent.icon === Disc3 ? 'rotate' : agent.icon === Boxes ? 'stack' : agent.icon === Zap || agent.icon === BatteryCharging ? 'energy' : agent.icon === Activity ? 'pulse' : 'chart';
+  return <button ref={cardRef} type="button" style={{ '--agent-index': index } as CSSProperties} className={`auth-agent-card auth-agent-${agent.tone} auth-agent-motion-${motion}`} onPointerMove={followPointer} onPointerLeave={resetTilt} onPointerCancel={resetTilt} onBlur={resetTilt} onClick={onLogin}>
     <span className="auth-agent-orb" aria-hidden="true"/>
     <span className="auth-agent-glint" aria-hidden="true"/>
     <span className="auth-agent-card-top"><span className="auth-agent-icon"><Icon size={20} strokeWidth={1.6}/></span><span className="auth-agent-tag">{agent.capability}</span></span>

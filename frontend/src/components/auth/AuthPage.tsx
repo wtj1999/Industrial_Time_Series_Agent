@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Eye, EyeOff, KeyRound, User, AudioLines, ScanLine, ChartNoAxesCombined, ShieldCheck, X, MoveUpRight } from 'lucide-react';
+import { Eye, EyeOff, KeyRound, User, AudioLines, ScanLine, ChartNoAxesCombined, GitFork, ShieldCheck, X, MoveUpRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/Button';
 import './AuthPage.css';
@@ -130,9 +130,18 @@ export function AuthPage() {
         </div>
 
         <div className="auth-landscape">
-          <div className="auth-landscape-caption"><span className="auth-chart-key" />多维时序分析<span className="auth-demo-label">概念可视化</span></div>
           <SignalLandscape insight={insight} paused={reducedMotion || authOpen} />
-          <div className="auth-insight-note" aria-live="polite"><span className="auth-note-dot" /><span>{INSIGHTS[insight].note}</span></div>
+          <div className="auth-landscape-tools" aria-hidden="true">
+            <div className="auth-signal-console">
+              <span className="auth-console-label"><i /> SIGNAL INPUT</span>
+              <strong>多源信号同步</strong>
+            </div>
+          </div>
+          <div key={`mobile-insight-${insight}`} className="auth-insight-note auth-mobile-insight-note" aria-live="polite">
+            <span className="auth-note-dot" />
+            <span className="auth-note-copy"><small>{INSIGHTS[insight].code}</small><strong>{INSIGHTS[insight].note}</strong></span>
+            <span className="auth-note-scan" aria-hidden="true" />
+          </div>
           <div className="auth-landscape-axis"><span>数据感知</span><span>智能分析</span><span>决策支持</span></div>
         </div>
 
@@ -140,7 +149,7 @@ export function AuthPage() {
           {INSIGHTS.map((item, index) => {
             const Icon = item.icon;
             return <button key={item.title} className={insight === index ? 'auth-capability is-active' : 'auth-capability'} aria-pressed={insight === index} onClick={() => setInsight(index)}>
-              <Icon size={19} strokeWidth={1.4} /><span><strong>{item.title}</strong><small>{item.description}</small></span><span className="auth-capability-indicator" />
+              <span className="auth-capability-icon"><Icon size={19} strokeWidth={1.4} /><span className="auth-capability-motion" aria-hidden="true"><i /><i /><i /></span></span><span><strong>{item.title}</strong><small>{item.description}</small></span><span className="auth-capability-indicator" />
             </button>;
           })}
         </div>
@@ -180,9 +189,9 @@ export function AuthPage() {
 }
 
 const INSIGHTS = [
-  { title: '异常检测', description: '识别偏离，捕捉潜在风险', note: '从连续信号中，识别不寻常的波动', icon: ScanLine },
-  { title: '趋势预测', description: '理解规律，预见未来趋势', note: '沿着历史规律，推演未来变化', icon: ChartNoAxesCombined },
-  { title: '归因分析', description: '关联变量，追溯问题成因', note: '连接多维变量，追溯波动的来源', icon: AudioLines },
+  { code: 'ANOMALY SCAN', title: '异常检测', description: '识别偏离，捕捉潜在风险', note: '从连续信号中，识别不寻常的波动', icon: ScanLine },
+  { code: 'TREND FORECAST', title: '趋势预测', description: '理解规律，预见未来趋势', note: '沿着历史规律，推演未来变化', icon: ChartNoAxesCombined },
+  { code: 'CAUSE ANALYSIS', title: '归因分析', description: '关联变量，追溯问题成因', note: '连接多维变量，追溯波动的来源', icon: GitFork },
 ];
 
 /** Deterministic, illustrative signal surface; no production telemetry. */
@@ -250,9 +259,15 @@ function SignalLandscape({ insight, paused }: { insight: number; paused: boolean
     {Array.from({ length: 38 }, (_, row) => <path key={row} data-wave-row={row} d={line(row)} stroke="url(#auth-surface-stroke)" strokeWidth={row === 20 ? 1.8 : .8} opacity={row === 20 ? 1 : .22 + row / 80} />)}
     <path data-wave-row={20} d={line(20)} stroke={insight === 0 ? 'var(--auth-wave-strong)' : 'var(--auth-wave-mid)'} strokeWidth="1.4" opacity=".85" strokeDasharray={insight === 1 ? '4 5' : undefined} />
     <g className="auth-surface-marker" key={insight}>
-      <path d={`M${nodeX} ${nodeY - 8} v-52 h70`} stroke="var(--auth-wave-grid)" strokeWidth=".7" />
+      <path d={`M${nodeX} ${nodeY - 8} v-54 h18`} stroke="var(--auth-wave-grid)" strokeWidth=".8" />
       <circle cx={nodeX} cy={nodeY} r="10" fill="var(--auth-wave-shadow)" fillOpacity=".12" /><circle cx={nodeX} cy={nodeY} r="3.5" fill="var(--auth-wave-strong)" stroke="var(--auth-wave-surface)" strokeWidth="1.5" />
-      <text x={nodeX + 9} y={nodeY - 69} fill="var(--auth-wave-label)" fontSize="14">{INSIGHTS[insight].title}</text>
+      <foreignObject className="auth-surface-insight-object" x={nodeX + 18} y={nodeY - 88} width="276" height="62">
+        <div className="auth-insight-note auth-surface-insight" role="status">
+          <span className="auth-note-dot" />
+          <span className="auth-note-copy"><small>{INSIGHTS[insight].code}</small><strong>{INSIGHTS[insight].note}</strong></span>
+          <span className="auth-note-scan" aria-hidden="true" />
+        </div>
+      </foreignObject>
     </g>
   </svg>;
 }
