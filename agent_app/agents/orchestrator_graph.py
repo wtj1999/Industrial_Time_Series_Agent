@@ -1040,6 +1040,31 @@ class OrchestratorAgent:
             self,
             state: SessionState
     ):
+
+        if not state.file_path:
+            return Command(
+                update={
+                    "current_stage": TaskStage.Parse,
+                    "planned_workflow": self._advance_workflow(
+                        state,
+                        "等待文件上传",
+                    ),
+                },
+                goto="await_csv_upload",
+            )
+
+        if state.csv_profile is None:
+            return Command(
+                update={
+                    "current_stage": TaskStage.Parse,
+                    "planned_workflow": self._advance_workflow(
+                        state,
+                        "文件画像生成",
+                    ),
+                },
+                goto="profiling",
+            )
+
         logger.info("parse_intent node start")
         spec = await self.parser_agent.generate_task_spec(
             user_query=state.last_user_query,
@@ -1058,18 +1083,18 @@ class OrchestratorAgent:
             "planned_workflow": self._advance_workflow(state, "文件参数解析"),
         }
 
-        if not state.file_path:
-            return Command(
-                update=update,
-                goto="await_csv_upload",
-            )
-
-            # ② 已上传文件但还没有画像
-        if state.csv_profile is None:
-            return Command(
-                update=update,
-                goto="profiling",
-            )
+        # if not state.file_path:
+        #     return Command(
+        #         update=update,
+        #         goto="await_csv_upload",
+        #     )
+        #
+        #     # ② 已上传文件但还没有画像
+        # if state.csv_profile is None:
+        #     return Command(
+        #         update=update,
+        #         goto="profiling",
+        #     )
 
         # ③ 参数默认需要澄清
         return Command(
