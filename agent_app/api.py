@@ -28,6 +28,7 @@ import uvicorn
 from main import IndustrialTimeSeriesAgent
 from config.settings import settings
 from utils.helpers import validate_existing_file_name, validate_file_path
+from utils.dataset_table_preview import read_dataset_table_preview
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -190,6 +191,7 @@ async def index():
             'GET /api/sessions/{session_id}/messages': 'Get the stored dialogue history for a session',
             'DELETE /api/sessions/{session_id}': 'Delete a conversation thread (index + checkpoint state)',
             'GET /api/datasets': 'List all uploaded data files',
+            'GET /api/datasets/{file_name}/preview': 'Preview the first 50 rows of an uploaded file',
             'GET /api/models': 'List anomaly-detection and fine-tuned prediction models',
             'GET /health': 'Health check endpoint',
         },
@@ -902,6 +904,30 @@ async def list_datasets(
     except Exception as e:
         logger.error(f"Error listing datasets: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to list datasets: {str(e)}")
+
+
+@app.get("/api/datasets/{file_name}/preview", response_model=Dict[str, Any])
+async def preview_dataset(
+    file_name: str,
+    x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
+):
+    """Preview an uploaded file belonging to the requesting user."""
+    valid, message = validate_existing_file_name(file_name)
+    if not valid:
+        raise HTTPException(status_code=400, detail=message)
+    if Path(file_name).suffix.lower() not in {".csv", ".xlsx", ".parquet"}:
+        raise HTTPException(status_code=400, detail="不支持的文件格式")
+
+    user_dir = (_uploads_dir() / _sanitize_user_id(x_user_id)).resolve()
+    file_path = (user_dir / file_name).resolve()
+    if file_path.parent != user_dir or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="文件不存在")
+
+    try:
+        return await asyncio.to_thread(read_dataset_table_preview, file_path)
+    except Exception as exc:
+        logger.warning("Failed to preview dataset %s: %s", file_name, exc)
+        raise HTTPException(status_code=422, detail="无法读取文件内容，请检查文件格式") from exc
 
 
 @app.get("/api/models", response_model=Dict[str, Any])

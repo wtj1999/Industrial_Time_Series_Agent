@@ -16,6 +16,7 @@ import type {
   AuthResponse,
   CSVPreview,
   DatasetsResponse,
+  DatasetTablePreview,
   ModelsResponse,
   PredictionChart,
   ResumeValue,
@@ -158,6 +159,15 @@ export async function listDatasets(): Promise<DatasetsResponse> {
     '/api/datasets',
     { method: 'GET' },
     '获取数据列表失败',
+  );
+}
+
+/** Read the first 50 rows of one uploaded file. */
+export async function previewDataset(fileName: string): Promise<DatasetTablePreview> {
+  return getJson<DatasetTablePreview>(
+    `/api/datasets/${encodeURIComponent(fileName)}/preview`,
+    { method: 'GET' },
+    '预览文件失败',
   );
 }
 

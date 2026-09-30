@@ -847,6 +847,15 @@ export interface DatasetEntry {
   session_id?: string | null;
 }
 
+export interface DatasetTablePreview {
+  file_name: string;
+  columns: string[];
+  rows: (string | number | boolean | null)[][];
+  preview_rows: number;
+  has_more: boolean;
+  total_rows: number | null;
+}
+
 export interface DatasetsResponse {
   datasets: DatasetEntry[];
   total: number;

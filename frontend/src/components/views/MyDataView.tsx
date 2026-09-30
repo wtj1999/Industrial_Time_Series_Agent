@@ -16,6 +16,7 @@ import {
   Upload,
 } from 'lucide-react';
 import * as api from '@/services/api';
+import { DatasetPreviewDialog } from '@/components/datasets/DatasetPreviewDialog';
 import type { DatasetEntry } from '@/types';
 import { cn } from '@/utils/cn';
 import {
@@ -77,6 +78,7 @@ export function MyDataView({
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewDataset, setPreviewDataset] = useState<DatasetEntry | null>(null);
 
   const fetchDatasets = useCallback(async (isRefresh: boolean) => {
     if (isRefresh) setRefreshing(true);
@@ -159,12 +161,15 @@ export function MyDataView({
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {datasets.map((ds) => (
-                <DatasetCard key={ds.file_name} ds={ds} />
+                <DatasetCard key={ds.file_name} ds={ds} onPreview={() => setPreviewDataset(ds)} />
               ))}
             </div>
           )}
         </div>
       </div>
+      {previewDataset && (
+        <DatasetPreviewDialog dataset={previewDataset} onClose={() => setPreviewDataset(null)} />
+      )}
     </div>
   );
 }
@@ -223,7 +228,7 @@ function OnlineEmptyState() {
   );
 }
 
-function DatasetCard({ ds }: { ds: DatasetEntry }) {
+function DatasetCard({ ds, onPreview }: { ds: DatasetEntry; onPreview: () => void }) {
   const meta = extMeta(ds.extension);
   const Icon = meta.icon;
   return (
@@ -282,6 +287,9 @@ function DatasetCard({ ds }: { ds: DatasetEntry }) {
           </div>
         )}
       </div>
+      <button type="button" onClick={onPreview} className="mt-3 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-3 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+        <Table className="h-3.5 w-3.5" />预览表格
+      </button>
     </div>
   );
 }
