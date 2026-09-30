@@ -1,19 +1,16 @@
 /**
- * "我的数据" — full-page list of every dataset the user has ever
- * uploaded. Backed by ``GET /api/datasets``.
- *
- * Replaces the chat panel when the user clicks the "我的数据" entry in
- * the sidebar. A top bar with a back button returns to the chat; a
- * refresh button re-fetches the listing; the body is a responsive
- * grid of dataset cards.
+ * "我的数据" — data source categories and uploaded file listing.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 import {
   ArrowLeft,
+  ArrowRight,
   Database,
   FileSpreadsheet,
   FileText,
+  HardDrive,
+  Radio,
   RefreshCw,
   Table,
   Upload,
@@ -63,9 +60,21 @@ function extMeta(ext: string) {
   );
 }
 
-export function MyDataView({ onBack }: { onBack: () => void }) {
+type DataSourceKind = 'overview' | 'online' | 'offline';
+
+export function MyDataView({
+  kind,
+  onBack,
+  onGoChat,
+  onOpen,
+}: {
+  kind: DataSourceKind;
+  onBack: () => void;
+  onGoChat: () => void;
+  onOpen: (source: 'online' | 'offline') => void;
+}) {
   const [datasets, setDatasets] = useState<DatasetEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,8 +94,8 @@ export function MyDataView({ onBack }: { onBack: () => void }) {
   }, []);
 
   useEffect(() => {
-    void fetchDatasets(false);
-  }, [fetchDatasets]);
+    if (kind === 'offline') void fetchDatasets(false);
+  }, [kind, fetchDatasets]);
 
   return (
     <div className="flex h-full flex-col">
@@ -96,7 +105,8 @@ export function MyDataView({ onBack }: { onBack: () => void }) {
           type="button"
           onClick={onBack}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-steel-600 transition-colors hover:bg-steel-100 hover:text-steel-900"
-          title="返回对话"
+          title={kind === 'overview' ? '返回对话' : '返回我的数据'}
+          aria-label={kind === 'overview' ? '返回对话' : '返回我的数据'}
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -105,12 +115,20 @@ export function MyDataView({ onBack }: { onBack: () => void }) {
             <Database className="h-3.5 w-3.5" />
           </span>
           <h1 className="text-sm font-semibold text-steel-800">我的数据</h1>
-          <span className="rounded-full bg-steel-100 px-2 py-0.5 text-[10px] font-medium text-steel-600">
-            {datasets.length} 个文件
-          </span>
+          {kind !== 'overview' && <span className="text-steel-300">/</span>}
+          {kind !== 'overview' && (
+            <span className="text-xs font-medium text-steel-600">
+              {kind === 'online' ? '在线数据源' : '离线数据源'}
+            </span>
+          )}
+          {kind === 'offline' && !loading && !error && (
+            <span className="rounded-full bg-steel-100 px-2 py-0.5 text-[10px] font-medium text-steel-600">
+              {datasets.length} 个文件
+            </span>
+          )}
         </div>
         <div className="flex-1" />
-        <button
+        {kind === 'offline' && <button
           type="button"
           onClick={() => void fetchDatasets(true)}
           disabled={refreshing}
@@ -122,18 +140,22 @@ export function MyDataView({ onBack }: { onBack: () => void }) {
         >
           <RefreshCw className={cn('h-3.5 w-3.5', refreshing && 'animate-spin')} />
           刷新
-        </button>
+        </button>}
       </div>
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
         <div className="mx-auto w-full max-w-5xl">
-          {loading ? (
+          {kind === 'overview' ? (
+            <DataSourceOverview onOpen={onOpen} />
+          ) : kind === 'online' ? (
+            <OnlineEmptyState />
+          ) : loading ? (
             <LoadingState />
           ) : error ? (
             <ErrorState message={error} onRetry={() => void fetchDatasets(true)} />
           ) : datasets.length === 0 ? (
-            <EmptyState onBack={onBack} />
+            <EmptyState onBack={onGoChat} />
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {datasets.map((ds) => (
@@ -143,6 +165,60 @@ export function MyDataView({ onBack }: { onBack: () => void }) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function DataSourceOverview({
+  onOpen,
+}: {
+  onOpen: (source: 'online' | 'offline') => void;
+}) {
+  return (
+    <div>
+      <div className="mb-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-steel-400">数据资产</p>
+        <h2 className="mt-1 text-lg font-semibold tracking-tight text-steel-900">按数据来源浏览</h2>
+        <p className="mt-1 text-xs text-steel-500">选择数据源类型，查看对应的数据。</p>
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => onOpen('online')}
+          className="group relative min-h-[190px] overflow-hidden rounded-2xl border border-sky-200/80 bg-white p-5 text-left shadow-sm transition-all hover:border-sky-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-sky-50 opacity-60 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex h-full flex-col">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-100 text-sky-700"><Radio className="h-5 w-5" /></span>
+            <h3 className="mt-6 text-base font-semibold text-steel-900">在线数据源</h3>
+            <p className="mt-1.5 text-xs leading-5 text-steel-500">查看在线连接的数据源。</p>
+            <span className="mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-sky-700">查看数据源<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => onOpen('offline')}
+          className="group relative min-h-[190px] overflow-hidden rounded-2xl border border-brand-200/80 bg-white p-5 text-left shadow-sm transition-all hover:border-brand-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+        >
+          <span aria-hidden="true" className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-brand-50 opacity-60 transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex h-full flex-col">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-100 text-brand-700"><HardDrive className="h-5 w-5" /></span>
+            <h3 className="mt-6 text-base font-semibold text-steel-900">离线数据源</h3>
+            <p className="mt-1.5 text-xs leading-5 text-steel-500">查看已上传的 CSV、Excel 和 Parquet 文件。</p>
+            <span className="mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-brand-700">查看文件<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function OnlineEmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-center">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-100 to-brand-100 text-sky-700"><Radio className="h-7 w-7" /></span>
+      <h2 className="mt-5 text-sm font-semibold text-steel-700">暂无在线数据源</h2>
+      <p className="mt-1.5 text-[11px] text-steel-500">在线数据源将在这里展示。</p>
     </div>
   );
 }

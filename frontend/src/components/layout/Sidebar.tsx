@@ -70,7 +70,7 @@ const NAV_ENTRIES: NavEntry[] = [
     path: '/datasets',
     icon: Database,
     label: '我的数据',
-    hint: '已上传的数据文件',
+    hint: '在线与离线数据源',
   },
   {
     view: 'models',

@@ -30,7 +30,9 @@ export default function App() {
  *   /                  — redirect → /chat
  *   /chat              — fresh / active chat (no specific session id)
  *   /chat/:sessionId   — open a past session
- *   /datasets          — my datasets
+ *   /datasets          — data source categories
+ *   /datasets/online   — online data sources
+ *   /datasets/offline  — uploaded files
  *   /models            — my models
  *   /agents            — my agents
  */
@@ -63,7 +65,9 @@ function Root() {
           <Route index element={<Navigate to="/chat" replace />} />
           <Route path="chat" element={<ChatRoute />} />
           <Route path="chat/:sessionId" element={<ChatRoute />} />
-          <Route path="datasets" element={<DataRoute />} />
+          <Route path="datasets" element={<DataRoute kind="overview" />} />
+          <Route path="datasets/online" element={<DataRoute kind="online" />} />
+          <Route path="datasets/offline" element={<DataRoute kind="offline" />} />
           <Route path="models" element={<ModelsRoute />} />
           <Route path="agents" element={<AgentsRoute />} />
         </Route>
@@ -75,9 +79,16 @@ function Root() {
 
 /** Thin wrapper that injects an `onBack` going back to /chat.
  *  Keeps MyDataView/MyModelsView free of any router coupling. */
-function DataRoute() {
+function DataRoute({ kind }: { kind: 'overview' | 'online' | 'offline' }) {
   const navigate = useNavigate();
-  return <MyDataView onBack={() => navigate('/chat')} />;
+  return (
+    <MyDataView
+      kind={kind}
+      onBack={() => navigate(kind === 'overview' ? '/chat' : '/datasets')}
+      onGoChat={() => navigate('/chat')}
+      onOpen={(source) => navigate(`/datasets/${source}`)}
+    />
+  );
 }
 
 function ModelsRoute() {
