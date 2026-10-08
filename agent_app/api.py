@@ -29,6 +29,14 @@ from main import IndustrialTimeSeriesAgent
 from config.settings import settings
 from utils.helpers import validate_existing_file_name, validate_file_path
 from utils.dataset_table_preview import read_dataset_table_preview
+from config.online_sources import ONLINE_SOURCES
+from utils.online_data_sources import (
+    MissingInsertTime,
+    OnlineTableNotFound,
+    list_online_sources,
+    list_online_tables,
+    preview_online_table,
+)
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -192,6 +200,9 @@ async def index():
             'DELETE /api/sessions/{session_id}': 'Delete a conversation thread (index + checkpoint state)',
             'GET /api/datasets': 'List all uploaded data files',
             'GET /api/datasets/{file_name}/preview': 'Preview the first 50 rows of an uploaded file',
+            'GET /api/online-sources': 'List configured online data sources',
+            'GET /api/online-sources/{source_id}/tables': 'List tables in an online source',
+            'GET /api/online-sources/{source_id}/tables/{table_name}/preview': 'Preview the latest 50 rows',
             'GET /api/models': 'List anomaly-detection and fine-tuned prediction models',
             'GET /health': 'Health check endpoint',
         },
@@ -928,6 +939,43 @@ async def preview_dataset(
     except Exception as exc:
         logger.warning("Failed to preview dataset %s: %s", file_name, exc)
         raise HTTPException(status_code=422, detail="无法读取文件内容，请检查文件格式") from exc
+
+
+@app.get("/api/online-sources", response_model=Dict[str, Any])
+async def get_online_sources():
+    return {"sources": list_online_sources()}
+
+
+@app.get("/api/online-sources/{source_id}/tables", response_model=Dict[str, Any])
+async def get_online_tables(source_id: str):
+    source = ONLINE_SOURCES.get(source_id)
+    if source is None:
+        raise HTTPException(status_code=404, detail="在线数据源不存在")
+    try:
+        tables = await asyncio.to_thread(list_online_tables, source)
+        return {
+            "source": {"id": source_id, "name": source.name, "description": source.description, "database": source.database},
+            "tables": tables,
+        }
+    except Exception as exc:
+        logger.warning("Could not list online tables for %s: %s", source_id, type(exc).__name__)
+        raise HTTPException(status_code=503, detail="在线数据源暂时无法连接") from exc
+
+
+@app.get("/api/online-sources/{source_id}/tables/{table_name}/preview", response_model=Dict[str, Any])
+async def get_online_table_preview(source_id: str, table_name: str):
+    source = ONLINE_SOURCES.get(source_id)
+    if source is None:
+        raise HTTPException(status_code=404, detail="在线数据源不存在")
+    try:
+        return await asyncio.to_thread(preview_online_table, source, table_name)
+    except OnlineTableNotFound as exc:
+        raise HTTPException(status_code=404, detail="表格不存在") from exc
+    except MissingInsertTime as exc:
+        raise HTTPException(status_code=422, detail="该表缺少 insert_time 字段，无法预览最近 50 条") from exc
+    except Exception as exc:
+        logger.warning("Could not preview online table %s: %s", table_name, type(exc).__name__)
+        raise HTTPException(status_code=503, detail="在线数据源暂时无法读取") from exc
 
 
 @app.get("/api/models", response_model=Dict[str, Any])

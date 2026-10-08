@@ -17,6 +17,8 @@ import type {
   CSVPreview,
   DatasetsResponse,
   DatasetTablePreview,
+  OnlineSource,
+  OnlineTable,
   ModelsResponse,
   PredictionChart,
   ResumeValue,
@@ -168,6 +170,26 @@ export async function previewDataset(fileName: string): Promise<DatasetTablePrev
     `/api/datasets/${encodeURIComponent(fileName)}/preview`,
     { method: 'GET' },
     '预览文件失败',
+  );
+}
+
+export async function listOnlineSources(): Promise<{ sources: OnlineSource[] }> {
+  return getJson('/api/online-sources', { method: 'GET' }, '获取在线数据源失败');
+}
+
+export async function listOnlineTables(sourceId: string): Promise<{ source: OnlineSource; tables: OnlineTable[] }> {
+  return getJson(
+    `/api/online-sources/${encodeURIComponent(sourceId)}/tables`,
+    { method: 'GET' },
+    '获取数据库表格失败',
+  );
+}
+
+export async function previewOnlineTable(sourceId: string, tableName: string): Promise<DatasetTablePreview> {
+  return getJson(
+    `/api/online-sources/${encodeURIComponent(sourceId)}/tables/${encodeURIComponent(tableName)}/preview`,
+    { method: 'GET' },
+    '预览在线表格失败',
   );
 }
 

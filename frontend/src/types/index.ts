@@ -856,6 +856,18 @@ export interface DatasetTablePreview {
   total_rows: number | null;
 }
 
+export interface OnlineSource {
+  id: string;
+  name: string;
+  description: string;
+  database: string;
+}
+
+export interface OnlineTable {
+  name: string;
+  table_name: string;
+}
+
 export interface DatasetsResponse {
   datasets: DatasetEntry[];
   total: number;

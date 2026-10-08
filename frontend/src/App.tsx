@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { AuthPage } from '@/components/auth/AuthPage';
 import { ChatRoute } from '@/components/chat/ChatRoute';
@@ -32,6 +32,7 @@ export default function App() {
  *   /chat/:sessionId   — open a past session
  *   /datasets          — data source categories
  *   /datasets/online   — online data sources
+ *   /datasets/online/:sourceId — tables in one online source
  *   /datasets/offline  — uploaded files
  *   /models            — my models
  *   /agents            — my agents
@@ -67,6 +68,7 @@ function Root() {
           <Route path="chat/:sessionId" element={<ChatRoute />} />
           <Route path="datasets" element={<DataRoute kind="overview" />} />
           <Route path="datasets/online" element={<DataRoute kind="online" />} />
+          <Route path="datasets/online/:sourceId" element={<DataRoute kind="online-tables" />} />
           <Route path="datasets/offline" element={<DataRoute kind="offline" />} />
           <Route path="models" element={<ModelsRoute />} />
           <Route path="agents" element={<AgentsRoute />} />
@@ -79,14 +81,17 @@ function Root() {
 
 /** Thin wrapper that injects an `onBack` going back to /chat.
  *  Keeps MyDataView/MyModelsView free of any router coupling. */
-function DataRoute({ kind }: { kind: 'overview' | 'online' | 'offline' }) {
+function DataRoute({ kind }: { kind: 'overview' | 'online' | 'online-tables' | 'offline' }) {
   const navigate = useNavigate();
+  const { sourceId } = useParams();
   return (
     <MyDataView
       kind={kind}
-      onBack={() => navigate(kind === 'overview' ? '/chat' : '/datasets')}
+      sourceId={sourceId}
+      onBack={() => navigate(kind === 'overview' ? '/chat' : kind === 'online-tables' ? '/datasets/online' : '/datasets')}
       onGoChat={() => navigate('/chat')}
       onOpen={(source) => navigate(`/datasets/${source}`)}
+      onOpenSource={(id) => navigate(`/datasets/online/${encodeURIComponent(id)}`)}
     />
   );
 }

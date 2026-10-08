@@ -16,7 +16,8 @@ import {
   Upload,
 } from 'lucide-react';
 import * as api from '@/services/api';
-import { DatasetPreviewDialog } from '@/components/datasets/DatasetPreviewDialog';
+import { TablePreviewDialog } from '@/components/datasets/TablePreviewDialog';
+import { OnlineSourceList, OnlineTableList } from '@/components/datasets/OnlineDataView';
 import type { DatasetEntry } from '@/types';
 import { cn } from '@/utils/cn';
 import {
@@ -61,18 +62,22 @@ function extMeta(ext: string) {
   );
 }
 
-type DataSourceKind = 'overview' | 'online' | 'offline';
+type DataSourceKind = 'overview' | 'online' | 'online-tables' | 'offline';
 
 export function MyDataView({
   kind,
+  sourceId,
   onBack,
   onGoChat,
   onOpen,
+  onOpenSource,
 }: {
   kind: DataSourceKind;
+  sourceId?: string;
   onBack: () => void;
   onGoChat: () => void;
   onOpen: (source: 'online' | 'offline') => void;
+  onOpenSource: (id: string) => void;
 }) {
   const [datasets, setDatasets] = useState<DatasetEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -107,8 +112,8 @@ export function MyDataView({
           type="button"
           onClick={onBack}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-steel-600 transition-colors hover:bg-steel-100 hover:text-steel-900"
-          title={kind === 'overview' ? '返回对话' : '返回我的数据'}
-          aria-label={kind === 'overview' ? '返回对话' : '返回我的数据'}
+          title={kind === 'overview' ? '返回对话' : kind === 'online-tables' ? '返回在线数据源' : '返回我的数据'}
+          aria-label={kind === 'overview' ? '返回对话' : kind === 'online-tables' ? '返回在线数据源' : '返回我的数据'}
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -120,7 +125,7 @@ export function MyDataView({
           {kind !== 'overview' && <span className="text-steel-300">/</span>}
           {kind !== 'overview' && (
             <span className="text-xs font-medium text-steel-600">
-              {kind === 'online' ? '在线数据源' : '离线数据源'}
+              {kind === 'offline' ? '离线数据源' : '在线数据源'}
             </span>
           )}
           {kind === 'offline' && !loading && !error && (
@@ -151,7 +156,9 @@ export function MyDataView({
           {kind === 'overview' ? (
             <DataSourceOverview onOpen={onOpen} />
           ) : kind === 'online' ? (
-            <OnlineEmptyState />
+            <OnlineSourceList onOpen={onOpenSource} />
+          ) : kind === 'online-tables' ? (
+            <OnlineTableList sourceId={sourceId ?? ''} />
           ) : loading ? (
             <LoadingState />
           ) : error ? (
@@ -168,7 +175,7 @@ export function MyDataView({
         </div>
       </div>
       {previewDataset && (
-        <DatasetPreviewDialog dataset={previewDataset} onClose={() => setPreviewDataset(null)} />
+        <TablePreviewDialog title={previewDataset.name} source={{ kind: 'offline', fileName: previewDataset.file_name }} onClose={() => setPreviewDataset(null)} />
       )}
     </div>
   );
@@ -218,24 +225,16 @@ function DataSourceOverview({
   );
 }
 
-function OnlineEmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-100 to-brand-100 text-sky-700"><Radio className="h-7 w-7" /></span>
-      <h2 className="mt-5 text-sm font-semibold text-steel-700">暂无在线数据源</h2>
-      <p className="mt-1.5 text-[11px] text-steel-500">在线数据源将在这里展示。</p>
-    </div>
-  );
-}
-
 function DatasetCard({ ds, onPreview }: { ds: DatasetEntry; onPreview: () => void }) {
   const meta = extMeta(ds.extension);
   const Icon = meta.icon;
   return (
-    <div
+    <button
+      type="button"
+      onClick={onPreview}
       className={cn(
-        'group relative flex flex-col rounded-2xl border border-steel-200/80 bg-white p-4 shadow-sm transition-all',
-        'hover:border-brand-300 hover:shadow-soft',
+        'group relative flex w-full flex-col rounded-2xl border border-steel-200/80 bg-white p-4 text-left shadow-sm transition-all',
+        'hover:border-brand-300 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
       )}
     >
       <div className="flex items-start gap-3">
@@ -287,10 +286,11 @@ function DatasetCard({ ds, onPreview }: { ds: DatasetEntry; onPreview: () => voi
           </div>
         )}
       </div>
-      <button type="button" onClick={onPreview} className="mt-3 inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-3 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
-        <Table className="h-3.5 w-3.5" />预览表格
-      </button>
-    </div>
+      <span className="mt-auto flex items-center justify-between gap-2 pt-3 text-[11px] font-medium text-brand-700">
+        <span>预览历史上传记录</span>
+        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+      </span>
+    </button>
   );
 }
 

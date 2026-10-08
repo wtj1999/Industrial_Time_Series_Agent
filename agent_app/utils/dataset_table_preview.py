@@ -15,7 +15,7 @@ import pyarrow.parquet as pq
 PREVIEW_ROWS = 50
 
 
-def _cell(value: Any) -> str | int | float | bool | None:
+def to_preview_cell(value: Any) -> str | int | float | bool | None:
     if value is None:
         return None
     if isinstance(value, (datetime, date, time, pd.Timestamp)):
@@ -63,7 +63,7 @@ def read_dataset_table_preview(file_path: Path) -> dict[str, Any]:
     return {
         "file_name": file_path.name,
         "columns": [str(column) for column in sample.columns],
-        "rows": [[_cell(value) for value in row] for row in sample.itertuples(index=False, name=None)],
+        "rows": [[to_preview_cell(value) for value in row] for row in sample.itertuples(index=False, name=None)],
         "preview_rows": len(sample),
         "has_more": has_more,
         "total_rows": total_rows,
