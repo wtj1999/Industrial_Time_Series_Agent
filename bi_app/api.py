@@ -1,20 +1,32 @@
 """Standalone FastAPI service for the production BI application."""
 
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 
 from .client import BiRemoteClient, BiUpstreamError
 from .config import get_settings
+from .auth import BiAuthMiddleware
 from .schemas import BiQueryRequest, RemoteBiResponse
+from .ng.api import close_ng_service, router as ng_router
 
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    yield
+    close_ng_service()
+
+
 app = FastAPI(
-    title="Production BI Adapter",
-    version="1.0.0",
-    description="Independent adapter for the remote production BI application.",
+    title="Production BI Service",
+    version="1.1.0",
+    description="Remote production BI adapter and local NG analytics with resumable confirmation.",
+    lifespan=lifespan,
 )
+app.include_router(ng_router)
+app.add_middleware(BiAuthMiddleware)
 
 
 @app.get("/health")

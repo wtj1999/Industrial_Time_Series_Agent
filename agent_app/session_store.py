@@ -120,6 +120,18 @@ def _row_to_summary(row: sqlite3.Row) -> Dict[str, Any]:
 # ----------------------------------------------------------------------
 
 
+def claim_session(user_id: str, session_id: str) -> bool:
+    """Atomically reserve a new thread; an existing owner can never change."""
+    with _LOCK, _connect() as c:
+        now = _now_iso()
+        c.execute(
+            'INSERT OR IGNORE INTO session_index (session_id,user_id,title,created_at,updated_at,message_count) VALUES (?,?,?,?,?,0)',
+            (session_id, user_id, '新对话', now, now),
+        )
+        owner = c.execute('SELECT user_id FROM session_index WHERE session_id=?', (session_id,)).fetchone()
+        return bool(owner and owner['user_id'] == user_id)
+
+
 def upsert_session(
     user_id: str,
     session_id: str,
@@ -160,19 +172,21 @@ def upsert_session(
 
     with _LOCK, _connect() as c:
         cur = c.execute(
-            "SELECT created_at, title FROM session_index WHERE session_id = ?",
+            "SELECT created_at, title, user_id, message_count FROM session_index WHERE session_id = ?",
             (session_id,),
         )
         existing = cur.fetchone()
         if existing:
+            if existing['user_id'] != user_id:
+                raise ValueError('Session belongs to a different user')
             # Preserve original created_at + title (stable identity).
             c.execute(
                 """
                 UPDATE session_index
-                   SET user_id = ?, updated_at = ?, message_count = ?
+                   SET title = ?, updated_at = ?, message_count = ?
                  WHERE session_id = ?
                 """,
-                (user_id, now, msg_count, session_id),
+                (title if existing['message_count'] == 0 else existing['title'], now, msg_count, session_id),
             )
         else:
             c.execute(

@@ -825,6 +825,9 @@ export interface AuthResponse {
   success: boolean;
   user_id?: string | null;
   username?: string | null;
+  email?: string | null;
+  access_token?: string;
+  expires_at?: number;
   error?: string | null;
 }
 
@@ -854,6 +857,18 @@ export interface DatasetTablePreview {
   preview_rows: number;
   has_more: boolean;
   total_rows: number | null;
+  column_metadata?: OnlineColumnMetadata[];
+}
+
+export type OnlineFilters = Record<string, string | null>;
+
+export interface OnlineColumnMetadata {
+  name: string;
+  data_type: string;
+  comment: string;
+  filterable: boolean;
+  chartable: boolean;
+  temporal: boolean;
 }
 
 export interface OnlineSource {
@@ -866,6 +881,21 @@ export interface OnlineSource {
 export interface OnlineTable {
   name: string;
   table_name: string;
+}
+
+export interface OnlineTableMetrics {
+  sample_limit: number;
+  sample_rows: number;
+  column_count: number;
+  total_cells: number;
+  missing_cells: number;
+  completeness_rate: number | null;
+  numeric_column_count: number;
+  constant_numeric_column_count: number;
+  duplicate_rate: number | null;
+  latest_insert_time: string | null;
+  freshness_seconds: number | null;
+  checked_at: string;
 }
 
 export interface DatasetsResponse {

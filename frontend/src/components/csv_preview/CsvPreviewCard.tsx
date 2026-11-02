@@ -19,7 +19,7 @@
  *     column
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -70,7 +70,7 @@ export function CsvPreviewCard({ preview }: { preview: CSVPreview }) {
   return (
     <Bubble>
       <Header file_name={preview.file_name} total_rows={preview.total_rows} preview_rows={preview.preview_rows} />
-      <Body preview={preview} />
+      <CsvPreviewBody preview={preview} />
       <Footer preview_rows={preview.preview_rows} />
     </Bubble>
   );
@@ -139,7 +139,7 @@ function Footer({ preview_rows }: { preview_rows: number }) {
 
 /* ------------------------------------------------------------------ */
 
-function Body({ preview }: { preview: CSVPreview }) {
+export function CsvPreviewBody({ preview, indexLabels, showColumnChips = true }: { preview: CSVPreview; indexLabels?: string[]; showColumnChips?: boolean }) {
   const chartableColumns = useMemo(
     () => preview.columns.filter((c) => c.chartable),
     [preview.columns],
@@ -180,11 +180,11 @@ function Body({ preview }: { preview: CSVPreview }) {
 
   return (
     <div className="mt-3">
-      <ChipRow columns={preview.columns} active={active} onPick={setActive} />
+      {showColumnChips && <ChipRow columns={preview.columns} active={active} onPick={setActive} />}
       {stats && active && <StatsRow name={active} stats={stats} />}
       <div className="mt-3">
         {active ? (
-          <Chart data={data} stats={stats} />
+          <Chart data={data} stats={stats} indexLabels={indexLabels} />
         ) : (
           <div className="flex h-48 flex-col items-center justify-center text-center text-[11px] text-steel-500">
             <Activity className="mb-2 h-5 w-5 text-steel-400" />
@@ -276,10 +276,13 @@ function Stat({ label, value }: { label: string; value: string }) {
 function Chart({
   data,
   stats,
+  indexLabels,
 }: {
   data: ChartPoint[];
   stats: ColumnStats | null;
+  indexLabels?: string[];
 }) {
+  const fillId = useId().replace(/:/g, '');
   // Pad the Y-domain slightly so the line doesn't hug the edges.
   const yDomain = useMemo<[number, number] | undefined>(() => {
     if (!stats) return undefined;
@@ -293,7 +296,7 @@ function Chart({
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 10, right: 12, bottom: 0, left: 0 }}>
           <defs>
-            <linearGradient id="csvPreviewFill" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={BRAND_FILL_TOP} />
               <stop offset="100%" stopColor={BRAND_FILL_BOT} />
             </linearGradient>
@@ -301,6 +304,7 @@ function Chart({
           <CartesianGrid stroke="#eceef2" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="idx"
+            tickFormatter={indexLabels ? (value: number) => (indexLabels[value] ?? '').replace('T', ' ').slice(5, 19) : undefined}
             tick={{ fontSize: 10, fill: '#8493ab' }}
             tickLine={false}
             axisLine={{ stroke: '#d5dae3' }}
@@ -316,14 +320,14 @@ function Chart({
           />
           <Tooltip
             cursor={{ stroke: '#8eb6ff', strokeWidth: 1, strokeDasharray: '4 4' }}
-            content={<ChartTooltip />}
+            content={<ChartTooltip indexLabels={indexLabels} />}
           />
           <Area
             type="monotone"
             dataKey="value"
             stroke={BRAND_STROKE}
             strokeWidth={1.75}
-            fill="url(#csvPreviewFill)"
+            fill={`url(#${fillId})`}
             dot={false}
             activeDot={{ r: 3, strokeWidth: 1.5, fill: '#fff', stroke: BRAND_STROKE }}
             connectNulls={false}
@@ -333,7 +337,7 @@ function Chart({
           {stats && (
             <>
               <ReferenceDot
-                x={argmin(data).toString()}
+                x={argmin(data)}
                 y={stats.min}
                 r={3}
                 fill="#8eb6ff"
@@ -341,7 +345,7 @@ function Chart({
                 strokeWidth={1}
               />
               <ReferenceDot
-                x={argmax(data).toString()}
+                x={argmax(data)}
                 y={stats.max}
                 r={3}
                 fill="#1f47f5"
@@ -365,14 +369,14 @@ function Chart({
   );
 }
 
-function ChartTooltip({ active, payload, label }: any) {
+function ChartTooltip({ active, payload, label, indexLabels }: any) {
   if (!active || !payload || !payload.length) return null;
   const value = payload[0]?.value;
   const hasValue = typeof value === 'number';
   return (
     <div className="rounded-lg border border-steel-200/80 bg-white/95 px-2.5 py-1.5 shadow-soft backdrop-blur">
       <div className="text-[10px] uppercase tracking-wider text-steel-400">
-        第 {label} 行(末尾)
+        {indexLabels ? indexLabels[label] : `第 ${label} 行(末尾)`}
       </div>
       <div className="mt-0.5 font-mono text-[12px] font-medium text-steel-900">
         {hasValue ? value.toFixed(4) : '—  (null)'}

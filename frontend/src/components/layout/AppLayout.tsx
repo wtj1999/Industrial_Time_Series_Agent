@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useSession } from '@/context/SessionContext';
+import { AccountSecurityNotice } from '@/components/auth/AccountSecurityNotice';
 
 /** Context shape passed via <Outlet context={...}> to child routes.
  *  ChatRoute consumes it so AppLayout owns the composer state while the
@@ -23,6 +24,7 @@ export function AppLayout() {
   return (
     <div className="flex h-full flex-col">
       <Header />
+      <AccountSecurityNotice />
       <div className="flex min-h-0 flex-1">
         <Sidebar
           onPickExample={(p) => {

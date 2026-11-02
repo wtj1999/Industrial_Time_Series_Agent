@@ -19,6 +19,8 @@ import type {
   DatasetTablePreview,
   OnlineSource,
   OnlineTable,
+  OnlineTableMetrics,
+  OnlineFilters,
   ModelsResponse,
   PredictionChart,
   ResumeValue,
@@ -28,7 +30,7 @@ import type {
   StandardResponse,
   StreamEvent,
 } from '@/types';
-import { getUserId } from '@/utils/user';
+import { getAuthHeaders, handleUnauthorized } from '@/utils/user';
 
 const envBase = import.meta.env.VITE_API_BASE_URL;
 /** Empty base => use the Vite dev proxy (relative URLs). */
@@ -45,7 +47,9 @@ function url(path: string): string {
  * to remember to add it.
  */
 function authHeaders(extra?: HeadersInit): HeadersInit {
-  return { 'X-User-Id': getUserId(), ...(extra ?? {}) };
+  const headers = new Headers(extra);
+  Object.entries(getAuthHeaders()).forEach(([key, value]) => headers.set(key, value));
+  return headers;
 }
 
 async function parseJson<T>(res: Response): Promise<T> {
@@ -70,11 +74,16 @@ function raiseIfFailed(
   fallback: string,
 ): void {
   if (!res.ok) {
-    throw new Error(body?.error ?? `${fallback} (${res.status})`);
+    const detail = (body as { detail?: unknown } | null)?.detail;
+    throw new ApiError(body?.error ?? (typeof detail === 'string' ? detail : res.status === 422 ? '输入格式不正确，请检查表单' : `${fallback} (${res.status})`), res.status, Number(res.headers.get('Retry-After')) || 0);
   }
   if (body && body.success === false) {
     throw new Error(body.error ?? fallback);
   }
+}
+
+export class ApiError extends Error {
+  constructor(message: string, public status: number, public retryAfter = 0) { super(message); }
 }
 
 async function getJson<T>(
@@ -92,6 +101,7 @@ async function getJson<T>(
     if (err instanceof Error && err.name === 'AbortError') throw err;
     throw new Error('网络错误，请确认后端服务已启动');
   }
+  if (!['/api/auth/login', '/api/auth/register'].includes(path)) handleUnauthorized(res);
   const body = await parseJson<T & { success?: boolean; error?: string | null }>(res).catch(
     () => null,
   );
@@ -177,20 +187,34 @@ export async function listOnlineSources(): Promise<{ sources: OnlineSource[] }> 
   return getJson('/api/online-sources', { method: 'GET' }, '获取在线数据源失败');
 }
 
-export async function listOnlineTables(sourceId: string): Promise<{ source: OnlineSource; tables: OnlineTable[] }> {
+export async function listOnlineTables(sourceId: string, signal?: AbortSignal): Promise<{ source: OnlineSource; tables: OnlineTable[] }> {
   return getJson(
     `/api/online-sources/${encodeURIComponent(sourceId)}/tables`,
-    { method: 'GET' },
+    { method: 'GET', signal },
     '获取数据库表格失败',
   );
 }
 
-export async function previewOnlineTable(sourceId: string, tableName: string): Promise<DatasetTablePreview> {
+export async function onlineTableMetrics(sourceId: string, tableName: string, signal?: AbortSignal): Promise<OnlineTableMetrics> {
   return getJson(
-    `/api/online-sources/${encodeURIComponent(sourceId)}/tables/${encodeURIComponent(tableName)}/preview`,
+    `/api/online-sources/${encodeURIComponent(sourceId)}/tables/${encodeURIComponent(tableName)}/metrics`,
+    { method: 'GET', signal },
+    '获取数据表指标失败',
+  );
+}
+
+export async function previewOnlineTable(sourceId: string, tableName: string, filters: OnlineFilters = {}, limit = 50): Promise<DatasetTablePreview> {
+  const params = new URLSearchParams({ filters: JSON.stringify(filters), limit: String(limit) });
+  return getJson(
+    `/api/online-sources/${encodeURIComponent(sourceId)}/tables/${encodeURIComponent(tableName)}/preview?${params}`,
     { method: 'GET' },
     '预览在线表格失败',
   );
+}
+
+export async function onlineFilterOptions(sourceId: string, tableName: string, column: string, filters: OnlineFilters, search: string, limit: number): Promise<{ values: (string | null)[]; has_more: boolean }> {
+  const params = new URLSearchParams({ column, filters: JSON.stringify(filters), search, limit: String(limit) });
+  return getJson(`/api/online-sources/${encodeURIComponent(sourceId)}/tables/${encodeURIComponent(tableName)}/filter-options?${params}`, { method: 'GET' }, '获取筛选选项失败');
 }
 
 /** List every persisted anomaly-detection model across all sessions. */
@@ -202,20 +226,7 @@ export async function listModels(): Promise<ModelsResponse> {
   );
 }
 
-/* ------------------------------------------------------------------ *
- * Auth endpoints — login / register / validate-session.
- *
- * All three return the same ``AuthResponse`` envelope. On success the
- * caller (AuthContext) persists ``{user_id, username}`` via
- * ``utils/user.ts``; the ``X-User-Id`` header then flows automatically
- * through :func:`authHeaders` on every subsequent request.
- *
- * ``getMe`` is called on mount to validate a stored session — it sends
- * the current ``X-User-Id`` and the backend looks it up; a
- * ``success:false`` response means the stored id is stale and the user
- * is bounced back to the login page.
- * ------------------------------------------------------------------ */
-
+/** Account APIs use a server-issued Bearer token for subsequent requests. */
 export async function login(username: string, password: string): Promise<AuthResponse> {
   return postJson<AuthResponse>(
     '/api/auth/login',
@@ -224,10 +235,10 @@ export async function login(username: string, password: string): Promise<AuthRes
   );
 }
 
-export async function register(username: string, password: string): Promise<AuthResponse> {
+export async function register(username: string, password: string, email: string, code: string): Promise<AuthResponse> {
   return postJson<AuthResponse>(
     '/api/auth/register',
-    { username, password },
+    { username, password, email, code },
     '注册失败',
   );
 }
@@ -238,6 +249,23 @@ export async function getMe(): Promise<AuthResponse> {
     { method: 'GET' },
     '验证失败',
   );
+}
+
+export type CodePurpose = 'register' | 'reset_password' | 'bind_email';
+export function sendEmailCode(email: string, purpose: CodePurpose) {
+  return postJson<{ success: boolean; message: string; retry_after: number; expires_in: number }>('/api/auth/send-code', { email, purpose }, '获取验证码失败');
+}
+
+export function resetPassword(email: string, code: string, password: string) {
+  return postJson<{ success: boolean }>('/api/auth/reset-password', { email, code, password }, '重置密码失败');
+}
+
+export function bindEmail(email: string, code: string, password: string) {
+  return postJson<AuthResponse>('/api/auth/bind-email', { email, code, password }, '绑定邮箱失败');
+}
+
+export function logout() {
+  return postJson<{ success: boolean }>('/api/auth/logout', {}, '退出失败，请重试');
 }
 
 /** POST JSON helper — mirrors :func:`getJson` but defaults the method
@@ -345,6 +373,7 @@ export async function streamQuery(params: QueryParams, cb: QueryCallbacks): Prom
   // The FastAPI exception handler returns HTTP 200 with a JSON body
   // `{success:false, error, status_code}` for errors. Detect that case by
   // inspecting Content-Type — a real stream is `text/event-stream`.
+  handleUnauthorized(res);
   const ct = res.headers.get('content-type') ?? '';
   const isStream = ct.includes('text/event-stream') || ct.includes('application/x-ndjson');
 

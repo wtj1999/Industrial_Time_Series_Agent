@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, Code2, Database, Table2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { BiScalar, BiSuccessResponse } from './types';
+import { NgDefectChart } from '../ng-defect-analysis/NgDefectChart';
+import { NgAnalysisCard } from '../ng-defect-analysis/NgAnalysisCard';
 
 const PAGE_SIZE = 20;
 
@@ -41,11 +43,13 @@ export function BiResultCard({ result }: { result: BiSuccessResponse }) {
             <p className="mt-1 text-sm leading-6 text-steel-800">{result.rewritten_query}</p>
           </div>
         )}
-        {result.sql_explanation && (
+        {result.sql_explanation && result.chart?.type !== 'ng_bar' && (
           <div className="rounded-xl border border-steel-200 bg-steel-50/60 px-3 py-2.5">
             <p className="text-xs leading-5 text-steel-700">{result.sql_explanation}</p>
           </div>
         )}
+
+        {result.chart?.type === 'ng_bar' && <NgDefectChart chart={result.chart} />}
 
         <div className="overflow-hidden rounded-xl border border-steel-200">
           {rows.length > 0 ? (
@@ -92,10 +96,12 @@ export function BiResultCard({ result }: { result: BiSuccessResponse }) {
           </div>
         )}
 
+        {result.chart?.type === 'ng_bar' && result.analysis && <NgAnalysisCard analysis={result.analysis} />}
+
         {result.sql && (
           <details className="rounded-xl border border-steel-700 bg-steel-950">
             <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-xs font-medium text-steel-200">
-              <Code2 className="h-3.5 w-3.5 text-brand-300" />查看生成的 SQL
+              <Code2 className="h-3.5 w-3.5 text-brand-300" />{result.chart?.type === 'ng_bar' ? '查看查询模板' : '查看生成的 SQL'}
             </summary>
             <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words border-t border-steel-700 px-3 py-3 font-mono text-[11px] leading-5 text-steel-200">
               <code>{result.sql}</code>

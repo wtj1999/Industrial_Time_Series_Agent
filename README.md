@@ -31,6 +31,8 @@ Industrial Time Series Agent 是一个面向工业时序数据的多智能体应
 
 ### 登录与注册
 
+支持邮箱验证码注册、用户名或邮箱登录、忘记密码后通过邮箱验证码重置密码，以及旧账户登录后绑定邮箱。部署前请按[账户与邮件配置说明](agent_app/auth/README.md)配置 SMTP；示例见 [`agent_app/auth.env.example`](agent_app/auth.env.example)。
+
 <p align="center">
   <img src="./登录页面.png" alt="登录与注册页面" width="90%" />
 </p>
@@ -88,6 +90,9 @@ Industrial Time Series Agent 是一个面向工业时序数据的多智能体应
 | 设备域 | 锂电分容容量偏低根因分析智能体 | 基于分容容量和工艺参数训练树模型，输出特征重要性与 TreeSHAP |
 | 市场域 | 动力电池装车量预测智能体 | 按电池类型和外生变量预测未来装车量 |
 | 市场域 | 新能源汽车销量预测智能体 | 按 BEV、PHEV、EREV、乘用车、商用车等维度预测销量 |
+| 市场域 | 零跑汽车销量预测智能体 | 基于零跑汽车历史销量，按月度或季度预测品牌销量 |
+| 市场域 | 吉利汽车销量预测智能体 | 基于吉利汽车历史销量，按月度或季度预测品牌销量 |
+| 市场域 | 长城汽车销量预测智能体 | 基于长城汽车历史销量，按月度或季度预测品牌销量 |
 | 市场域 | 锂电原材料价格预测智能体 | 按原材料品类结合供需、库存和下游需求变量预测未来价格走势 |
 | 市场域 | 锂电电芯SOH预测智能体 | 根据历史容量衰减序列自动推断预测步长，估计达到目标SOH所需圈数 |
 | 生产域 | 锂电电芯产量预测智能体 | 结合历史产量、产线运行与质量数据预测未来产量和产能缺口 |
@@ -95,6 +100,8 @@ Industrial Time Series Agent 是一个面向工业时序数据的多智能体应
 | 生产域 | 锂电工厂能耗预测智能体 | 按工段、PACK、公共设备和总计维度预测未来能耗及单位产量能耗变化 |
 
 业务智能体注册位于 `agent_app/applications/registry.py`，前端页面位于 `frontend/src/features/agent-apps/`。
+
+零跑、吉利、长城销量预测入口复用新能源汽车销量预测表单和通用预测流程，分别注册为 `leapmotor-sales-forecast`、`geely-sales-forecast`、`great-wall-sales-forecast`。支持选择已有数据或上传 CSV/XLSX/Parquet、选择模型、月度/季度粒度、1至36期及分析维度；预测目标固定为对应品牌销量。品牌入口按具体车型型号多选：零跑提供C01/C10/C11/C16/B01/B10/T03，吉利提供星瑞/星越L/帝豪/博越L/缤越/豪越L/吉利星愿，长城提供哈弗H6/哈弗大狗/坦克300/坦克500/魏牌蓝山/魏牌高山/欧拉好猫/长城炮。未选时按全部车型处理；品牌入口不接受BEV/PHEV等分类作为车型型号。车型名称参考[零跑官网](https://cn.leapmotor.com/C10-select-type.html?APPFullScreen=true&isNewReserve=true&newwebsite=true&platform=web&type=C10)、[吉利官网](https://dh.geely.com/Home)、[长城官网](https://www.gwm.com.cn/index.html)，按车系名称展示，不展开年款或动力版本。应提供对应品牌的历史数据，包含多个品牌时需先确认并筛选品牌范围。
 
 ## 系统架构
 

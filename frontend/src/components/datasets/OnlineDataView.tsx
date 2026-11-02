@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, Database, RefreshCw, Table2 } from 'lucide-react';
 import * as api from '@/services/api';
 import type { OnlineSource, OnlineTable } from '@/types';
-import { TablePreviewDialog } from './TablePreviewDialog';
+import { OnlineTableExplorer } from './OnlineTableExplorer';
+import { OnlineTableMetrics } from './OnlineTableMetrics';
 
 function LoadError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
@@ -67,22 +68,37 @@ export function OnlineTableList({ sourceId }: { sourceId: string }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<OnlineTable | null>(null);
+  const [metricsVersion, setMetricsVersion] = useState(0);
+  const requestRef = useRef<AbortController | null>(null);
   const load = useCallback(async (refresh = false) => {
+    requestRef.current?.abort();
+    const controller = new AbortController();
+    requestRef.current = controller;
     if (refresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
     try {
-      const result = await api.listOnlineTables(sourceId);
+      const result = await api.listOnlineTables(sourceId, controller.signal);
+      if (controller.signal.aborted) return;
       setSource(result.source);
       setTables(result.tables);
+      setMetricsVersion((value) => value + 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '获取数据库表格失败');
+      if (!controller.signal.aborted) setError(err instanceof Error ? err.message : '获取数据库表格失败');
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [sourceId]);
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    setSource(null);
+    setTables([]);
+    setSelected(null);
+    void load();
+    return () => requestRef.current?.abort();
+  }, [load]);
 
   return (
     <div>
@@ -90,7 +106,7 @@ export function OnlineTableList({ sourceId }: { sourceId: string }) {
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-steel-400">{source?.database ?? 'dwd'} 数据库</p>
           <h2 className="mt-1 text-lg font-semibold tracking-tight text-steel-900">{source?.name ?? '工厂数据表'}</h2>
-          <p className="mt-1 text-xs text-steel-500">{loading ? '正在读取表格…' : `${tables.length} 张表 · 点击卡片预览最近 50 条记录`}</p>
+          <p className="mt-1 text-xs text-steel-500">{loading ? '正在读取表格…' : `${tables.length} 张表 · 点击卡片筛选记录、预览表格与曲线`}</p>
         </div>
         <button type="button" onClick={() => void load(true)} disabled={refreshing} className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-steel-200 bg-white px-3 text-xs font-medium text-steel-700 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700 disabled:opacity-50"><RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />刷新</button>
       </div>
@@ -98,17 +114,20 @@ export function OnlineTableList({ sourceId }: { sourceId: string }) {
         : error ? <LoadError message={error} onRetry={() => void load()} />
         : tables.length === 0 ? <div className="py-20 text-center text-xs text-steel-500">此数据库暂无表格</div>
         : <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {tables.map((table) => <button key={table.table_name} type="button" onClick={() => setSelected(table)} className="group flex min-h-[155px] flex-col rounded-2xl border border-steel-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-brand-300 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 text-sky-700"><Table2 className="h-5 w-5" /></span>
+            {tables.map((table) => <button key={`${sourceId}:${table.table_name}`} type="button" onClick={() => setSelected(table)} className="group flex min-h-[175px] flex-col rounded-2xl border border-steel-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-brand-300 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
+              <span className="flex w-full items-start justify-between">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700"><Table2 className="h-5 w-5" /></span>
+                <OnlineTableMetrics sourceId={sourceId} tableName={table.table_name} refreshVersion={metricsVersion} />
+              </span>
               <h3 className="mt-3 line-clamp-2 text-[13px] font-semibold leading-5 text-steel-800" title={table.name}>{table.name}</h3>
               <code className="mt-1 break-all text-[10px] text-steel-500">{table.table_name}</code>
               <span className="mt-auto flex items-center justify-between gap-2 pt-3 text-[11px] font-medium text-brand-700">
-                <span>预览实时生产记录</span>
+                <span>预览与筛选生产记录</span>
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </span>
             </button>)}
           </div>}
-      {selected && <TablePreviewDialog title={selected.name} source={{ kind: 'online', sourceId, tableName: selected.table_name }} onClose={() => setSelected(null)} />}
+      {selected && <OnlineTableExplorer key={`${sourceId}:${selected.table_name}`} title={selected.name} sourceId={sourceId} tableName={selected.table_name} onClose={() => setSelected(null)} />}
     </div>
   );
 }

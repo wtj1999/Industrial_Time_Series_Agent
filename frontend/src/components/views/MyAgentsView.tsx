@@ -6,7 +6,6 @@ import {
   BatteryCharging,
   BatteryMedium,
   BatteryWarning,
-  BarChart3,
   Boxes,
   Bot,
   ChartSpline,
@@ -27,7 +26,7 @@ import { useSession } from '@/context/SessionContext';
 import { BatteryInstallationForecastApp } from '@/features/agent-apps/battery-installation-forecast/BatteryInstallationForecastApp';
 import { BATTERY_INSTALLATION_AGENT } from '@/features/agent-apps/battery-installation-forecast/config';
 import { NewEnergyVehicleSalesApp } from '@/features/agent-apps/new-energy-vehicle-sales/NewEnergyVehicleSalesApp';
-import { NEW_ENERGY_VEHICLE_SALES_AGENT } from '@/features/agent-apps/new-energy-vehicle-sales/config';
+import { VEHICLE_SALES_AGENTS } from '@/features/agent-apps/new-energy-vehicle-sales/config';
 import { CoatingArealDensityAnalysisApp } from '@/features/agent-apps/coating-areal-density-analysis/CoatingArealDensityAnalysisApp';
 import { COATING_AREAL_DENSITY_AGENT } from '@/features/agent-apps/coating-areal-density-analysis/config';
 import { CoatingArealDensityAnomalyDetectionApp } from '@/features/agent-apps/coating-areal-density-anomaly-detection/CoatingArealDensityAnomalyDetectionApp';
@@ -51,14 +50,17 @@ import { WELDING_EQUIPMENT_ANOMALY_AGENT } from '@/features/agent-apps/welding-e
 import { CellSohForecastApp } from '@/features/agent-apps/cell-soh-forecast/CellSohForecastApp';
 import { CELL_SOH_FORECAST_AGENT } from '@/features/agent-apps/cell-soh-forecast/config';
 import { ProductionBiAnalysisApp } from '@/features/agent-apps/production-bi-analysis/ProductionBiAnalysisApp';
-import { PRODUCTION_BI_ANALYSIS_AGENT } from '@/features/agent-apps/production-bi-analysis/config';
+import { PRODUCTION_BI_AGENTS } from '@/features/agent-apps/production-bi-analysis/config';
+import { NG_DEFECT_AGENT } from '@/features/agent-apps/ng-defect-analysis/config';
+
+const PRODUCTION_QUERY_AGENTS = [...PRODUCTION_BI_AGENTS, NG_DEFECT_AGENT];
 
 type AgentDomain = 'equipment' | 'production' | 'market';
 
 const DOMAIN_COUNTS: Record<AgentDomain, number> = {
   equipment: 6,
-  production: 4,
-  market: 4,
+  production: 3 + PRODUCTION_QUERY_AGENTS.length,
+  market: 3 + VEHICLE_SALES_AGENTS.length,
 };
 
 const DOMAIN_META: Record<
@@ -106,6 +108,8 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
   const { initNewSession } = useSession();
   const [activeDomain, setActiveDomain] = useState<AgentDomain | null>(null);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
+  const activeBiAgent = PRODUCTION_QUERY_AGENTS.find((agent) => agent.id === activeAgent);
+  const activeVehicleSalesAgent = VEHICLE_SALES_AGENTS.find((agent) => agent.id === activeAgent);
   const activeMeta = activeDomain ? DOMAIN_META[activeDomain] : null;
   const visibleCount = activeDomain
     ? DOMAIN_COUNTS[activeDomain]
@@ -126,9 +130,9 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(BATTERY_INSTALLATION_AGENT.id);
   };
 
-  const openVehicleSalesAgent = () => {
+  const openVehicleSalesAgent = (agentId: string) => {
     initNewSession();
-    setActiveAgent(NEW_ENERGY_VEHICLE_SALES_AGENT.id);
+    setActiveAgent(agentId);
   };
 
   const openRawMaterialPriceForecastAgent = () => {
@@ -186,14 +190,14 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(FACTORY_ENERGY_FORECAST_AGENT.id);
   };
 
-  const openProductionBiAnalysisAgent = () => {
-    setActiveAgent(PRODUCTION_BI_ANALYSIS_AGENT.id);
+  const openProductionBiAnalysisAgent = (agentId: string) => {
+    setActiveAgent(agentId);
   };
 
-  const activeAgentName = activeAgent === PRODUCTION_BI_ANALYSIS_AGENT.id
-    ? PRODUCTION_BI_ANALYSIS_AGENT.name
-    : activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
-    ? NEW_ENERGY_VEHICLE_SALES_AGENT.name
+  const activeAgentName = activeBiAgent
+    ? activeBiAgent.name
+    : activeVehicleSalesAgent
+    ? activeVehicleSalesAgent.name
     : activeAgent === RAW_MATERIAL_PRICE_FORECAST_AGENT.id
       ? RAW_MATERIAL_PRICE_FORECAST_AGENT.name
       : activeAgent === CELL_SOH_FORECAST_AGENT.id
@@ -247,10 +251,10 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
       </div>
 
       {activeAgent ? (
-        activeAgent === PRODUCTION_BI_ANALYSIS_AGENT.id
-          ? <ProductionBiAnalysisApp />
-          : activeAgent === NEW_ENERGY_VEHICLE_SALES_AGENT.id
-          ? <NewEnergyVehicleSalesApp />
+        activeBiAgent
+          ? <ProductionBiAnalysisApp key={activeBiAgent.id} agent={activeBiAgent} />
+          : activeVehicleSalesAgent
+          ? <NewEnergyVehicleSalesApp key={activeVehicleSalesAgent.id} agent={activeVehicleSalesAgent} />
           : activeAgent === RAW_MATERIAL_PRICE_FORECAST_AGENT.id
             ? <RawMaterialPriceForecastApp />
             : activeAgent === CELL_SOH_FORECAST_AGENT.id
@@ -319,7 +323,7 @@ function ProductionAgents({
   onOpenCellProductionForecastAgent: () => void;
   onOpenPackProductionForecastAgent: () => void;
   onOpenFactoryEnergyForecastAgent: () => void;
-  onOpenProductionBiAnalysisAgent: () => void;
+  onOpenProductionBiAnalysisAgent: (agentId: string) => void;
 }) {
   return <div>
     <p className="mb-4 text-xs text-steel-500">{DOMAIN_META.production.description}</p>
@@ -372,22 +376,28 @@ function ProductionAgents({
         <p className="relative mt-4 text-xs leading-5 text-steel-500">结合各工段、公共设备和生产负荷数据，预测工厂未来能耗及单位产量能耗变化。</p>
         <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-amber-700">配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
       </button>
-      <button
-        type="button"
-        onClick={onOpenProductionBiAnalysisAgent}
-        className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-blue-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-blue-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-      >
-        <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-blue-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
-        <div className="relative flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><BarChart3 className="h-5 w-5" /></span>
-          <div className="min-w-0 flex-1">
-            <h3 className="text-[13px] font-semibold leading-5 text-steel-800">生产BI分析智能体</h3>
-            <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[9px] font-medium text-blue-700"><DatabaseZap className="h-3 w-3" />远程 BI</span>
-          </div>
-        </div>
-        <p className="relative mt-4 text-xs leading-5 text-steel-500">用自然语言查询生产计划、实际产出、工序完成率等经营指标，并交互确认筛选条件。</p>
-        <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-blue-700">开始查询<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
-      </button>
+      {PRODUCTION_QUERY_AGENTS.map((agent) => {
+        const Icon = agent.icon;
+        return (
+          <button
+            key={agent.id}
+            type="button"
+            onClick={() => onOpenProductionBiAnalysisAgent(agent.id)}
+            className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-blue-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-blue-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
+            <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-blue-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
+            <div className="relative flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><Icon className="h-5 w-5" /></span>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-[13px] font-semibold leading-5 text-steel-800">{agent.name}</h3>
+                <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[9px] font-medium text-blue-700"><DatabaseZap className="h-3 w-3" />{agent.id === NG_DEFECT_AGENT.id ? 'NG问数' : '远程 BI'}</span>
+              </div>
+            </div>
+            <p className="relative mt-4 text-xs leading-5 text-steel-500">{agent.description}</p>
+            <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-blue-700">开始查询<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
+          </button>
+        );
+      })}
     </div>
   </div>;
 }
@@ -579,7 +589,7 @@ function MarketAgents({
   onOpenCellSohForecastAgent,
 }: {
   onOpenBatteryAgent: () => void;
-  onOpenVehicleSalesAgent: () => void;
+  onOpenVehicleSalesAgent: (agentId: string) => void;
   onOpenRawMaterialPriceForecastAgent: () => void;
   onOpenCellSohForecastAgent: () => void;
 }) {
@@ -618,9 +628,10 @@ function MarketAgents({
             <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
           </span>
         </button>
-        <button
+        {VEHICLE_SALES_AGENTS.map((agent) => <button
+          key={agent.id}
           type="button"
-          onClick={onOpenVehicleSalesAgent}
+          onClick={() => onOpenVehicleSalesAgent(agent.id)}
           className="group relative flex min-h-[180px] flex-col overflow-hidden rounded-2xl border border-blue-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-blue-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         >
           <span aria-hidden="true" className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-blue-50 opacity-70 transition-transform duration-300 group-hover:scale-110" />
@@ -629,19 +640,19 @@ function MarketAgents({
               <CarFront className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">新能源汽车销量预测智能体</h3>
+              <h3 className="text-[13px] font-semibold leading-5 text-steel-800">{agent.name}</h3>
               <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[9px] font-medium text-blue-700">
                 <ChartSpline className="h-3 w-3" />时序预测
               </span>
             </div>
           </div>
           <p className="relative mt-4 text-xs leading-5 text-steel-500">
-            基于历史销量与市场影响因素，预测新能源汽车未来销量及细分市场趋势。
+            {agent.description}
           </p>
           <span className="relative mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-blue-700">
             配置任务<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
           </span>
-        </button>
+        </button>)}
         <button
           type="button"
           onClick={onOpenRawMaterialPriceForecastAgent}

@@ -18,7 +18,7 @@ import logging
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from fastapi import FastAPI, Header, HTTPException, UploadFile, File, Form
+from fastapi import FastAPI, Header, HTTPException, UploadFile, File, Form, Query
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -31,11 +31,14 @@ from utils.helpers import validate_existing_file_name, validate_file_path
 from utils.dataset_table_preview import read_dataset_table_preview
 from config.online_sources import ONLINE_SOURCES
 from utils.online_data_sources import (
+    InvalidOnlineQuery,
     MissingInsertTime,
     OnlineTableNotFound,
     list_online_sources,
     list_online_tables,
     preview_online_table,
+    online_column_options,
+    online_table_metrics,
 )
 
 import warnings
@@ -94,6 +97,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+from auth.middleware import SessionAuthMiddleware
+
+app.add_middleware(SessionAuthMiddleware)
 
 # Add CORS middleware
 app.add_middleware(
@@ -202,6 +209,7 @@ async def index():
             'GET /api/datasets/{file_name}/preview': 'Preview the first 50 rows of an uploaded file',
             'GET /api/online-sources': 'List configured online data sources',
             'GET /api/online-sources/{source_id}/tables': 'List tables in an online source',
+            'GET /api/online-sources/{source_id}/tables/{table_name}/metrics': 'Quality and freshness of the latest 100 rows',
             'GET /api/online-sources/{source_id}/tables/{table_name}/preview': 'Preview the latest 50 rows',
             'GET /api/models': 'List anomaly-detection and fine-tuned prediction models',
             'GET /health': 'Health check endpoint',
@@ -243,6 +251,17 @@ async def process_query(
         file_path = None
         parsed_resume_value: Any = None
         user_id = _sanitize_user_id(x_user_id)
+
+        from session_store import claim_session, get_session_owner
+        if not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', session_id):
+            raise HTTPException(status_code=400, detail='Invalid session ID')
+        owner = get_session_owner(session_id)
+        if (owner is not None and owner != user_id) or (
+            owner is None and await agent.get_session_info(session_id) is not None
+        ):
+            raise HTTPException(status_code=404, detail='Session not found or not owned by the current user')
+        if not claim_session(user_id, session_id):
+            raise HTTPException(status_code=404, detail='Session not found or not owned by the current user')
 
         if application_id:
             try:
@@ -483,7 +502,7 @@ async def process_query(
 
 # Get session info endpoint
 @app.get("/api/session/{session_id}", response_model=Dict[str, Any])
-async def get_session_info(session_id: str):
+async def get_session_info(session_id: str, x_user_id: Optional[str] = Header(None, alias="X-User-Id")):
     """
     Get information about a session.
 
@@ -497,6 +516,9 @@ async def get_session_info(session_id: str):
         HTTPException: If session not found
     """
     try:
+        from session_store import get_session_owner
+        if get_session_owner(session_id) != _sanitize_user_id(x_user_id):
+            raise HTTPException(status_code=404, detail='Session not found')
         info = await agent.get_session_info(session_id)
 
         if info is None:
@@ -516,7 +538,7 @@ async def get_session_info(session_id: str):
 
 # Reset session task endpoint
 @app.delete("/api/session/{session_id}/reset", response_model=Dict[str, Any])
-async def reset_session_task(session_id: str):
+async def reset_session_task(session_id: str, x_user_id: Optional[str] = Header(None, alias="X-User-Id")):
     """
     Reset the current task in a session.
 
@@ -530,6 +552,9 @@ async def reset_session_task(session_id: str):
         HTTPException: If reset operation fails
     """
     try:
+        from session_store import get_session_owner
+        if get_session_owner(session_id) != _sanitize_user_id(x_user_id):
+            raise HTTPException(status_code=404, detail='Session not found')
         result = await agent.reset_session_task(session_id)
 
         if not result.get('success'):
@@ -687,101 +712,9 @@ async def health_check():
 # Authentication endpoints (register / login / me)
 # ----------------------------------------------------------------------
 
-class AuthRequest(BaseModel):
-    """JSON body for register / login."""
-    username: str = Field(..., min_length=1, max_length=64)
-    password: str = Field(..., min_length=1, max_length=256)
+from auth.routes import router as auth_router
 
-
-class AuthResponse(BaseModel):
-    """Response for all auth endpoints. ``user_id`` is the stable identity
-    the client stores and sends back as ``X-User-Id`` on every subsequent
-    request."""
-    success: bool
-    user_id: Optional[str] = None
-    username: Optional[str] = None
-    error: Optional[str] = None
-
-
-@app.post("/api/auth/register", response_model=AuthResponse)
-async def auth_register(req: AuthRequest):
-    """Create a new user account.
-
-    On success returns the stable ``user_id`` that the client stores and
-    uses as the ``X-User-Id`` header for all future requests. The same
-    account (username + password) always maps to the same user_id, so a
-    user's uploads + trained models are reachable from any browser.
-    """
-    from auth.user_store import register as _register
-
-    try:
-        result = _register(req.username, req.password)
-        if result is None:
-            return AuthResponse(
-                success=False,
-                error="用户名已存在，或用户名/密码不符合要求",
-            )
-        logger.info("auth: registered user=%s", result.get("username"))
-        return AuthResponse(
-            success=True,
-            user_id=result["user_id"],
-            username=result["username"],
-        )
-    except Exception as e:
-        logger.error(f"auth register error: {str(e)}", exc_info=True)
-        return AuthResponse(success=False, error="注册失败，请稍后重试")
-
-
-@app.post("/api/auth/login", response_model=AuthResponse)
-async def auth_login(req: AuthRequest):
-    """Validate credentials and return the account's stable user_id.
-
-    The returned ``user_id`` is what the client stores in localStorage
-    and sends as ``X-User-Id`` on subsequent requests — it never changes
-    for a given account, so uploads/models persist across logins.
-    """
-    from auth.user_store import authenticate as _authenticate
-
-    try:
-        result = _authenticate(req.username, req.password)
-        if result is None:
-            return AuthResponse(success=False, error="用户名或密码错误")
-        return AuthResponse(
-            success=True,
-            user_id=result["user_id"],
-            username=result["username"],
-        )
-    except Exception as e:
-        logger.error(f"auth login error: {str(e)}", exc_info=True)
-        return AuthResponse(success=False, error="登录失败，请稍后重试")
-
-
-@app.get("/api/auth/me", response_model=AuthResponse)
-async def auth_me(
-    x_user_id: Optional[str] = Header(None, alias="X-User-Id"),
-):
-    """Validate a stored session (page reload / re-open).
-
-    The client calls this on mount with the user_id it has in
-    localStorage; if the backend confirms the account still exists, the
-    session is valid. Otherwise the client clears localStorage and shows
-    the login page.
-    """
-    from auth.user_store import get_by_user_id
-
-    try:
-        user_id = _sanitize_user_id(x_user_id)
-        result = get_by_user_id(user_id)
-        if result is None:
-            return AuthResponse(success=False, error="会话已失效，请重新登录")
-        return AuthResponse(
-            success=True,
-            user_id=result["user_id"],
-            username=result["username"],
-        )
-    except Exception as e:
-        logger.error(f"auth me error: {str(e)}", exc_info=True)
-        return AuthResponse(success=False, error="验证失败，请重新登录")
+app.include_router(auth_router)
 
 
 # ----------------------------------------------------------------------
@@ -962,13 +895,31 @@ async def get_online_tables(source_id: str):
         raise HTTPException(status_code=503, detail="在线数据源暂时无法连接") from exc
 
 
-@app.get("/api/online-sources/{source_id}/tables/{table_name}/preview", response_model=Dict[str, Any])
-async def get_online_table_preview(source_id: str, table_name: str):
+@app.get("/api/online-sources/{source_id}/tables/{table_name}/metrics", response_model=Dict[str, Any])
+async def get_online_table_metrics(source_id: str, table_name: str):
     source = ONLINE_SOURCES.get(source_id)
     if source is None:
         raise HTTPException(status_code=404, detail="在线数据源不存在")
     try:
-        return await asyncio.to_thread(preview_online_table, source, table_name)
+        return await asyncio.to_thread(online_table_metrics, source, table_name)
+    except OnlineTableNotFound as exc:
+        raise HTTPException(status_code=404, detail="表格不存在") from exc
+    except MissingInsertTime as exc:
+        raise HTTPException(status_code=422, detail="该表缺少入库时间，无法计算最近记录的指标") from exc
+    except Exception as exc:
+        logger.warning("Could not read online table metrics: %s", type(exc).__name__)
+        raise HTTPException(status_code=503, detail="数据表指标暂时无法读取") from exc
+
+
+@app.get("/api/online-sources/{source_id}/tables/{table_name}/preview", response_model=Dict[str, Any])
+async def get_online_table_preview(source_id: str, table_name: str, filters: str = Query('{}', max_length=32768), limit: int = Query(50, ge=1, le=500)):
+    source = ONLINE_SOURCES.get(source_id)
+    if source is None:
+        raise HTTPException(status_code=404, detail="在线数据源不存在")
+    try:
+        return await asyncio.to_thread(preview_online_table, source, table_name, json.loads(filters), limit)
+    except (InvalidOnlineQuery, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=422, detail="筛选条件无效：" + str(exc)) from exc
     except OnlineTableNotFound as exc:
         raise HTTPException(status_code=404, detail="表格不存在") from exc
     except MissingInsertTime as exc:
@@ -976,6 +927,26 @@ async def get_online_table_preview(source_id: str, table_name: str):
     except Exception as exc:
         logger.warning("Could not preview online table %s: %s", table_name, type(exc).__name__)
         raise HTTPException(status_code=503, detail="在线数据源暂时无法读取") from exc
+
+
+@app.get("/api/online-sources/{source_id}/tables/{table_name}/filter-options", response_model=Dict[str, Any])
+async def get_online_filter_options(source_id: str, table_name: str, column: str = Query(..., max_length=256),
+                                    filters: str = Query('{}', max_length=32768), search: str = Query('', max_length=200),
+                                    limit: int = Query(50, ge=1, le=500)):
+    source = ONLINE_SOURCES.get(source_id)
+    if source is None:
+        raise HTTPException(status_code=404, detail="在线数据源不存在")
+    try:
+        return await asyncio.to_thread(online_column_options, source, table_name, column, json.loads(filters), search, limit)
+    except (InvalidOnlineQuery, json.JSONDecodeError) as exc:
+        raise HTTPException(status_code=422, detail="筛选条件无效：" + str(exc)) from exc
+    except OnlineTableNotFound as exc:
+        raise HTTPException(status_code=404, detail="表格不存在") from exc
+    except MissingInsertTime as exc:
+        raise HTTPException(status_code=422, detail="该表缺少 insert_time 字段") from exc
+    except Exception as exc:
+        logger.warning("Could not read online filter options: %s", type(exc).__name__)
+        raise HTTPException(status_code=503, detail="筛选选项暂时无法读取") from exc
 
 
 @app.get("/api/models", response_model=Dict[str, Any])

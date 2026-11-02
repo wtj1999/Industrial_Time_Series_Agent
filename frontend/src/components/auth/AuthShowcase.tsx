@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { Activity, ArrowLeft, ArrowRight, BatteryCharging, BarChart3, Boxes, ChartSpline, Disc3, Factory, Gauge, LineChart, ScanSearch, Store, Wrench, Zap, type LucideIcon } from 'lucide-react';
+import { PRODUCTION_BI_AGENTS } from '@/features/agent-apps/production-bi-analysis/config';
+import { NG_DEFECT_AGENT } from '@/features/agent-apps/ng-defect-analysis/config';
 
 type Domain = 'equipment' | 'production' | 'market';
 type Agent = { name: string; description: string; capability: string; icon: LucideIcon; tone: string };
@@ -21,7 +23,8 @@ const AGENTS: Record<Domain, Agent[]> = {
     { name: '锂电电芯产量预测智能体', description: '结合历史产量、产线运行与质量数据预测产量及产能缺口。', capability: '产量预测', icon: ChartSpline, tone: 'emerald' },
     { name: '锂电PACK产量预测智能体', description: '结合电芯齐套、PACK产线运行与质量数据预测未来产量。', capability: '产能规划', icon: Boxes, tone: 'teal' },
     { name: '锂电工厂能耗预测智能体', description: '预测工厂未来能耗及单位产量能耗变化。', capability: '能耗预测', icon: Zap, tone: 'amber' },
-    { name: '生产BI分析智能体', description: '围绕生产经营数据进行多维指标分析与业务洞察。', capability: '经营分析', icon: BarChart3, tone: 'blue' },
+    ...PRODUCTION_BI_AGENTS.map((agent) => ({ name: agent.name, description: agent.description, capability: `${agent.category}分析`, icon: agent.icon, tone: 'blue' })),
+    { name: NG_DEFECT_AGENT.name, description: NG_DEFECT_AGENT.description, capability: 'NG问数', icon: NG_DEFECT_AGENT.icon, tone: 'blue' },
   ],
   market: [
     { name: '动力电池装车量预测智能体', description: '基于历史装车量与市场数据预测未来动力电池装车量。', capability: '装车量预测', icon: BatteryCharging, tone: 'cyan' },

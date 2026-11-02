@@ -1,11 +1,12 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: backend
-      args:
-        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
+    image: ts_agent-backend:custom-20261029
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      target: backend
+#      args:
+#        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
     restart: unless-stopped
     env_file:
       - path: ./agent_app/.env
@@ -44,8 +45,12 @@ services:
       - path: ./bi_app/.env
         required: false
     environment:
-      BI_REMOTE_QUERY_URL: ${BI_REMOTE_QUERY_URL:-http://10.11.88.106:19052/api/query}
+      BI_REMOTE_QUERY_URL: ${BI_REMOTE_QUERY_URL:-http://10.2.128.43:19062/api/query}
       BI_API_WORKERS: ${BI_API_WORKERS:-1}
+      AUTH_SERVICE_URL: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
     command:
       - sh
       - -c

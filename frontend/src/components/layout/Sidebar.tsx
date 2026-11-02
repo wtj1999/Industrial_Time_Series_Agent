@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   ArrowLeft,
   Bot,
@@ -106,6 +107,8 @@ export function Sidebar({
     refreshSessions,
   } = useSession();
   const { user, logout } = useAuth();
+  const [logoutError, setLogoutError] = useState('');
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const turns = items.filter((i) => i.kind === 'message').length;
 
@@ -140,9 +143,14 @@ export function Sidebar({
     void removeSession(targetId);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login', { replace: true });
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    setLogoutError('');
+    try {
+      await logout();
+      navigate('/login', { replace: true });
+    } catch (err) { setLogoutError(err instanceof Error ? err.message : '退出失败，请重试'); }
+    finally { setLoggingOut(false); }
   };
 
   return (
@@ -412,7 +420,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={handleLogout}
-            disabled={!user}
+            disabled={!user || loggingOut}
             title="退出登录"
             className={cn(
               'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
@@ -423,6 +431,7 @@ export function Sidebar({
             <LogOut className="h-4 w-4" />
           </button>
         </div>
+        {logoutError && <p role="alert" className="mt-2 text-xs text-rose-600">{logoutError}</p>}
         <div className="mt-2 flex items-center gap-1.5 text-[10px] text-steel-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-soft" />
           LangGraph · FastAPI · Human-in-the-Loop

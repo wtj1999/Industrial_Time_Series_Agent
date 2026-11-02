@@ -17,11 +17,12 @@ import {
   type ForecastGranularity,
   type ForecastModel,
   type VehicleSalesForecastTask,
+  type VehicleSalesAgent,
 } from './config';
 
 const MAX_FILE_MB = 100;
 
-export function NewEnergyVehicleSalesApp() {
+export function NewEnergyVehicleSalesApp({ agent = NEW_ENERGY_VEHICLE_SALES_AGENT }: { agent?: VehicleSalesAgent }) {
   const { items, streaming, sendQuery, sendAgentTask, stop } = useSession();
   const [datasets, setDatasets] = useState<DatasetEntry[]>([]);
   const [datasetsLoading, setDatasetsLoading] = useState(true);
@@ -73,9 +74,7 @@ export function NewEnergyVehicleSalesApp() {
     setFormError(null);
     if (!file) return;
     const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
-    if (!NEW_ENERGY_VEHICLE_SALES_AGENT.supportedExtensions.includes(
-      extension as (typeof NEW_ENERGY_VEHICLE_SALES_AGENT.supportedExtensions)[number],
-    )) {
+    if (!agent.supportedExtensions.includes(extension)) {
       setFormError('仅支持 CSV、XLSX 和 Parquet 文件');
       return;
     }
@@ -100,7 +99,7 @@ export function NewEnergyVehicleSalesApp() {
     setFormError(null);
     setStarted(true);
     void sendAgentTask(
-      NEW_ENERGY_VEHICLE_SALES_AGENT.id,
+      agent.id,
       {
         model: task.model,
         granularity: task.granularity,
@@ -109,7 +108,7 @@ export function NewEnergyVehicleSalesApp() {
         external_variables: task.externalVariables,
         additional_requirements: task.additionalRequirements,
       },
-      buildVehicleSalesForecastQuery(task),
+      buildVehicleSalesForecastQuery(task, agent),
       upload,
       selectedFileName || undefined,
     );
@@ -121,7 +120,7 @@ export function NewEnergyVehicleSalesApp() {
         <div className="border-b border-steel-200/70 bg-blue-50/50 px-4 py-2.5 sm:px-6">
           <div className="mx-auto flex max-w-3xl items-center gap-2 text-xs text-steel-600">
             <CarFront className="h-4 w-4 text-blue-700" />
-            <span className="font-medium text-steel-800">{NEW_ENERGY_VEHICLE_SALES_AGENT.name}</span>
+            <span className="font-medium text-steel-800">{agent.name}</span>
             <span className="text-steel-300">·</span>
             <span>结构化任务已提交，可继续追问或补充要求</span>
           </div>
@@ -138,12 +137,12 @@ export function NewEnergyVehicleSalesApp() {
         <div className="mb-5 rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-50 to-white p-5">
           <div className="flex items-start gap-3">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><CarFront className="h-5 w-5" /></span>
-            <div><h2 className="text-base font-semibold text-steel-900">配置销量预测任务</h2><p className="mt-1 text-xs leading-5 text-steel-500">选择销量数据与分析维度，系统将复用通用 Agent 编排层完成预测和解读。</p></div>
+            <div><h2 className="text-base font-semibold text-steel-900">配置{agent.target}预测任务</h2><p className="mt-1 text-xs leading-5 text-steel-500">选择销量数据与分析维度，系统将复用通用 Agent 编排层完成预测和解读。</p></div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <FormSection number="1" title="选择预测数据" description="选择包含历史新能源汽车销量的数据文件。">
+          <FormSection number="1" title="选择预测数据" description={`选择包含历史${agent.target}的数据文件。`}>
             <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
               <select value={selectedFileName} onChange={(event) => { setSelectedFileName(event.target.value); if (event.target.value) setUpload(null); }} disabled={datasetsLoading} className="h-10 rounded-xl border border-steel-200 bg-white px-3 text-xs text-steel-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
                 <option value="">{datasetsLoading ? '正在加载我的数据…' : '从我的数据中选择'}</option>
@@ -155,7 +154,7 @@ export function NewEnergyVehicleSalesApp() {
             {datasetError && <p className="mt-2 text-xs text-rose-600">{datasetError}</p>}
           </FormSection>
 
-          <FormSection number="2" title="设置预测参数" description="预测目标固定为新能源汽车销量。">
+          <FormSection number="2" title="设置预测参数" description={`预测目标固定为${agent.target}。`}>
             <div className="grid gap-3 sm:grid-cols-3">
               <Field label="预测模型"><select value={task.model} onChange={(event) => setTask({ ...task, model: event.target.value as ForecastModel })} className="h-10 w-full rounded-xl border border-steel-200 bg-white px-3 text-xs text-steel-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100">{FORECAST_MODELS.map((model) => <option key={model}>{model}</option>)}</select></Field>
               <Field label="时间粒度"><select value={task.granularity} onChange={(event) => setTask({ ...task, granularity: event.target.value as ForecastGranularity })} className="h-10 w-full rounded-xl border border-steel-200 bg-white px-3 text-xs text-steel-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"><option>月度</option><option>季度</option></select></Field>
@@ -163,8 +162,8 @@ export function NewEnergyVehicleSalesApp() {
             </div>
           </FormSection>
 
-          <FormSection number="3" title="选择分析维度" description="可多选；不选择时默认预测总体新能源汽车销量。">
-            <ChoiceGroup label="车型与动力类型" values={VEHICLE_SEGMENTS} selected={task.vehicleSegments} onToggle={(value) => toggleValue('vehicleSegments', value)} />
+          <FormSection number="3" title="选择分析维度" description={`可多选；不选择时默认预测总体${agent.target}。`}>
+            <ChoiceGroup label={agent.brand ? '车型型号' : '车型与动力类型'} values={agent.vehicleModels ?? VEHICLE_SEGMENTS} selected={task.vehicleSegments} onToggle={(value) => toggleValue('vehicleSegments', value)} />
             <ChoiceGroup label="外生变量" values={VEHICLE_EXTERNAL_VARIABLES} selected={task.externalVariables} onToggle={(value) => toggleValue('externalVariables', value)} />
           </FormSection>
 
@@ -187,6 +186,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return <label className="block"><span className="mb-1.5 block text-[11px] font-medium text-steel-600">{label}</span>{children}</label>;
 }
 
-function ChoiceGroup({ label, values, selected, onToggle }: { label: string; values: string[]; selected: string[]; onToggle: (value: string) => void }) {
+function ChoiceGroup({ label, values, selected, onToggle }: { label: string; values: readonly string[]; selected: string[]; onToggle: (value: string) => void }) {
   return <div className="mb-4 last:mb-0"><p className="mb-2 text-[11px] font-medium text-steel-600">{label}</p><div className="flex flex-wrap gap-2">{values.map((value) => <button key={value} type="button" onClick={() => onToggle(value)} className={cn('rounded-full border px-3 py-1.5 text-xs transition-colors', selected.includes(value) ? 'border-blue-400 bg-blue-50 font-medium text-blue-800' : 'border-steel-200 bg-white text-steel-600 hover:border-blue-300')}>{value}</button>)}</div></div>;
 }

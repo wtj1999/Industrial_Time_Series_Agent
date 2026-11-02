@@ -1,5 +1,6 @@
 """Resolve structured business applications into orchestrator queries."""
 
+from functools import partial
 from typing import Any, Callable, Dict
 
 from .battery_installation_forecast import build_query as build_battery_query
@@ -22,6 +23,9 @@ ApplicationBuilder = Callable[[Dict[str, Any]], str]
 _APPLICATION_BUILDERS: Dict[str, ApplicationBuilder] = {
     "battery-installation-forecast": build_battery_query,
     "new-energy-vehicle-sales": build_vehicle_sales_query,
+    "leapmotor-sales-forecast": partial(build_vehicle_sales_query, brand="零跑汽车"),
+    "geely-sales-forecast": partial(build_vehicle_sales_query, brand="吉利汽车"),
+    "great-wall-sales-forecast": partial(build_vehicle_sales_query, brand="长城汽车"),
     "coating-areal-density-analysis": build_coating_query,
     "coating-areal-density-anomaly-detection": build_coating_anomaly_query,
     "cell-capacity-root-cause": build_cell_capacity_root_cause_query,
