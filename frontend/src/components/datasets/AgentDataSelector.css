@@ -1,0 +1,16 @@
+.agent-data-selector{display:contents}
+/* Share the outer grid so notes occupy their own row below all controls. */
+.grid:has(> .agent-data-selector){grid-template-columns:minmax(0,1fr) auto;align-items:end}
+.agent-data-selector-fields{grid-column:1;grid-row:1;min-width:0}
+.grid:has(> .agent-data-selector)>label{grid-column:2;grid-row:1;align-self:end}
+.agent-data-selector>p{grid-column:1/-1}
+.agent-data-selector-fields{display:grid;grid-template-columns:minmax(110px,.75fr) minmax(130px,1fr) minmax(170px,1.5fr);gap:10px}
+.agent-data-selector-fields label{min-width:0;display:block}
+.agent-data-selector-fields label>span{display:block;margin-bottom:6px;font-size:11px;color:#647591}
+.agent-data-selector-fields select{width:100%;min-width:0;text-overflow:ellipsis}
+.agent-data-selector>p{margin-top:0;font-size:11px;line-height:1.6;color:#647591}
+.agent-data-selector>p[role=alert]{color:#be123c}
+.agent-data-selector>p button{text-decoration:underline}
+@media(max-width:1100px){.agent-data-selector-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.agent-data-selector-fields label:last-child{grid-column:1/-1}}
+@media(max-width:480px){.agent-data-selector-fields{grid-template-columns:1fr}.agent-data-selector-fields label:last-child{grid-column:auto}}
+@media(max-width:639px){.grid:has(> .agent-data-selector){grid-template-columns:minmax(0,1fr)}.grid:has(> .agent-data-selector)>label{grid-column:1;grid-row:2}}
