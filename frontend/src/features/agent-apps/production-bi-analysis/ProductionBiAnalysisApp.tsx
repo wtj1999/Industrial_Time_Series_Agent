@@ -17,7 +17,7 @@ import type {
 
 type BiTurn =
   | { id: string; kind: 'message'; message: Message }
-  | { id: string; kind: 'confirm'; confirm: BiConfirmPayload; threadId: string; submitted: boolean; expired?: boolean }
+  | { id: string; kind: 'confirm'; confirm: BiConfirmPayload; threadId: string; submitted: boolean; expired?: boolean; analysisQuery: string }
   | { id: string; kind: 'result'; result: BiSuccessResponse };
 
 function newId(): string {
@@ -39,7 +39,7 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  const appendResponse = (response: BiResponse) => {
+  const appendResponse = (response: BiResponse, analysisQuery: string) => {
     setThreadId(response.thread_id);
     if (response.status === 'need_confirm' && 'confirm' in response) {
       const confirmation = response as BiNeedConfirmResponse;
@@ -49,6 +49,7 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
         confirm: confirmation.confirm,
         threadId: confirmation.thread_id,
         submitted: false,
+        analysisQuery,
       }]);
       return;
     }
@@ -68,9 +69,9 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
     abortRef.current = controller;
     setLoading(true);
     try {
-      const response = await queryProductionBi(payload, controller.signal, agent.endpoint);
+      const response = await queryProductionBi({ ...payload, ...(agent.tenantId ? { tenant_id: agent.tenantId } : {}), ...(agent.analysisDomain ? { domain: agent.analysisDomain } : {}) }, controller.signal, agent.endpoint);
       if (controller.signal.aborted) return false;
-      appendResponse(response);
+      appendResponse(response, payload.analysis_query || payload.query);
       return true;
     } catch (error) {
       if (controller.signal.aborted || (error instanceof Error && error.name === 'AbortError')) return false;
@@ -111,9 +112,10 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
     confirmationThreadId: string,
     resume: Record<string, string[]>,
     confirmationId?: string,
+    analysisQuery?: string,
   ) => {
     if (loading) return;
-    const succeeded = await runRequest({ query: '', thread_id: confirmationThreadId, resume, confirmation_id: confirmationId });
+    const succeeded = await runRequest({ query: '', thread_id: confirmationThreadId, resume, confirmation_id: confirmationId, ...(agent.analysisDomain ? { analysis_query: analysisQuery } : {}) });
     if (succeeded) {
       setTurns((current) => current.map((turn) => (
         turn.id === turnId && turn.kind === 'confirm' ? { ...turn, submitted: true } : turn
@@ -148,7 +150,7 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
                     loadOptions={turn.confirm.confirmation_id ? (field, search, offset, signal) => queryNgOptions({
                       thread_id: turn.threadId, confirmation_id: turn.confirm.confirmation_id!, field, search, offset,
                     }, signal) : undefined}
-                    onSubmit={(resume) => void submitConfirmation(turn.id, turn.threadId, resume, turn.confirm.confirmation_id)}
+                    onSubmit={(resume) => void submitConfirmation(turn.id, turn.threadId, resume, turn.confirm.confirmation_id, turn.analysisQuery)}
                   />
                 );
               }

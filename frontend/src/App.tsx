@@ -70,6 +70,8 @@ function Root() {
           <Route path="datasets/online" element={<DataRoute kind="online" />} />
           <Route path="datasets/online/:sourceId" element={<DataRoute kind="online-tables" />} />
           <Route path="datasets/offline" element={<DataRoute kind="offline" />} />
+          <Route path="datasets/offline/private" element={<DataRoute kind="offline-private" />} />
+          <Route path="datasets/offline/public" element={<DataRoute kind="offline-public" />} />
           <Route path="models" element={<ModelsRoute />} />
           <Route path="agents" element={<AgentsRoute />} />
         </Route>
@@ -81,16 +83,18 @@ function Root() {
 
 /** Thin wrapper that injects an `onBack` going back to /chat.
  *  Keeps MyDataView/MyModelsView free of any router coupling. */
-function DataRoute({ kind }: { kind: 'overview' | 'online' | 'online-tables' | 'offline' }) {
+function DataRoute({ kind }: { kind: 'overview' | 'online' | 'online-tables' | 'offline' | 'offline-private' | 'offline-public' }) {
   const navigate = useNavigate();
   const { sourceId } = useParams();
   return (
     <MyDataView
+      key={kind}
       kind={kind}
       sourceId={sourceId}
-      onBack={() => navigate(kind === 'overview' ? '/chat' : kind === 'online-tables' ? '/datasets/online' : '/datasets')}
+      onBack={() => navigate(kind === 'overview' ? '/chat' : kind === 'online-tables' ? '/datasets/online' : kind === 'offline-private' || kind === 'offline-public' ? '/datasets/offline' : '/datasets')}
       onGoChat={() => navigate('/chat')}
       onOpen={(source) => navigate(`/datasets/${source}`)}
+      onOpenOffline={(visibility) => navigate(`/datasets/offline/${visibility}`)}
       onOpenSource={(id) => navigate(`/datasets/online/${encodeURIComponent(id)}`)}
     />
   );

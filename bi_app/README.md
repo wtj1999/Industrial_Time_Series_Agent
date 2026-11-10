@@ -7,6 +7,29 @@
 - 远程地址：通过 `BI_REMOTE_QUERY_URL` 配置，默认使用项目约定地址
 - 超时配置：`BI_CONNECT_TIMEOUT_SECONDS`、`BI_REQUEST_TIMEOUT_SECONDS`
 
+## 四领域查询结果分析
+
+制造、品质、成本、设备入口会在远程查询成功后生成领域分析，在查询结果表下展示总结、数据观察、分优先级的建议及验证方式。NG 智能体保留原有流程。
+
+| 领域 | 分析重点 | 建议方向 |
+| --- | --- | --- |
+| 制造 | 投入产出计划差异、工时劳产率、损耗、批次流转 | 排产、齐套供料、节拍协同、人员调配与后续达成验证 |
+| 品质 | 订单 A 品/非 A 品、预警处理与问题状态 | 重点订单复检、工艺一致性、响应及验证关闭；不把已处理等同已关闭 |
+| 成本 | 工段用电、能耗费用、物料及库存、制费结构 | 空转能耗、用能安排、损耗和库存优化；不虚构预算、单价或节省金额 |
+| 设备 | OEE 分项、停机/待料/堵料、故障及 MTBF/MTTR | 区分故障维修与供料/节拍组织，按检查结果维修并试机验证 |
+
+前端每次请求传递可选 `domain`（`manufacturing/quality/cost/equipment`），筛选恢复时用 `analysis_query` 保留原问题。两个字段只在本地适配层消费，不转发远程 BI。旧调用若未传领域，仅在返回的数据表属于已知领域映射时启用分析，不从模糊用户问题猜测领域。确认阶段不分析；成功后结合原问题、已确认筛选和本次返回数据分析。
+
+四个入口的确认卡片支持全部不勾选直接点击「不限定筛选并继续」。提交时为每个待确认字段传递已选列表，未选字段传 `[]`，明确表示已确认且不限制该字段，避免空对象被远程工作流当作尚未确认；日期范围等固定查询上下文继续沿用当前线程。部分选择时也保留其他待确认字段的空列表。已提交、失效或请求中的卡片不能重复提交。更新前端时需同时同步 `FieldConfirmationCard.tsx` 与新增的 `confirmation.ts`。
+
+模型复用 `BI_NG_LLM_*` 配置，单次最多45秒、无自动重试。先扫描全部返回行计算每个数值指标的极值和重点对象；数值指标最多12个、字段最多24个、样例最多8行，文本限长。ID、凭据字段、布尔值和非有限数值不作为指标。百分数字符串保留百分数量纲；混合百分数与原始数值的列不做排名。不直接累加汇总与明细、比率、单价、MTBF/MTTR，不编造阈值、分母、单位、币种、同比环比或因果。界面说明分析基于本次返回数据，不宣称覆盖数据库全量。
+
+空数据或无可分析数值时跳过模型；模型故障/超时返回 `analysis.status=unavailable`，原始查询仍然成功，表格不丢失。成功分析按用户、领域、原问题、筛选和完整返回数据指纹缓存24小时；默认最多保留512条，存储在 `bi_app/.state/bi_analysis.sqlite3`，可通过 `BI_ANALYSIS_CACHE_PATH` 修改。失败结果不缓存；缓存读写故障不影响查询或分析。
+
+同步 `bi_app/analysis.py`、`bi_app/api.py`、`bi_app/schemas.py` 和前端改动到服务器后重新加载 BI 服务与前端；无新增 Python/npm 依赖。Vite BI 代理等待时间增加为240秒，覆盖远程查询及分析；使用构建后的 Nginx 部署时也需同步 `docker/nginx.conf` 并按现有部署方式加载。已有确认卡建议重新发起查询以携带领域与原问题。
+
+验证：`python -m pytest bi_app/test_analysis.py bi_app/test_api.py bi_app/test_auth.py bi_app/ng/test_analysis.py bi_app/ng/test_ng.py -q`；前端执行 `npm run test:bi-analysis`、`npm run test:ng-chart` 和 `npm run build`。测试替换远程查询、数据库及模型调用，不代表生产模型已完成实际数据验收。
+
 ## BI 账户校验与服务器更新
 
 BI 和 NG 接口要求前端传递 `Authorization: Bearer ...`，BI 向主后端的 `/api/auth/me` 校验会话，并从验证结果推导用户身份。外部传入的 `X-User-Id` 不作为身份凭证。
@@ -89,3 +112,14 @@ SQLite checkpoint 默认保存在 `bi_app/.state/ng_checkpoints.sqlite3`，已�
 
 实现参考：[LangGraph interrupt/resume](https://docs.langchain.com/oss/python/langgraph/interrupts)、[PyMySQL 参数绑定](https://pymysql.readthedocs.io/en/latest/modules/cursors.html)。
 
+
+
+## 工厂租户参数
+
+`POST /api/bi/query` 支持字符串字段 `tenant_id`，首次查询与确认恢复请求均应携带。适配层校验为 1–64 位数字字符串后透传至远端 BI 接口，分析缓存也包含租户标识。为兼容旧客户端，未提供该字段时保持原有透传行为。
+
+生产域下，金寨二期的制造/品质/成本/设备 BI 入口使用 `11200001`，芜湖一期的同名四个入口使用 `14100001`。租户来自目录配置，不依赖用户在问题中指定。进入不同目录或应用会重新创建 BI 页面和对话，后续确认沿用该工厂租户。
+
+首次请求示例：`{"query":"统计最近30天设备运行时间","thread_id":"factory-thread","domain":"equipment","tenant_id":"14100001"}`。确认请求示例：`{"query":"","thread_id":"factory-thread","resume":{"device_type":[]},"domain":"equipment","tenant_id":"14100001"}`。
+
+部署需同步前端目录配置、BI 页面与类型，以及 `bi_app/schemas.py`、`bi_app/analysis.py`，重新构建前端并重启 BI 服务。远端 BI 服务也需支持 `tenant_id` 并按该租户过滤数据。

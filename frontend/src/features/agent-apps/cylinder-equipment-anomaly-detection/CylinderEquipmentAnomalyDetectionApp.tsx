@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
+import { useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import { Database, FileUp, Gauge, Loader2, Play } from 'lucide-react';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatView } from '@/components/chat/ChatView';
 import { Button } from '@/components/ui/Button';
 import { useSession } from '@/context/SessionContext';
-import * as api from '@/services/api';
+import { AgentDataSelector } from '@/components/datasets/AgentDataSelector';
 import type { DatasetEntry } from '@/types';
 import { cn } from '@/utils/cn';
 import {
@@ -24,9 +24,6 @@ const fieldClass = 'h-10 w-full rounded-xl border border-steel-200 bg-white px-3
 
 export function CylinderEquipmentAnomalyDetectionApp() {
   const { items, streaming, sendQuery, sendAgentTask, stop } = useSession();
-  const [datasets, setDatasets] = useState<DatasetEntry[]>([]);
-  const [datasetsLoading, setDatasetsLoading] = useState(true);
-  const [datasetError, setDatasetError] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [upload, setUpload] = useState<File | null>(null);
   const [started, setStarted] = useState(false);
@@ -41,19 +38,8 @@ export function CylinderEquipmentAnomalyDetectionApp() {
     additionalRequirements: DEFAULT_CYLINDER_ANOMALY_REQUIREMENTS,
   });
 
-  useEffect(() => {
-    let alive = true;
-    api.listDatasets()
-      .then((response) => { if (alive) setDatasets(response.datasets ?? []); })
-      .catch((error: unknown) => { if (alive) setDatasetError(error instanceof Error ? error.message : '获取数据列表失败'); })
-      .finally(() => { if (alive) setDatasetsLoading(false); });
-    return () => { alive = false; };
-  }, []);
+  const [selectedDataset, setSelectedDataset] = useState<DatasetEntry | null>(null);
 
-  const selectedDataset = useMemo(
-    () => datasets.find((dataset) => dataset.file_name === selectedFileName),
-    [datasets, selectedFileName],
-  );
 
   const toggleTarget = (target: string) => {
     setTask((current) => ({
@@ -134,9 +120,8 @@ export function CylinderEquipmentAnomalyDetectionApp() {
     <div className="mb-5 rounded-2xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-white p-5"><div className="flex items-start gap-3"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700"><Gauge className="h-5 w-5" /></span><div><h2 className="text-base font-semibold text-steel-900">配置气缸设备异常检测任务</h2><p className="mt-1 text-xs leading-5 text-steel-500">从气缸关键状态特征出发，识别突变、持续偏移及多特征协同异常。</p></div></div></div>
     <form onSubmit={handleSubmit} className="space-y-4">
       <FormSection number="1" title="选择检测数据" description="选择包含时间列及气缸关键状态特征的 CSV 文件。">
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto]"><select value={selectedFileName} onChange={(event) => { setSelectedFileName(event.target.value); if (event.target.value) setUpload(null); }} disabled={datasetsLoading} className={fieldClass}><option value="">{datasetsLoading ? '正在加载我的数据…' : '从我的数据中选择'}</option>{datasets.filter((dataset) => dataset.extension === 'csv').map((dataset) => <option key={dataset.file_name} value={dataset.file_name}>{dataset.name}</option>)}</select><label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-steel-200 bg-white px-4 text-xs font-medium text-steel-700 transition-colors hover:border-indigo-400 hover:bg-indigo-50"><FileUp className="h-4 w-4" />上传新数据<input type="file" accept=".csv" onChange={handleUpload} className="hidden" /></label></div>
+        <div className="grid items-end gap-3 sm:grid-cols-[1fr_auto]"><AgentDataSelector value={selectedFileName} uploadedFile={upload} csvOnly={true} fieldClassName={fieldClass} onChange={(dataset, file) => { setSelectedDataset(dataset); setSelectedFileName(file ? '' : dataset?.file_name ?? ''); setUpload(file ?? null); }} /><label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-steel-200 bg-white px-4 text-xs font-medium text-steel-700 transition-colors hover:border-indigo-400 hover:bg-indigo-50"><FileUp className="h-4 w-4" />上传新数据<input type="file" accept=".csv" onChange={handleUpload} className="hidden" /></label></div>
         {(upload || selectedDataset) && <div className="mt-3 flex items-center gap-2 rounded-lg bg-steel-50 px-3 py-2 text-xs text-steel-600"><Database className="h-3.5 w-3.5 text-indigo-700" /><span className="font-medium">{upload?.name ?? selectedDataset?.name}</span></div>}
-        {datasetError && <p className="mt-2 text-xs text-rose-600">{datasetError}</p>}
       </FormSection>
 
       <FormSection number="2" title="选择异常检测目标" description="框选数据中需要重点监测的气缸关键特征，可同时选择多个目标。">

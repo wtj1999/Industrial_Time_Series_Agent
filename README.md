@@ -495,3 +495,12 @@ npm run build
 - [`agent_app/tools/finetuning_README.md`](agent_app/tools/finetuning_README.md)
 - [`agent_app/tools/prediction_tools/finetuning_SPEC.md`](agent_app/tools/prediction_tools/finetuning_SPEC.md)
 - [`agent_app/API_USAGE.md`](agent_app/API_USAGE.md)
+
+
+### 配置型智能体的数据选择
+
+全部配置型智能体共用三级数据选择器：在线数据源 → 基地 → 数据表，或离线数据源 → 私有/公共数据 → 文件。上传新数据保留原有入口和格式、大小校验；只接受 CSV 的应用继续过滤 XLSX/Parquet 文件。
+
+私有文件沿用当前用户的历史上传引用。公共文件及在线表通过 `POST /api/data-selection` 准备为本次任务数据，再交给现有上传与 Agent 执行链路。在线表使用已配置的基地、经元数据校验的数据表，先按 `insert_time` 降序在数据库内限定最近 5,000 条，再按时间升序分批导出；不足 5,000 条时读取全部。选择器会显示该范围，避免将样本视为整表。CSV 导出及公共文件上限为 100MB；超限会明确报错，不截断后继续分析。在线导出使用临时文件，下载完成或导出失败后清理；本次任务提交后数据副本按现有规则进入当前用户上传目录，不修改数据库或公共原文件。
+
+切换来源/基地会清除原选择，读取失败可重试；上传新文件会取消待完成的选择读取。界面在宽屏横向排列，窄屏自动分行。部署需同步 `agent_app/data_selection_api.py` 与路由注册，重启主后端并重新构建前端，无新增 Python/npm 依赖。在线数据读取沿用基地连接与只读查询配置。

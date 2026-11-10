@@ -47,6 +47,18 @@ def validate_password(password: str) -> None:
         raise AuthError("密码需为 8–128 个字符，且包含字母和数字")
 
 
+def validate_registration_password(password: str) -> None:
+    """Apply the new policy only when creating an account."""
+    if not (
+        8 <= len(password) <= 128
+        and re.search(r"[A-Z]", password)
+        and re.search(r"[a-z]", password)
+        and re.search(r"[0-9]", password)
+        and re.search(r"[\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]", password)
+    ):
+        raise AuthError("注册密码需为 8–128 个字符，且包含大写字母、小写字母、数字和特殊字符（如 !@#）")
+
+
 def password_hash(password: str, salt: str, iterations: int = ITERATIONS) -> str:
     return hashlib.pbkdf2_hmac('sha256', password.encode(), bytes.fromhex(salt), iterations).hex()
 
@@ -236,7 +248,7 @@ def register(username: str, password: str, email: str, code: str, ip: str) -> di
     username = username.strip()
     if not USERNAME_RE.fullmatch(username) or len(username.encode()) > 32:
         raise AuthError('用户名需为 2–32 个字符且不超过 32 字节，支持中文、字母、数字、下划线、点和短横线')
-    validate_password(password)
+    validate_registration_password(password)
     email = normalize_email(email)
     with transaction() as db:
         rate_limit(db, 'verify-ip:' + ip, 30, 900)

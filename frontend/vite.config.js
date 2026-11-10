@@ -17,13 +17,12 @@ export default defineConfig({
     server: {
         port: 5173,
         host: true,
-        allowedHosts: true,
         proxy: {
             '/api/bi': {
                 target: biProxyTarget,
                 changeOrigin: true,
-                timeout: 180000,
-                proxyTimeout: 180000,
+                timeout: 240000,
+                proxyTimeout: 240000,
             },
             // Proxy API requests to the FastAPI backend
             '/api': {

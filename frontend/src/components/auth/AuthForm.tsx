@@ -5,6 +5,10 @@ import { ApiError, bindEmail, resetPassword, sendEmailCode, type CodePurpose } f
 import { Button } from '@/components/ui/Button';
 
 type Mode = 'login' | 'register' | 'reset' | 'bind';
+const REGISTRATION_PASSWORD_HINT = '注册密码需为 8–128 个字符，且包含大写字母、小写字母、数字和特殊字符（如 !@#）';
+const registrationPasswordValid = (value: string) => [...value].length >= 8 && [...value].length <= 128
+  && /[A-Z]/.test(value) && /[a-z]/.test(value) && /[0-9]/.test(value)
+  && /[\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/.test(value);
 const CODE_KEY = 'industrial_ts_code_deadlines';
 const emailValid = (value: string) => /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/.test(value) && value.length <= 254 && value.split('@')[0].length <= 64;
 const passwordValid = (value: string) => value.length >= 8 && value.length <= 128 && /[A-Za-z]/.test(value) && /[0-9]/.test(value);
@@ -82,7 +86,8 @@ export function AuthForm({ initialMode = 'login', onBusyChange, onBound }: {
     }
     if (!emailValid(normalizedEmail)) { setLocalError('请输入有效的邮箱地址'); return; }
     if (!/^[0-9]{6}$/.test(code)) { setLocalError('请输入邮件中的 6 位验证码'); return; }
-    if (mode === 'bind' ? !password : !passwordValid(password)) {
+    if (mode === 'register' && !registrationPasswordValid(password)) { setLocalError(REGISTRATION_PASSWORD_HINT); return; }
+    if (mode === 'bind' ? !password : mode === 'reset' && !passwordValid(password)) {
       setLocalError(mode === 'bind' ? '请输入当前密码' : '密码需为 8–128 个字符，且包含字母和数字'); return;
     }
     if (mode !== 'bind' && password !== confirm) { setLocalError('两次输入的密码不一致'); return; }
@@ -126,9 +131,10 @@ export function AuthForm({ initialMode = 'login', onBusyChange, onBound }: {
         </div>
       </>}
       <Field id="auth-password" label={mode === 'bind' ? '当前密码' : mode === 'reset' ? '新密码' : '密码'} icon={<KeyRound size={17} />}>
-        <input id="auth-password" type={showPassword ? 'text' : 'password'} autoComplete={mode === 'login' || mode === 'bind' ? 'current-password' : 'new-password'} value={password} onChange={e => setPassword(e.target.value)} placeholder={mode === 'login' || mode === 'bind' ? '请输入密码' : '8–128 个字符，包含字母和数字'} maxLength={128} disabled={busy} aria-describedby={shownError ? 'auth-error' : undefined} />
+        <input id="auth-password" type={showPassword ? 'text' : 'password'} autoComplete={mode === 'login' || mode === 'bind' ? 'current-password' : 'new-password'} value={password} onChange={e => setPassword(e.target.value)} placeholder={mode === 'login' || mode === 'bind' ? '请输入密码' : mode === 'register' ? '8–128 位，含大小写、数字和特殊字符' : '8–128 个字符，包含字母和数字'} maxLength={128} disabled={busy} aria-describedby={[mode === 'register' ? 'registration-password-hint' : '', shownError ? 'auth-error' : ''].filter(Boolean).join(' ') || undefined} />
         <button className="auth-password-toggle" type="button" onClick={() => setShowPassword(value => !value)} disabled={busy} aria-label={showPassword ? '隐藏密码' : '显示密码'} aria-pressed={showPassword}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
       </Field>
+      {mode === 'register' && <p id="registration-password-hint" className="auth-register-hint">{REGISTRATION_PASSWORD_HINT}</p>}
       {(mode === 'register' || mode === 'reset') && <Field id="auth-confirm" label="确认密码" icon={<KeyRound size={17} />}>
         <input id="auth-confirm" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="再次输入密码" maxLength={128} disabled={busy} />
       </Field>}

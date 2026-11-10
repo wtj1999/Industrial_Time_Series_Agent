@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { cn } from '@/utils/cn';
 import type { BiConfirmPayload, BiOptionsLoader } from './types';
 import { SearchableFieldOptions } from './SearchableFieldOptions';
+import { buildConfirmationResume } from './confirmation';
 
 interface Props {
   confirm: BiConfirmPayload;
@@ -81,7 +82,8 @@ export function FieldConfirmationCard({ confirm, disabled, submitted, expired = 
           <div className="flex items-start gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2.5">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
             <p className="text-xs leading-5 text-sky-800">
-              {confirm.message ?? '请选择需要限定的筛选值。未选择的字段不会传给 BI 服务。'}
+              {confirm.message && <span className="mb-1 block">{confirm.message}</span>}
+              筛选条件均为可选项，可以全部不勾选后直接提交。未选择的字段不限制，原查询的日期范围等固定条件仍然保留。
             </p>
           </div>
 
@@ -171,11 +173,13 @@ export function FieldConfirmationCard({ confirm, disabled, submitted, expired = 
           {!submitted && !expired && (
             <div className="flex flex-col gap-3 border-t border-steel-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-[11px] text-steel-500">
-                当前选择 {selectedCount} 个值；未选择的字段将不作为筛选条件。
+                {selectedCount === 0 ? '当前未限定可选筛选条件，可直接继续查询。' : `当前选择 ${selectedCount} 个值；其他字段不限制。`}
               </p>
-              <Button loading={disabled} onClick={() => onSubmit(selected)}>
-                <Check className="h-4 w-4" />提交筛选条件
-              </Button>
+              <div className="flex shrink-0 items-center gap-2">
+                <Button loading={disabled} disabled={locked} onClick={() => onSubmit(buildConfirmationResume(fields, selected))}>
+                  <Check className="h-4 w-4" />{selectedCount === 0 ? '不限定筛选并继续' : '提交筛选条件'}
+                </Button>
+              </div>
             </div>
           )}
         </div>

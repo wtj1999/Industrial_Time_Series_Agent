@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Database, FileUp, Loader2, Play, ScanSearch } from 'lucide-react';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatView } from '@/components/chat/ChatView';
 import { Button } from '@/components/ui/Button';
 import { useSession } from '@/context/SessionContext';
-import * as api from '@/services/api';
+import { AgentDataSelector } from '@/components/datasets/AgentDataSelector';
 import type { DatasetEntry } from '@/types';
 import { cn } from '@/utils/cn';
 import {
@@ -26,9 +26,6 @@ const fieldClass = 'h-10 w-full rounded-xl border border-steel-200 bg-white px-3
 
 export function CoatingArealDensityAnomalyDetectionApp() {
   const { items, streaming, sendQuery, sendAgentTask, stop } = useSession();
-  const [datasets, setDatasets] = useState<DatasetEntry[]>([]);
-  const [datasetsLoading, setDatasetsLoading] = useState(true);
-  const [datasetError, setDatasetError] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [upload, setUpload] = useState<File | null>(null);
   const [started, setStarted] = useState(false);
@@ -44,19 +41,8 @@ export function CoatingArealDensityAnomalyDetectionApp() {
     additionalRequirements: DEFAULT_ANOMALY_REQUIREMENTS,
   });
 
-  useEffect(() => {
-    let alive = true;
-    api.listDatasets()
-      .then((response) => { if (alive) setDatasets(response.datasets ?? []); })
-      .catch((error: unknown) => { if (alive) setDatasetError(error instanceof Error ? error.message : '获取数据列表失败'); })
-      .finally(() => { if (alive) setDatasetsLoading(false); });
-    return () => { alive = false; };
-  }, []);
+  const [selectedDataset, setSelectedDataset] = useState<DatasetEntry | null>(null);
 
-  const selectedDataset = useMemo(
-    () => datasets.find((dataset) => dataset.file_name === selectedFileName),
-    [datasets, selectedFileName],
-  );
 
   const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null;
@@ -139,9 +125,8 @@ export function CoatingArealDensityAnomalyDetectionApp() {
     <div className="mb-5 rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-white p-5"><div className="flex items-start gap-3"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><ScanSearch className="h-5 w-5" /></span><div><h2 className="text-base font-semibold text-steel-900">配置面密度异常检测任务</h2><p className="mt-1 text-xs leading-5 text-steel-500">识别异常时间点、连续异常区间和主要异常分区，检测过程始终保留时序顺序。</p></div></div></div>
     <form onSubmit={handleSubmit} className="space-y-4">
       <FormSection number="1" title="选择检测数据" description="选择包含时间列及涂布面密度分区数据的 CSV 文件。">
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto]"><select value={selectedFileName} onChange={(event) => { setSelectedFileName(event.target.value); if (event.target.value) setUpload(null); }} disabled={datasetsLoading} className={fieldClass}><option value="">{datasetsLoading ? '正在加载我的数据…' : '从我的数据中选择'}</option>{datasets.filter((dataset) => dataset.extension === 'csv').map((dataset) => <option key={dataset.file_name} value={dataset.file_name}>{dataset.name}</option>)}</select><label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-steel-200 bg-white px-4 text-xs font-medium text-steel-700 transition-colors hover:border-violet-400 hover:bg-violet-50"><FileUp className="h-4 w-4" />上传新数据<input type="file" accept=".csv" onChange={handleUpload} className="hidden" /></label></div>
+        <div className="grid items-end gap-3 sm:grid-cols-[1fr_auto]"><AgentDataSelector value={selectedFileName} uploadedFile={upload} csvOnly={true} fieldClassName={fieldClass} onChange={(dataset, file) => { setSelectedDataset(dataset); setSelectedFileName(file ? '' : dataset?.file_name ?? ''); setUpload(file ?? null); }} /><label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-steel-200 bg-white px-4 text-xs font-medium text-steel-700 transition-colors hover:border-violet-400 hover:bg-violet-50"><FileUp className="h-4 w-4" />上传新数据<input type="file" accept=".csv" onChange={handleUpload} className="hidden" /></label></div>
         {(upload || selectedDataset) && <div className="mt-3 flex items-center gap-2 rounded-lg bg-steel-50 px-3 py-2 text-xs text-steel-600"><Database className="h-3.5 w-3.5 text-violet-700" /><span className="font-medium">{upload?.name ?? selectedDataset?.name}</span></div>}
-        {datasetError && <p className="mt-2 text-xs text-rose-600">{datasetError}</p>}
       </FormSection>
       <FormSection number="2" title="设置检测任务" description="检测目标固定为涂布面密度时序异常。">
         <div className="grid gap-3 sm:grid-cols-2"><Field label="主检测任务"><select value={task.detectionTask} onChange={(event) => setTask({ ...task, detectionTask: event.target.value as DetectionTask })} className={fieldClass}>{DETECTION_TASKS.map((item) => <option key={item}>{item}</option>)}</select></Field><Field label="异常检测模型"><select value={task.model} onChange={(event) => setTask({ ...task, model: event.target.value as DetectionModel })} className={fieldClass}>{DETECTION_MODELS.map((item) => <option key={item}>{item}</option>)}</select></Field></div>

@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from math import isfinite
+import re
 from typing import Any
 
 import pymysql
@@ -12,6 +13,11 @@ import pymysql
 from config.online_sources import ONLINE_SOURCES, OnlineSource
 from utils.dataset_table_preview import to_preview_cell
 
+
+# Hide backup/test/maintenance tables by their physical name, not their comment.
+EXCLUDED_TABLE_NAME_RE = re.compile(
+    r"(?i).*_(bak|backup|test|tmp|temp|old|copy|clone|draft|scratch|demo|sample|example|spare|deprecated|obsolete|disabled|archive|archived|trace|debug|check|chk|verify|verification|fix|fixed)([_-]?\d+)?$"
+)
 
 PREVIEW_ROWS = 50
 METRIC_SAMPLE_ROWS = 100
@@ -129,7 +135,7 @@ def list_online_tables(source: OnlineSource) -> list[dict[str, Any]]:
             "table_name": table_name,
         }
         for table_name, comment in tables
-        if table_name in timestamped_tables
+        if table_name in timestamped_tables and not EXCLUDED_TABLE_NAME_RE.search(table_name)
     ]
 
 

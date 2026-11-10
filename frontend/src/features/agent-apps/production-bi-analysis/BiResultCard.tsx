@@ -96,7 +96,7 @@ export function BiResultCard({ result }: { result: BiSuccessResponse }) {
           </div>
         )}
 
-        {result.chart?.type === 'ng_bar' && result.analysis && <NgAnalysisCard analysis={result.analysis} />}
+        {result.analysis && <NgAnalysisCard analysis={result.analysis} />}
 
         {result.sql && (
           <details className="rounded-xl border border-steel-700 bg-steel-950">

@@ -715,6 +715,10 @@ async def health_check():
 from auth.routes import router as auth_router
 
 app.include_router(auth_router)
+from agent_app.public_datasets_api import router as public_datasets_router
+app.include_router(public_datasets_router)
+from agent_app.data_selection_api import router as data_selection_router
+app.include_router(data_selection_router)
 
 
 # ----------------------------------------------------------------------

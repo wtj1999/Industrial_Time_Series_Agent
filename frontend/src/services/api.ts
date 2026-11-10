@@ -183,6 +183,14 @@ export async function previewDataset(fileName: string): Promise<DatasetTablePrev
   );
 }
 
+export async function listPublicDatasets(): Promise<DatasetsResponse> {
+  return getJson('/api/public-datasets', { method: 'GET' }, '获取公共数据失败');
+}
+
+export async function previewPublicDataset(fileName: string): Promise<DatasetTablePreview> {
+  return getJson(`/api/public-datasets/${encodeURIComponent(fileName)}/preview`, { method: 'GET' }, '预览公共文件失败');
+}
+
 export async function listOnlineSources(): Promise<{ sources: OnlineSource[] }> {
   return getJson('/api/online-sources', { method: 'GET' }, '获取在线数据源失败');
 }

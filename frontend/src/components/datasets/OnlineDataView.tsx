@@ -4,6 +4,7 @@ import * as api from '@/services/api';
 import type { OnlineSource, OnlineTable } from '@/types';
 import { OnlineTableExplorer } from './OnlineTableExplorer';
 import { OnlineTableMetrics } from './OnlineTableMetrics';
+import { AssetArtwork, AssetCategoryCard } from '@/components/ui/AssetCards';
 
 function LoadError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
@@ -32,31 +33,16 @@ export function OnlineSourceList({ onOpen }: { onOpen: (id: string) => void }) {
   useEffect(() => { void load(); }, [load]);
 
   return (
-    <div>
-      <div className="mb-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-steel-400">在线数据源</p>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight text-steel-900">工厂数据</h2>
-        <p className="mt-1 text-xs text-steel-500">选择工厂，查看数据库中的表格。</p>
-      </div>
+    <div className="production-catalog">
+      <div className="production-directory-heading"><div><span className="production-eyebrow"><Database size={13}/>在线数据源 · 工厂目录</span><h2>连接现场，探索数据<span>。</span></h2><p>选择工厂，查看数据库中的表格。</p></div></div>
       {loading ? <div className="flex items-center gap-2 py-16 text-xs text-steel-500"><RefreshCw className="h-4 w-4 animate-spin text-brand-500" />正在加载数据源…</div>
         : error ? <LoadError message={error} onRetry={() => void load()} />
         : sources.length === 0 ? <div className="py-20 text-center text-xs text-steel-500">暂无在线数据源</div>
-        : <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {sources.map((source) => <button key={source.id} type="button" onClick={() => onOpen(source.id)} className="group relative min-h-[185px] overflow-hidden rounded-2xl border border-sky-200/80 bg-white p-5 text-left shadow-sm transition-all hover:border-sky-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
-              <span aria-hidden="true" className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-sky-50 opacity-60 transition-transform duration-300 group-hover:scale-110" />
-              <div className="relative flex h-full flex-col gap-4 sm:flex-row">
-                <div className="flex shrink-0 flex-col sm:w-[42%]">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-100 text-sky-700"><Database className="h-5 w-5" /></span>
-                  <h3 className="mt-4 text-base font-semibold text-steel-900">{source.name}</h3>
-                  <p className="mt-1 text-xs text-steel-500">{source.database} 数据库</p>
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col border-t border-sky-100 pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
-                  <p className="text-xs leading-5 text-steel-600">{source.description}</p>
-                  <span className="mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-sky-700">查看表格<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
-                </div>
-              </div>
-            </button>)}
+        : <div className="asset-grid">
+            {sources.map((source, index) => <AssetCategoryCard key={source.id} title={source.name} description={source.description}
+              subtitle={`${source.database} 数据库`} icon={Database} index={index} kind="工厂数据" action="查看表格" motif="online" onClick={() => onOpen(source.id)} />)}
           </div>}
+
     </div>
   );
 }
@@ -113,17 +99,18 @@ export function OnlineTableList({ sourceId }: { sourceId: string }) {
       {loading ? <div className="flex items-center gap-2 py-16 text-xs text-steel-500"><RefreshCw className="h-4 w-4 animate-spin text-brand-500" />正在加载表格…</div>
         : error ? <LoadError message={error} onRetry={() => void load()} />
         : tables.length === 0 ? <div className="py-20 text-center text-xs text-steel-500">此数据库暂无表格</div>
-        : <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {tables.map((table) => <button key={`${sourceId}:${table.table_name}`} type="button" onClick={() => setSelected(table)} className="group flex min-h-[175px] flex-col rounded-2xl border border-steel-200/80 bg-white p-4 text-left shadow-sm transition-all hover:border-brand-300 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
+        : <div className="asset-grid">
+            {tables.map((table) => <button key={`${sourceId}:${table.table_name}`} type="button" onClick={() => setSelected(table)} className="production-directory-card asset-record">
+              <AssetArtwork motif="table" />
               <span className="flex w-full items-start justify-between">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-700"><Table2 className="h-5 w-5" /></span>
+                <span className="asset-record-icon"><Table2 className="h-5 w-5" /></span>
                 <OnlineTableMetrics sourceId={sourceId} tableName={table.table_name} refreshVersion={metricsVersion} />
               </span>
-              <h3 className="mt-3 line-clamp-2 text-[13px] font-semibold leading-5 text-steel-800" title={table.name}>{table.name}</h3>
+              <h3 className="asset-record-title mt-3 line-clamp-2" title={table.name}>{table.name}</h3>
               <code className="mt-1 break-all text-[10px] text-steel-500">{table.table_name}</code>
-              <span className="mt-auto flex items-center justify-between gap-2 pt-3 text-[11px] font-medium text-brand-700">
+              <span className="asset-record-footer">
                 <span>预览与筛选生产记录</span>
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                <span className="production-card-arrow"><ArrowRight size={17}/></span>
               </span>
             </button>)}
           </div>}

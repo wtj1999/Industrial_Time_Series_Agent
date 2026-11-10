@@ -1,14 +1,15 @@
 import { Lightbulb, Sparkles } from 'lucide-react';
-import type { NgAnalysis } from '../production-bi-analysis/types';
+import type { BiAnalysis } from '../production-bi-analysis/types';
 
-export function NgAnalysisCard({ analysis }: { analysis: NgAnalysis }) {
+export function NgAnalysisCard({ analysis }: { analysis: BiAnalysis }) {
   return (
     <section aria-label="分析与建议" className="break-words rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-white p-4">
       <div className="flex flex-wrap items-center gap-2">
         <Sparkles className="h-4 w-4 text-emerald-600" />
-        <h4 className="text-sm font-semibold text-steel-900">分析与建议</h4>
-        <span className="text-[10px] text-steel-500">基于本次全部查询结果</span>
+        <h4 className="text-sm font-semibold text-steel-900">{analysis.title ?? '分析与建议'}</h4>
+        <span className="text-[10px] text-steel-500">{analysis.scope_label ?? '基于本次全部查询结果'}</span>
       </div>
+      {analysis.focus && <p className="mt-2 text-xs text-emerald-700">{analysis.focus}</p>}
       {analysis.status === 'success' ? (
         <div className="mt-3 space-y-4 text-xs leading-6 text-steel-700">
           <p className="whitespace-pre-wrap text-sm leading-6 text-steel-800">{analysis.summary}</p>
@@ -25,7 +26,7 @@ export function NgAnalysisCard({ analysis }: { analysis: NgAnalysis }) {
           </div>
           <div>
             <h5 className="mb-2 flex items-center gap-1.5 font-semibold text-steel-900">
-              <Lightbulb className="h-3.5 w-3.5 text-emerald-600" />排查与改善建议
+              <Lightbulb className="h-3.5 w-3.5 text-emerald-600" />{analysis.recommendation_title ?? '排查与改善建议'}
             </h5>
             <ol className="space-y-2.5">
               {analysis.recommendations.map((recommendation, index) => (

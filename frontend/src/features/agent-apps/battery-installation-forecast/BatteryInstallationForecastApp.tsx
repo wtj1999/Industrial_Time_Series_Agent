@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { BatteryCharging, Database, FileUp, Loader2, Play, Square } from 'lucide-react';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatView } from '@/components/chat/ChatView';
 import { Button } from '@/components/ui/Button';
 import { useSession } from '@/context/SessionContext';
-import * as api from '@/services/api';
+import { AgentDataSelector } from '@/components/datasets/AgentDataSelector';
 import type { DatasetEntry } from '@/types';
 import { cn } from '@/utils/cn';
 import {
@@ -23,9 +23,6 @@ const MAX_FILE_MB = 100;
 
 export function BatteryInstallationForecastApp() {
   const { items, streaming, sendQuery, sendAgentTask, stop } = useSession();
-  const [datasets, setDatasets] = useState<DatasetEntry[]>([]);
-  const [datasetsLoading, setDatasetsLoading] = useState(true);
-  const [datasetError, setDatasetError] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState('');
   const [upload, setUpload] = useState<File | null>(null);
   const [started, setStarted] = useState(false);
@@ -39,27 +36,8 @@ export function BatteryInstallationForecastApp() {
     additionalRequirements: DEFAULT_ADDITIONAL_REQUIREMENTS,
   });
 
-  useEffect(() => {
-    let alive = true;
-    api.listDatasets()
-      .then((response) => {
-        if (alive) setDatasets(response.datasets ?? []);
-      })
-      .catch((error: unknown) => {
-        if (alive) setDatasetError(error instanceof Error ? error.message : '获取数据列表失败');
-      })
-      .finally(() => {
-        if (alive) setDatasetsLoading(false);
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const [selectedDataset, setSelectedDataset] = useState<DatasetEntry | null>(null);
 
-  const selectedDataset = useMemo(
-    () => datasets.find((dataset) => dataset.file_name === selectedFileName),
-    [datasets, selectedFileName],
-  );
 
   const toggleListValue = (
     field: 'batteryTypes' | 'externalVariables',
@@ -162,21 +140,8 @@ export function BatteryInstallationForecastApp() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormSection number="1" title="选择预测数据" description="选择历史数据，系统将自动识别时间列和装车量字段。">
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
-            <select
-              value={selectedFileName}
-              onChange={(event) => {
-                setSelectedFileName(event.target.value);
-                if (event.target.value) setUpload(null);
-              }}
-              disabled={datasetsLoading}
-              className="h-10 rounded-xl border border-steel-200 bg-white px-3 text-xs text-steel-700 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
-            >
-              <option value="">{datasetsLoading ? '正在加载我的数据…' : '从我的数据中选择'}</option>
-              {datasets.map((dataset) => (
-                <option key={dataset.file_name} value={dataset.file_name}>{dataset.name}</option>
-              ))}
-            </select>
+          <div className="grid items-end gap-3 sm:grid-cols-[1fr_auto]">
+            <AgentDataSelector value={selectedFileName} uploadedFile={upload} csvOnly={false} fieldClassName="h-10 rounded-xl border border-steel-200 bg-white px-3 text-xs text-steel-700 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100" onChange={(dataset, file) => { setSelectedDataset(dataset); setSelectedFileName(file ? '' : dataset?.file_name ?? ''); setUpload(file ?? null); }} />
             <label className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-xl border border-steel-200 bg-white px-4 text-xs font-medium text-steel-700 transition-colors hover:border-amber-400 hover:bg-amber-50">
               <FileUp className="h-4 w-4" />
               上传新数据
@@ -189,7 +154,6 @@ export function BatteryInstallationForecastApp() {
               <span className="font-medium">{upload?.name ?? selectedDataset?.name}</span>
             </div>
           )}
-          {datasetError && <p className="mt-2 text-xs text-rose-600">{datasetError}</p>}
         </FormSection>
 
         <FormSection number="2" title="设置预测参数" description="预测目标固定为动力电池装车量。">

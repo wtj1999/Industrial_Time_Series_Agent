@@ -1,4 +1,5 @@
 import { Coins, Factory, Gauge, ShieldCheck, type LucideIcon } from 'lucide-react';
+import type { BiAnalysisDomain } from './types';
 
 export interface ProductionBiAgent {
   id: string;
@@ -9,12 +10,15 @@ export interface ProductionBiAgent {
   suggestions: readonly string[];
   endpoint?: string;
   footerText?: string;
+  analysisDomain?: BiAnalysisDomain;
+  tenantId?: string;
 }
 
 // 业务分类和推荐问题依据 bi_app/table_intent_config.py；四个入口共用 BI 查询接口。
 export const PRODUCTION_BI_AGENTS = [
   {
     id: 'manufacturing-bi-analysis',
+    analysisDomain: 'manufacturing',
     name: '制造BI分析智能体',
     category: '制造',
     icon: Factory,
@@ -24,13 +28,13 @@ export const PRODUCTION_BI_AGENTS = [
       '分析最近30天电芯计划产出与实际产出的差异',
       '查询本月PACK计划产出、实际产出及产出完成率',
       '查询本周出勤工时、劳动工时和劳产率',
-      '统计本月物料的生产损耗、材料净消耗与理论用量',
+      '统计上月物料的生产损耗、材料净消耗与理论用量',
       '查询本月电芯利用率及电芯上线数量、装包数量',
-      '查询本周电芯生产批次的投入、OCV3产出、报废与结批误差',
     ],
   },
   {
     id: 'quality-bi-analysis',
+    analysisDomain: 'quality',
     name: '品质BI分析智能体',
     category: '品质',
     icon: ShieldCheck,
@@ -43,12 +47,13 @@ export const PRODUCTION_BI_AGENTS = [
   },
   {
     id: 'cost-bi-analysis',
+    analysisDomain: 'cost',
     name: '成本BI分析智能体',
     category: '成本',
     icon: Coins,
     description: '分析各工段耗电、合浆投入电量、物料成本、能耗成本及电芯和PACK制费。',
     suggestions: [
-      '统计本月各工段耗电量并按耗电量排序',
+      '统计本月各工段耗电量并对各设备类型按耗电量排序',
       '查询本月合浆投入电量、合格率和实际投入电量',
       '查询物料库存数量、备件单价和备件总价',
       '分析最近30天总耗电量与电费变化',
@@ -57,6 +62,7 @@ export const PRODUCTION_BI_AGENTS = [
   },
   {
     id: 'equipment-bi-analysis',
+    analysisDomain: 'equipment',
     name: '设备BI分析智能体',
     category: '设备',
     icon: Gauge,
@@ -64,7 +70,7 @@ export const PRODUCTION_BI_AGENTS = [
     suggestions: [
       '查询本月各设备OEE并按OEE排序',
       '分析本周设备时间稼动率、性能稼动率和合格品率',
-      '统计最近30天设备总运行时间、总故障时间、故障次数、MTBF和MTTR',
+      '统计最近30天每天各个设备总运行时间、总故障时间、故障次数、MTBF和MTTR',
       '查询本周设备总主动停机时间、总待料时间和总堵料时间',
     ],
   },

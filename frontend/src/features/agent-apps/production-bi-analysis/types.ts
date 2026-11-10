@@ -42,6 +42,7 @@ export type NgAnalysis = {
 };
 
 export interface BiConfirmPayload {
+  // Confirmation context is preserved by the caller for post-query analysis.
   type?: string;
   message?: string;
   selected_table?: string;
@@ -62,6 +63,9 @@ export interface BiConfirmPayload {
   }>;
 }
 
+export type BiAnalysisDomain = 'manufacturing' | 'quality' | 'cost' | 'equipment';
+export type BiAnalysis = NgAnalysis & { domain?: BiAnalysisDomain; title?: string; focus?: string; scope_label?: string; recommendation_title?: string };
+
 export interface BiNeedConfirmResponse {
   status: 'need_confirm';
   type?: 'field_confirm' | string;
@@ -79,7 +83,7 @@ export interface BiSuccessResponse {
   sql?: string;
   sql_explanation?: string;
   row_count?: number;
-  analysis?: NgAnalysis;
+  analysis?: BiAnalysis;
   data?: Array<Record<string, BiScalar>>;
   chart?: {
     type: 'ng_bar';
@@ -98,6 +102,9 @@ export type BiResponse = BiNeedConfirmResponse | BiSuccessResponse | {
 };
 
 export interface BiQueryPayload {
+  tenant_id?: string;
+  domain?: BiAnalysisDomain;
+  analysis_query?: string;
   query: string;
   thread_id: string;
   resume?: Record<string, string[]>;

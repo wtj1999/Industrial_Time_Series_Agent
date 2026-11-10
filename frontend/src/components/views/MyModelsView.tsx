@@ -11,7 +11,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Activity,
   ArrowLeft,
-  ArrowRight,
   Boxes,
   ChartSpline,
   Cpu,
@@ -25,6 +24,7 @@ import {
 import * as api from '@/services/api';
 import type { ModelEntry } from '@/types';
 import { cn } from '@/utils/cn';
+import { AssetArtwork, AssetCategoryCard, assetTheme } from '@/components/ui/AssetCards';
 import {
   formatAbsolute,
   formatRelative,
@@ -35,24 +35,21 @@ type ModelCategory = 'data_analysis' | 'anomaly_detection' | 'time_series_predic
 
 const CATEGORY_META: Record<
   ModelCategory,
-  { title: string; description: string; accent: 'emerald' | 'violet' | 'blue'; icon: typeof Activity }
+  { title: string; description: string; icon: typeof Activity }
 > = {
   data_analysis: {
     title: '数据分析',
     description: '挖掘设备、工艺与传感器数据中的规律、关系与关键影响因素',
-    accent: 'emerald',
     icon: GitBranch,
   },
   anomaly_detection: {
     title: '异常检测',
     description: '识别设备、工艺与传感器数据中的异常模式',
-    accent: 'violet',
     icon: Activity,
   },
   time_series_prediction: {
     title: '时序预测',
     description: '预测未来趋势、周期变化与关键指标走势',
-    accent: 'blue',
     icon: ChartSpline,
   },
 };
@@ -102,7 +99,7 @@ export function MyModelsView({ onBack }: { onBack: () => void }) {
   }, [fetchModels]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className={`flex h-full flex-col ${assetTheme(activeCategory ?? 'anomaly_detection')}`}>
       {/* Top bar */}
       <div className="flex items-center gap-3 border-b border-steel-200/70 bg-white/60 px-4 py-3 backdrop-blur-md sm:px-6">
         <button
@@ -114,7 +111,7 @@ export function MyModelsView({ onBack }: { onBack: () => void }) {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg catalog-header-icon">
             <Boxes className="h-3.5 w-3.5" />
           </span>
           <h1 className="text-sm font-semibold text-steel-800">
@@ -156,7 +153,7 @@ export function MyModelsView({ onBack }: { onBack: () => void }) {
             ) : (
               <>
                 <p className="mb-4 text-xs text-steel-500">{activeMeta?.description}</p>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="asset-grid">
                   {visibleModels.map((m) => (
                     <ModelCard key={`${m.thread_id ?? ''}/${m.file_name}`} m={m} />
                   ))}
@@ -199,77 +196,16 @@ function CategoryGrid({
   groupedModels: Record<ModelCategory, ModelEntry[]>;
   onSelect: (category: ModelCategory) => void;
 }) {
-  return (
-    <div>
-      <div className="mb-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-steel-400">
-          模型资产
-        </p>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight text-steel-900">
-          按任务类型浏览
-        </h2>
-        <p className="mt-1 text-xs text-steel-500">
-          选择模型的应用方向，再查看已训练并保存的具体模型。
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {(Object.keys(CATEGORY_META) as ModelCategory[]).map((category) => {
-          const meta = CATEGORY_META[category];
-          const Icon = meta.icon;
-          const count = groupedModels[category].length;
-          const cardClasses = meta.accent === 'emerald'
-            ? 'border-emerald-200/80 hover:border-emerald-400 hover:shadow-soft focus-visible:ring-emerald-500'
-            : meta.accent === 'violet'
-              ? 'border-violet-200/80 hover:border-violet-400 hover:shadow-soft focus-visible:ring-violet-500'
-              : 'border-blue-200/80 hover:border-blue-400 hover:shadow-soft focus-visible:ring-blue-500';
-          const orbClass = meta.accent === 'emerald' ? 'bg-emerald-50' : meta.accent === 'violet' ? 'bg-violet-50' : 'bg-blue-50';
-          const iconClass = meta.accent === 'emerald' ? 'bg-emerald-100 text-emerald-700' : meta.accent === 'violet' ? 'bg-violet-100 text-violet-700' : 'bg-blue-100 text-blue-700';
-
-          return (
-            <button
-              key={category}
-              type="button"
-              onClick={() => onSelect(category)}
-              className={cn(
-                'group relative min-h-[190px] overflow-hidden rounded-2xl border bg-white p-5 text-left shadow-sm transition-all',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-                cardClasses,
-              )}
-            >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  'absolute -right-10 -top-12 h-36 w-36 rounded-full opacity-60 transition-transform duration-300 group-hover:scale-110',
-                  orbClass,
-                )}
-              />
-              <div className="relative flex h-full flex-col">
-                <div className="flex items-start justify-between gap-4">
-                  <span
-                    className={cn(
-                      'flex h-11 w-11 items-center justify-center rounded-xl',
-                      iconClass,
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-steel-500">
-                    {count} 个模型
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </div>
-                <h3 className="mt-6 text-base font-semibold text-steel-900">{meta.title}</h3>
-                <p className="mt-1.5 max-w-sm text-xs leading-5 text-steel-500">
-                  {meta.description}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+  return <section className="production-catalog" aria-label="模型资产分类">
+    <div className="production-directory-heading"><div><span className="production-eyebrow"><Boxes size={13}/>模型资产 · 能力目录</span><h2>让模型，沉淀业务经验<span>。</span></h2><p>从任务类型出发，查看已训练并保存的模型。</p></div><span className="production-directory-count">3 个分类</span></div>
+    <div className="asset-grid">
+      {(Object.keys(CATEGORY_META) as ModelCategory[]).map((category, index) => {
+        const meta = CATEGORY_META[category];
+        return <AssetCategoryCard key={category} title={meta.title} description={meta.description} icon={meta.icon} index={index}
+          kind={`${groupedModels[category].length} 个模型`} action="查看模型" motif={category} tone={index === 0 ? 'dark' : 'soft'} onClick={() => onSelect(category)} />;
+      })}
     </div>
-  );
+  </section>;
 }
 
 function ModelCard({ m }: { m: ModelEntry }) {
@@ -285,19 +221,17 @@ function ModelCard({ m }: { m: ModelEntry }) {
 
   return (
     <div
-      className={cn(
-        'group relative flex flex-col rounded-2xl border border-steel-200/80 bg-white p-4 shadow-sm transition-all',
-        isAnalysis ? 'hover:border-emerald-300 hover:shadow-soft' : 'hover:border-violet-300 hover:shadow-soft',
-      )}
+      className="production-directory-card asset-record asset-model-record"
     >
+      <AssetArtwork motif={category} />
       {/* Header */}
       <div className="flex items-start gap-3">
-        <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', isAnalysis ? 'bg-emerald-100 text-emerald-700' : 'bg-violet-100 text-violet-700')}>
+        <span className="asset-record-icon">
           <Cpu className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
           <h3
-            className="truncate text-[13px] font-semibold text-steel-800"
+            className="asset-record-title truncate"
             title={m.save_name}
           >
             {m.save_name}
@@ -312,7 +246,7 @@ function ModelCard({ m }: { m: ModelEntry }) {
             </p>
           )}
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <span className={cn('rounded-full border px-1.5 py-0.5 text-[9px] font-bold tracking-wide', isAnalysis ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-violet-200 bg-violet-50 text-violet-700')}>
+            <span className="asset-record-chip">
               {detector}
             </span>
             {isTransductive && (
@@ -409,7 +343,7 @@ function ModelCard({ m }: { m: ModelEntry }) {
             {m.feature_columns.slice(0, 6).map((col) => (
               <span
                 key={col}
-                className="rounded bg-steel-50 px-1.5 py-0.5 text-[10px] text-steel-600"
+                className="asset-model-feature rounded bg-steel-50 px-1.5 py-0.5 text-[10px] text-steel-600"
               >
                 {col}
               </span>

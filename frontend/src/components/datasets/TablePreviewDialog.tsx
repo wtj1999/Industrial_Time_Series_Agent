@@ -4,7 +4,7 @@ import * as api from '@/services/api';
 import type { DatasetTablePreview } from '@/types';
 
 type PreviewSource =
-  | { kind: 'offline'; fileName: string }
+  | { kind: 'offline' | 'public'; fileName: string }
   | { kind: 'online'; sourceId: string; tableName: string };
 
 export function TablePreviewDialog({
@@ -20,16 +20,16 @@ export function TablePreviewDialog({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
-  const sourceKey = source.kind === 'offline'
-    ? `offline:${source.fileName}`
+  const sourceKey = source.kind !== 'online'
+    ? `${source.kind}:${source.fileName}`
     : `online:${source.sourceId}:${source.tableName}`;
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
-    const request = source.kind === 'offline'
-      ? api.previewDataset(source.fileName)
+    const request = source.kind !== 'online'
+      ? (source.kind === 'public' ? api.previewPublicDataset(source.fileName) : api.previewDataset(source.fileName))
       : api.previewOnlineTable(source.sourceId, source.tableName);
     void request.then(
       (data) => {

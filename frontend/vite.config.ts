@@ -22,8 +22,8 @@ export default defineConfig({
       '/api/bi': {
         target: biProxyTarget,
         changeOrigin: true,
-        timeout: 180_000,
-        proxyTimeout: 180_000,
+        timeout: 240_000,
+        proxyTimeout: 240_000,
       },
       // Proxy API requests to the FastAPI backend
       '/api': {

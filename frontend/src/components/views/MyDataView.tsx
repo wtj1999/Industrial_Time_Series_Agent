@@ -14,12 +14,16 @@ import {
   RefreshCw,
   Table,
   Upload,
+  LockKeyhole,
+  Globe2,
 } from 'lucide-react';
 import * as api from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 import { TablePreviewDialog } from '@/components/datasets/TablePreviewDialog';
 import { OnlineSourceList, OnlineTableList } from '@/components/datasets/OnlineDataView';
 import type { DatasetEntry } from '@/types';
 import { cn } from '@/utils/cn';
+import { AssetArtwork, AssetCategoryCard } from '@/components/ui/AssetCards';
 import {
   formatAbsolute,
   formatBytes,
@@ -29,25 +33,19 @@ import {
 
 const EXT_META: Record<
   string,
-  { icon: typeof FileText; label: string; chip: string; iconWrap: string }
+  { icon: typeof FileText; label: string }
 > = {
   csv: {
     icon: FileText,
     label: 'CSV',
-    chip: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    iconWrap: 'bg-emerald-100 text-emerald-700',
   },
   xlsx: {
     icon: FileSpreadsheet,
     label: 'XLSX',
-    chip: 'bg-sky-50 text-sky-700 border-sky-200',
-    iconWrap: 'bg-sky-100 text-sky-700',
   },
   parquet: {
     icon: Table,
     label: 'PARQUET',
-    chip: 'bg-amber-50 text-amber-700 border-amber-200',
-    iconWrap: 'bg-amber-100 text-amber-700',
   },
 };
 
@@ -56,13 +54,11 @@ function extMeta(ext: string) {
     EXT_META[ext.toLowerCase()] ?? {
       icon: FileText,
       label: ext.toUpperCase() || 'FILE',
-      chip: 'bg-steel-100 text-steel-700 border-steel-200',
-      iconWrap: 'bg-steel-100 text-steel-600',
     }
   );
 }
 
-type DataSourceKind = 'overview' | 'online' | 'online-tables' | 'offline';
+type DataSourceKind = 'overview' | 'online' | 'online-tables' | 'offline' | 'offline-private' | 'offline-public';
 
 export function MyDataView({
   kind,
@@ -71,6 +67,7 @@ export function MyDataView({
   onGoChat,
   onOpen,
   onOpenSource,
+  onOpenOffline,
 }: {
   kind: DataSourceKind;
   sourceId?: string;
@@ -78,9 +75,12 @@ export function MyDataView({
   onGoChat: () => void;
   onOpen: (source: 'online' | 'offline') => void;
   onOpenSource: (id: string) => void;
+  onOpenOffline: (visibility: 'private' | 'public') => void;
 }) {
+  const isPublic = kind === 'offline-public';
+  const isFileList = kind === 'offline-private' || isPublic;
   const [datasets, setDatasets] = useState<DatasetEntry[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(isFileList);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewDataset, setPreviewDataset] = useState<DatasetEntry | null>(null);
@@ -90,7 +90,7 @@ export function MyDataView({
     else setLoading(true);
     setError(null);
     try {
-      const res = await api.listDatasets();
+      const res = await (isPublic ? api.listPublicDatasets() : api.listDatasets());
       setDatasets(res.datasets ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : '获取数据列表失败');
@@ -98,44 +98,44 @@ export function MyDataView({
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [isPublic]);
 
   useEffect(() => {
-    if (kind === 'offline') void fetchDatasets(false);
-  }, [kind, fetchDatasets]);
+    if (isFileList) void fetchDatasets(false);
+  }, [isFileList, fetchDatasets]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className={`flex h-full flex-col ${kind.startsWith('offline') ? 'catalog-theme-production' : 'catalog-theme-equipment'}`}>
       {/* Top bar */}
       <div className="flex items-center gap-3 border-b border-steel-200/70 bg-white/60 px-4 py-3 backdrop-blur-md sm:px-6">
         <button
           type="button"
           onClick={onBack}
           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-steel-600 transition-colors hover:bg-steel-100 hover:text-steel-900"
-          title={kind === 'overview' ? '返回对话' : kind === 'online-tables' ? '返回在线数据源' : '返回我的数据'}
-          aria-label={kind === 'overview' ? '返回对话' : kind === 'online-tables' ? '返回在线数据源' : '返回我的数据'}
+          title={kind === 'overview' ? '返回对话' : kind === 'online-tables' ? '返回在线数据源' : isFileList ? '返回离线数据源' : '返回我的数据'}
+          aria-label={kind === 'overview' ? '返回对话' : kind === 'online-tables' ? '返回在线数据源' : isFileList ? '返回离线数据源' : '返回我的数据'}
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 text-white">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg catalog-header-icon">
             <Database className="h-3.5 w-3.5" />
           </span>
           <h1 className="text-sm font-semibold text-steel-800">我的数据</h1>
           {kind !== 'overview' && <span className="text-steel-300">/</span>}
           {kind !== 'overview' && (
             <span className="text-xs font-medium text-steel-600">
-              {kind === 'offline' ? '离线数据源' : '在线数据源'}
+              {kind === 'offline' ? '离线数据源' : isPublic ? '公共数据' : kind === 'offline-private' ? '私有数据' : '在线数据源'}
             </span>
           )}
-          {kind === 'offline' && !loading && !error && (
+          {isFileList && !loading && !error && (
             <span className="rounded-full bg-steel-100 px-2 py-0.5 text-[10px] font-medium text-steel-600">
               {datasets.length} 个文件
             </span>
           )}
         </div>
         <div className="flex-1" />
-        {kind === 'offline' && <button
+        {isFileList && <button
           type="button"
           onClick={() => void fetchDatasets(true)}
           disabled={refreshing}
@@ -159,23 +159,25 @@ export function MyDataView({
             <OnlineSourceList onOpen={onOpenSource} />
           ) : kind === 'online-tables' ? (
             <OnlineTableList sourceId={sourceId ?? ''} />
+          ) : kind === 'offline' ? (
+            <OfflineOverview onOpen={onOpenOffline} />
           ) : loading ? (
             <LoadingState />
           ) : error ? (
             <ErrorState message={error} onRetry={() => void fetchDatasets(true)} />
           ) : datasets.length === 0 ? (
-            <EmptyState onBack={onGoChat} />
+            <EmptyState onBack={onGoChat} isPublic={isPublic} />
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="asset-grid">
               {datasets.map((ds) => (
-                <DatasetCard key={ds.file_name} ds={ds} onPreview={() => setPreviewDataset(ds)} />
+                <DatasetCard key={ds.file_name} ds={ds} isPublic={isPublic} onPreview={() => setPreviewDataset(ds)} />
               ))}
             </div>
           )}
         </div>
       </div>
       {previewDataset && (
-        <TablePreviewDialog title={previewDataset.name} source={{ kind: 'offline', fileName: previewDataset.file_name }} onClose={() => setPreviewDataset(null)} />
+        <TablePreviewDialog title={previewDataset.name} source={{ kind: isPublic ? 'public' : 'offline', fileName: previewDataset.file_name }} onClose={() => setPreviewDataset(null)} />
       )}
     </div>
   );
@@ -186,79 +188,53 @@ function DataSourceOverview({
 }: {
   onOpen: (source: 'online' | 'offline') => void;
 }) {
-  return (
-    <div>
-      <div className="mb-5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-steel-400">数据资产</p>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight text-steel-900">按数据来源浏览</h2>
-        <p className="mt-1 text-xs text-steel-500">选择数据源类型，查看对应的数据。</p>
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => onOpen('online')}
-          className="group relative min-h-[190px] overflow-hidden rounded-2xl border border-sky-200/80 bg-white p-5 text-left shadow-sm transition-all hover:border-sky-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
-        >
-          <span aria-hidden="true" className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-sky-50 opacity-60 transition-transform duration-300 group-hover:scale-110" />
-          <div className="relative flex h-full flex-col">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-100 text-sky-700"><Radio className="h-5 w-5" /></span>
-            <h3 className="mt-6 text-base font-semibold text-steel-900">在线数据源</h3>
-            <p className="mt-1.5 text-xs leading-5 text-steel-500">查看在线连接的数据源。</p>
-            <span className="mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-sky-700">查看数据源<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
-          </div>
-        </button>
-        <button
-          type="button"
-          onClick={() => onOpen('offline')}
-          className="group relative min-h-[190px] overflow-hidden rounded-2xl border border-brand-200/80 bg-white p-5 text-left shadow-sm transition-all hover:border-brand-400 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-        >
-          <span aria-hidden="true" className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-brand-50 opacity-60 transition-transform duration-300 group-hover:scale-110" />
-          <div className="relative flex h-full flex-col">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-100 text-brand-700"><HardDrive className="h-5 w-5" /></span>
-            <h3 className="mt-6 text-base font-semibold text-steel-900">离线数据源</h3>
-            <p className="mt-1.5 text-xs leading-5 text-steel-500">查看已上传的 CSV、Excel 和 Parquet 文件。</p>
-            <span className="mt-auto flex items-center justify-end gap-1 pt-3 text-[11px] font-medium text-brand-700">查看文件<ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></span>
-          </div>
-        </button>
-      </div>
+  return <section className="production-catalog" aria-label="数据资产分类">
+    <div className="production-directory-heading"><div><span className="production-eyebrow"><Database size={13}/>数据资产 · 来源目录</span><h2>让数据，连接业务现场<span>。</span></h2><p>选择数据来源，查看在线连接与历史上传的数据。</p></div><span className="production-directory-count">2 个分类</span></div>
+    <div className="asset-grid asset-grid-two">
+      <AssetCategoryCard title="在线数据源" description="连接工厂现场，浏览在线数据库与生产记录。" subtitle="实时连接 · 工厂数据" icon={Radio} index={0} kind="在线连接" action="查看数据源" motif="online" tone="dark" onClick={() => onOpen('online')} />
+      <AssetCategoryCard title="离线数据源" description="查看已上传的 CSV、Excel 和 Parquet 文件，沉淀可复用的数据资产。" subtitle="历史上传 · 文件数据" icon={HardDrive} index={1} kind="文件资产" action="查看文件" motif="offline" onClick={() => onOpen('offline')} />
     </div>
-  );
+  </section>;
 }
 
-function DatasetCard({ ds, onPreview }: { ds: DatasetEntry; onPreview: () => void }) {
+function OfflineOverview({ onOpen }: { onOpen: (visibility: 'private' | 'public') => void }) {
+  return <section className="production-catalog" aria-label="离线数据分类">
+    <div className="production-directory-heading"><div><span className="production-eyebrow"><HardDrive size={13}/>离线数据源 · 文件目录</span><h2>沉淀数据，连接更多可能<span>。</span></h2><p>查看个人上传记录，或浏览所有用户共享的公共数据。</p></div><span className="production-directory-count">2 个分类</span></div>
+    <div className="asset-grid asset-grid-two">
+      <AssetCategoryCard title="私有数据" description="查看你上传的 CSV、Excel 和 Parquet 文件，管理个人数据资产。" subtitle="个人空间 · 上传记录" icon={LockKeyhole} index={0} kind="私有文件" action="查看私有数据" motif="offline" tone="dark" onClick={() => onOpen('private')} />
+      <AssetCategoryCard title="公共数据" description="浏览共享数据文件，所有用户均可查看相同的公共数据。" subtitle="共享空间 · 公共文件" icon={Globe2} index={1} kind="共享文件" action="查看公共数据" motif="offline" onClick={() => onOpen('public')} />
+    </div>
+  </section>;
+}
+
+function DatasetCard({ ds, onPreview, isPublic }: { ds: DatasetEntry; onPreview: () => void; isPublic: boolean }) {
+  const { user } = useAuth();
+  const ownerName = isPublic ? 'root' : user?.username ?? '未登录';
   const meta = extMeta(ds.extension);
   const Icon = meta.icon;
   return (
     <button
       type="button"
       onClick={onPreview}
-      className={cn(
-        'group relative flex w-full flex-col rounded-2xl border border-steel-200/80 bg-white p-4 text-left shadow-sm transition-all',
-        'hover:border-brand-300 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
-      )}
+      className="production-directory-card asset-record"
     >
+      <AssetArtwork motif="offline" />
       <div className="flex items-start gap-3">
         <span
-          className={cn(
-            'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl',
-            meta.iconWrap,
-          )}
+          className="asset-record-icon"
         >
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
           <h3
-            className="truncate text-[13px] font-semibold text-steel-800"
+            className="asset-record-title truncate"
             title={ds.name}
           >
             {ds.name}
           </h3>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <span
-              className={cn(
-                'rounded-full border px-1.5 py-0.5 text-[9px] font-bold tracking-wide',
-                meta.chip,
-              )}
+              className="asset-record-chip"
             >
               {meta.label}
             </span>
@@ -268,8 +244,16 @@ function DatasetCard({ ds, onPreview }: { ds: DatasetEntry; onPreview: () => voi
       </div>
 
       <div className="mt-3 space-y-1.5 border-t border-steel-100 pt-2.5 text-[10px] text-steel-500">
+        <div className="flex items-center justify-between gap-2">
+          <span className="shrink-0">用户名</span>
+          <span className="max-w-[65%] truncate font-medium text-steel-700" title={ownerName}>{ownerName}</span>
+        </div>
+        {!isPublic && user?.user_id && <div className="flex items-center justify-between gap-2">
+          <span className="shrink-0">用户 ID</span>
+          <code className="max-w-[65%] truncate text-steel-600" title={user.user_id}>{shortId(user.user_id, 12, 6)}</code>
+        </div>}
         <div className="flex items-center justify-between">
-          <span>上传时间</span>
+          <span>{isPublic ? '更新时间' : '上传时间'}</span>
           <span
             className="font-medium text-steel-700"
             title={formatAbsolute(ds.modified_at)}
@@ -286,9 +270,9 @@ function DatasetCard({ ds, onPreview }: { ds: DatasetEntry; onPreview: () => voi
           </div>
         )}
       </div>
-      <span className="mt-auto flex items-center justify-between gap-2 pt-3 text-[11px] font-medium text-brand-700">
-        <span>预览历史上传记录</span>
-        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+      <span className="asset-record-footer">
+        <span>{isPublic ? '预览公共数据' : '预览历史上传记录'}</span>
+        <span className="production-card-arrow"><ArrowRight size={17}/></span>
       </span>
     </button>
   );
@@ -322,24 +306,24 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   );
 }
 
-function EmptyState({ onBack }: { onBack: () => void }) {
+function EmptyState({ onBack, isPublic }: { onBack: () => void; isPublic: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-steel-100 to-steel-200 text-steel-400">
         <Upload className="h-7 w-7" />
       </div>
-      <h2 className="mt-5 text-sm font-semibold text-steel-700">还没有上传过数据</h2>
+      <h2 className="mt-5 text-sm font-semibold text-steel-700">{isPublic ? '暂无公共数据' : '还没有上传过数据'}</h2>
       <p className="mt-1.5 max-w-xs text-[11px] text-steel-500">
-        在对话中上传 CSV / Excel / Parquet 文件后，它们会自动出现在这里。
+        {isPublic ? '公共文件发布后，将显示在这里。' : '在对话中上传 CSV / Excel / Parquet 文件后，它们会自动出现在这里。'}
       </p>
-      <button
+      {!isPublic && <button
         type="button"
         onClick={onBack}
         className="mt-4 inline-flex h-8 items-center gap-1.5 rounded-lg border border-brand-200 bg-brand-50 px-3 text-xs font-medium text-brand-700 hover:bg-brand-100"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         返回对话上传
-      </button>
+      </button>}
     </div>
   );
 }
