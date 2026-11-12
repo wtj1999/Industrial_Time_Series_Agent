@@ -1,0 +1,19 @@
+.workspace-header{position:relative;z-index:20;display:flex;flex-shrink:0;flex-direction:column;justify-content:center;gap:9px;min-height:88px;padding:13px 28px;border-bottom:1px solid #dde5ef;background:#ffffffd9;backdrop-filter:blur(14px);color:#414c62}
+.workspace-mobile-brand{display:none}
+.workspace-mobile-brand-standalone{flex-shrink:0;padding:16px 20px;border-bottom:1px solid #dde5ef;background:#ffffffd9}
+.workspace-header-main{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:28px}
+.workspace-heading{display:flex;align-items:center;flex-wrap:wrap;gap:10px;min-width:0}
+.workspace-heading>svg{flex-shrink:0;color:#8493ab}
+.workspace-heading h1{margin:0;font-size:13px;line-height:22px;font-weight:500;color:#414c62}
+.workspace-task{border-left:1px solid #dde5ef;padding-left:12px;font-size:12px;line-height:18px;font-weight:500;color:#2448d8}
+.workspace-stage{display:inline-flex;align-items:center;gap:6px;border:1px solid #e3e9f3;border-radius:6px;padding:2px 8px;font-size:10px;line-height:16px;white-space:nowrap;color:#647591;background:#f6f8fc}
+.workspace-stage>span{width:5px;height:5px;flex-shrink:0;border-radius:50%;background:#96a4b9}
+.workspace-stage[data-running=true]{border-color:#cddcff;color:#2448d8;background:#eef4ff}
+.workspace-stage[data-running=true]>span{background:#3366ff}
+.workspace-actions{display:flex;align-items:center;flex-shrink:0;gap:2px}
+.workspace-readiness{display:flex;align-items:center;flex-wrap:wrap;column-gap:18px;row-gap:7px;padding-left:25px;font-size:10px;line-height:16px}
+.workspace-readiness-label{color:#98a4b7}
+.workspace-preparation-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;color:#98a4b7}
+.workspace-preparation-item[data-ready=true]{color:#477c78}
+@media(max-width:1023px){.workspace-header{padding:14px 20px;gap:10px}.workspace-mobile-brand{display:block;padding-bottom:12px;margin-bottom:2px;border-bottom:1px solid #edf0f6}}
+@media(max-width:480px){.workspace-header{padding:12px 16px}.workspace-heading{gap:7px}.workspace-task{padding-left:8px;font-size:11px}.workspace-heading h1{font-size:12px}.workspace-readiness{column-gap:12px;padding-left:0}.workspace-readiness-label{display:none}}

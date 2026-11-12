@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "viewports": [
+    1440,
+    1024,
+    768,
+    390,
+    320
+  ],
+  "checks": [
+    "brand placement and SVG loading",
+    "ready and pending states",
+    "stage casing normalization",
+    "refresh and reset actions",
+    "resource navigation",
+    "brand return to chat",
+    "new conversation",
+    "no browser errors or horizontal overflow"
+  ],
+  "api": "isolated mocked responses; no real account or backend writes"
+}

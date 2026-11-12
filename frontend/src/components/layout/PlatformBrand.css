@@ -1,0 +1,9 @@
+.platform-brand{display:flex;align-items:center;gap:12px;min-width:0;width:fit-content;border-radius:6px;text-decoration:none}
+.platform-brand-mark{display:block;flex-shrink:0;width:40px;height:30px;object-fit:contain}
+.platform-brand-copy{display:flex;flex-direction:column;gap:5px;min-width:0;white-space:nowrap}
+.platform-brand-copy strong{font-size:15px;font-weight:600;line-height:1.2;letter-spacing:.3px;color:#25324a}
+.platform-brand-copy>span{font-size:10px;line-height:1.3;letter-spacing:.1px;color:#7b8aa2}
+.platform-brand:focus-visible{outline:2px solid #2b50ec;outline-offset:5px}
+.sidebar-brand .platform-brand-mark{width:56px;height:40px}
+.sidebar-brand .platform-brand-copy strong{font-size:18px}
+.sidebar-brand .platform-brand-copy>span{font-size:11.5px}
