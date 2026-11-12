@@ -1,5 +1,6 @@
 /* Compact navigation uses the same palette tokens and card details as the catalog. */
 .app-sidebar{width:288px;flex-shrink:0;min-height:0;flex-direction:column;border-right:1px solid var(--catalog-border);background:linear-gradient(165deg,var(--catalog-quiet),#fff);color:var(--catalog-ink)}
+.sidebar-brand{display:flex;align-items:center;justify-content:center;flex-shrink:0;min-height:88px;padding:18px 22px;border-bottom:1px solid var(--catalog-border)}
 .sidebar-top{padding:16px;border-bottom:1px solid var(--catalog-border);overflow:hidden;scrollbar-width:thin;scrollbar-gutter:stable}
 .sidebar-new-chat{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:12px 16px;border:1px solid #bcd3ff;border-radius:16px;background:#d9e6ff;color:#192cb6;font-size:12px;font-weight:500;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s}
 .sidebar-new-chat>svg:last-child{margin-left:auto;color:inherit}
@@ -21,7 +22,6 @@
 .sidebar-session-row>span:last-child{min-width:0;text-align:right;overflow-wrap:anywhere}
 .sidebar-session-row code{font-size:10px}
 .sidebar-muted{color:var(--catalog-muted)}
-.app-sidebar .sidebar-badge{border-color:var(--catalog-soft-border);background:var(--catalog-soft-end);color:var(--catalog-link);font-size:10px;padding:1px 7px}
 .sidebar-nav-card{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px 12px;border-radius:14px;overflow:hidden}
 .sidebar-nav-card>:not(.asset-artwork){position:relative;z-index:1}
 .sidebar-nav-card .asset-artwork{width:80px;height:52px;right:-10px;bottom:-6px;opacity:.14}

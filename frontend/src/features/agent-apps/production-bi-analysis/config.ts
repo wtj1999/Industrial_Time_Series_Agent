@@ -12,6 +12,7 @@ export interface ProductionBiAgent {
   footerText?: string;
   analysisDomain?: BiAnalysisDomain;
   tenantId?: string;
+  ngFactoryId?: string;
 }
 
 // 业务分类和推荐问题依据 bi_app/table_intent_config.py；四个入口共用 BI 查询接口。

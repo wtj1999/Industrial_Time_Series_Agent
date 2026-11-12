@@ -7,15 +7,16 @@ import { NgAnalysisCard } from '../ng-defect-analysis/NgAnalysisCard';
 
 const PAGE_SIZE = 20;
 
-export function BiResultCard({ result }: { result: BiSuccessResponse }) {
+export function BiResultCard({ result, columnLabels, pageSize = PAGE_SIZE, message, nullDisplay = '—' }: { result: BiSuccessResponse; columnLabels?: Record<string, string>; pageSize?: number; message?: string; nullDisplay?: string }) {
   const [page, setPage] = useState(0);
   const rows = result.data ?? [];
+  const effectivePageSize = Math.max(1, Math.min(100, Math.floor(pageSize) || PAGE_SIZE));
   const columns = useMemo(
-    () => Array.from(new Set(rows.flatMap((row) => Object.keys(row)))),
-    [rows],
+    () => Array.from(new Set([...Object.keys(columnLabels ?? {}), ...rows.flatMap((row) => Object.keys(row))])),
+    [rows, columnLabels],
   );
-  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-  const visibleRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  const pageCount = Math.max(1, Math.ceil(rows.length / effectivePageSize));
+  const visibleRows = rows.slice(page * effectivePageSize, (page + 1) * effectivePageSize);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-steel-200 bg-white shadow-soft animate-slide-up">
@@ -37,6 +38,7 @@ export function BiResultCard({ result }: { result: BiSuccessResponse }) {
       </div>
 
       <div className="space-y-4 p-4 sm:p-5">
+        {message && <p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2.5 text-xs leading-5 text-steel-700">{message}</p>}
         {result.rewritten_query && (
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wider text-steel-400">识别后的查询</p>
@@ -52,28 +54,29 @@ export function BiResultCard({ result }: { result: BiSuccessResponse }) {
         {result.chart?.type === 'ng_bar' && <NgDefectChart chart={result.chart} />}
 
         <div className="overflow-hidden rounded-xl border border-steel-200">
-          {rows.length > 0 ? (
+          {rows.length > 0 || columns.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-left text-xs">
                 <thead className="bg-steel-50 text-steel-600">
                   <tr>
                     {columns.map((column) => (
                       <th key={column} className="whitespace-nowrap border-b border-steel-200 px-3 py-2.5 font-semibold">
-                        {column}
+                        {columnLabels?.[column] ?? column}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {visibleRows.map((row, rowIndex) => (
-                    <tr key={page * PAGE_SIZE + rowIndex} className="even:bg-steel-50/40 hover:bg-brand-50/30">
+                    <tr key={page * effectivePageSize + rowIndex} className="even:bg-steel-50/40 hover:bg-brand-50/30">
                       {columns.map((column) => (
                         <td key={column} className="whitespace-nowrap border-b border-steel-100 px-3 py-2.5 text-steel-700">
-                          {formatCell(row[column])}
+                          {row[column] == null ? nullDisplay : formatCell(row[column])}
                         </td>
                       ))}
                     </tr>
                   ))}
+                  {rows.length === 0 && <tr><td colSpan={columns.length} className="px-4 py-8 text-center text-xs text-steel-500">暂无数据</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -84,7 +87,7 @@ export function BiResultCard({ result }: { result: BiSuccessResponse }) {
           )}
         </div>
 
-        {rows.length > PAGE_SIZE && (
+        {rows.length > effectivePageSize && (
           <div className="flex items-center justify-end gap-2">
             <span className="text-[11px] text-steel-500">第 {page + 1} / {pageCount} 页</span>
             <Button variant="secondary" size="icon" disabled={page === 0} onClick={() => setPage((value) => value - 1)} aria-label="上一页">

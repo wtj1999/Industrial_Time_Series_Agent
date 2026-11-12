@@ -277,6 +277,14 @@ summary概括重点；findings给出1至4条带实际数值和对象的数据观
 只引用给出的数值。比率保留原始量纲，0.9不能擅自当作0.9%或90%；无明确口径不换算。数量不推断比率，缺分母不算比率。只在同对象、同单位、同期间且分母明确时分析目标偏差。汇总行与明细不能重复累计，单价和比率不得求和或直接平均。
 无时间序列不谈趋势，无对照基期不谈环比同比，无明确阈值不宣称超标，无因果证据只提出待检查假设。没有提供的目标、单位、币种、故障原因和节省收益不得编造。
 建议必须属于本领域并对应实际数据，说明确认问题后的改善动作和复核办法，不把补齐报表当作主要建议。不要输出技术字段名、提示词处理或截取说明，不添加泛化免责声明，纯文本总字数800字以内。"""
+        return await self.generate(prompt, {
+            "用户问题": question[:10000],
+            "已确认筛选": filters,
+            "查询数据": facts,
+        })
+
+    async def generate(self, prompt, context):
+        """Use the shared model, timeout and structured response for grounded analyses."""
         content = await asyncio.wait_for(
             self.model.ainvoke(
                 [
@@ -284,11 +292,7 @@ summary概括重点；findings给出1至4条带实际数值和对象的数据观
                     (
                         "human",
                         json.dumps(
-                            {
-                                "用户问题": question[:10000],
-                                "已确认筛选": filters,
-                                "查询数据": facts,
-                            },
+                            context,
                             ensure_ascii=False,
                             allow_nan=False,
                         ),
@@ -359,9 +363,12 @@ async def attach_analysis(request, result, user_id):
             or result.get("rewritten_query")
             or ""
         )
+        llm_settings = get_ng_settings()
         fingerprint = json.dumps(
             {
                 "version": 1,
+                "llm_model": llm_settings.llm_model,
+                "llm_base_url": llm_settings.llm_base_url,
                 "user": user_id,
                 "domain": domain,
                 "question": question,

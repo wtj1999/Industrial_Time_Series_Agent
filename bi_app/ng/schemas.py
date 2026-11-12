@@ -4,6 +4,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
 from ..schemas import BiQueryRequest
+from .config import DEFAULT_NG_FACTORY
 
 FILTER_LABELS = {
     "tenant_id": "租户",
@@ -84,6 +85,7 @@ class NgMatchingResult(BaseModel):
 
 class NgQueryRequest(BiQueryRequest):
     model_config = ConfigDict(extra="forbid")
+    factory_id: str = Field(default=DEFAULT_NG_FACTORY, min_length=1, max_length=80, pattern=r'^[a-z0-9-]+$')
     confirmation_id: str | None = Field(default=None, min_length=1, max_length=100)
 
     @model_validator(mode="after")
@@ -101,6 +103,7 @@ class NgQueryRequest(BiQueryRequest):
 
 class NgOptionsRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    factory_id: str = Field(default=DEFAULT_NG_FACTORY, min_length=1, max_length=80, pattern=r'^[a-z0-9-]+$')
     thread_id: str = Field(min_length=1, max_length=200)
     confirmation_id: str = Field(min_length=1, max_length=100)
     field: FilterName

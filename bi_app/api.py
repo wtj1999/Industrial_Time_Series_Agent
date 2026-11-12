@@ -11,6 +11,7 @@ from .config import get_settings
 from .auth import BiAuthMiddleware
 from .schemas import BiQueryRequest, RemoteBiResponse
 from .ng.api import close_ng_service, router as ng_router
+from .control_plan import router as control_plan_router
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(ng_router)
+app.include_router(control_plan_router)
 app.add_middleware(BiAuthMiddleware)
 
 

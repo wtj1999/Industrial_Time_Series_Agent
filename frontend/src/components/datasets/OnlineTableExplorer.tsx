@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, FileSpreadsheet, Filter, LineChart, RefreshCw, RotateCcw, Table2, X } from 'lucide-react';
+import { Activity, FileSpreadsheet, Filter, LineChart, RefreshCw, RotateCcw, Table2, X, Download } from 'lucide-react';
 import * as api from '@/services/api';
 import type { DatasetTablePreview, OnlineFilters } from '@/types';
 import { cn } from '@/utils/cn';
 import { OnlineColumnFilter } from './OnlineColumnFilter';
 import { OnlinePreviewChart } from './OnlinePreviewChart';
+import { OnlineDataExportDialog } from './OnlineDataExportDialog';
 
 export function OnlineTableExplorer({ title, sourceId, tableName, onClose }: {
   title: string; sourceId: string; tableName: string; onClose: () => void;
@@ -17,6 +18,7 @@ export function OnlineTableExplorer({ title, sourceId, tableName, onClose }: {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showChart, setShowChart] = useState(false);
+  const [exportSnapshot, setExportSnapshot] = useState<{ preview: DatasetTablePreview; filters: OnlineFilters } | null>(null);
   const dirty = JSON.stringify(draft) !== JSON.stringify(applied) || limit !== query.limit;
   const metadata = useMemo(() => new Map((preview?.column_metadata ?? []).map((column) => [column.name, column])), [preview]);
 
@@ -31,10 +33,10 @@ export function OnlineTableExplorer({ title, sourceId, tableName, onClose }: {
   }, [sourceId, tableName, query]);
 
   useEffect(() => {
-    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape' && !event.defaultPrevented) onClose(); };
+    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape' && !event.defaultPrevented && !exportSnapshot) onClose(); };
     window.addEventListener('keydown', escape);
     return () => window.removeEventListener('keydown', escape);
-  }, [onClose]);
+  }, [onClose, exportSnapshot]);
 
   const apply = (filters = draft, count = limit) => setQuery((current) => ({ filters: { ...filters }, limit: count, revision: current.revision + 1 }));
   const change = (column: string, value: string | null | undefined) => setDraft((current) => {
@@ -57,6 +59,7 @@ export function OnlineTableExplorer({ title, sourceId, tableName, onClose }: {
         <div className="flex-1" />
         <button type="button" disabled={loading} aria-label="刷新数据" onClick={() => apply(query.filters, query.limit)} className={cn(actionClass, 'border-steel-200 bg-white text-steel-600')}><RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />刷新</button>
         <button type="button" disabled={loading || dirty || !!error || !preview?.rows.length} aria-pressed={showChart} onClick={() => setShowChart((current) => !current)} className={cn(actionClass, showChart ? 'border-brand-300 bg-brand-50 text-brand-700' : 'border-steel-200 bg-white text-steel-700 hover:border-brand-300')} >{showChart ? <Table2 className="h-3.5 w-3.5" /> : <LineChart className="h-3.5 w-3.5" />}{showChart ? '收起曲线' : '绘制曲线'}</button>
+        <button type="button" disabled={loading || dirty || !!error || !preview?.rows.length} onClick={() => { if (preview) setExportSnapshot({ preview, filters: { ...applied } }); }} className={cn(actionClass, 'border-brand-200 bg-brand-50 text-brand-700 hover:border-brand-300 hover:bg-brand-100')}><Download className="h-3.5 w-3.5" />数据导出</button>
       </div>
       {Object.keys(draft).length > 0 && <div className="flex flex-wrap gap-1.5 border-b border-steel-100 px-4 py-2 sm:px-5">{Object.entries(draft).map(([column, value]) => <button key={column} type="button" disabled={loading} onClick={() => change(column, undefined)} title="移除此筛选条件" className="inline-flex max-w-full items-center gap-1 rounded-md border border-brand-200 bg-brand-50 px-2 py-1 text-[10px] text-brand-700"><span className="max-w-[280px] truncate">{column}：{value === null ? '空值 (NULL)' : value === '' ? '空字符串' : value}</span><X className="h-3 w-3 shrink-0" /></button>)}</div>}
       {dirty && <p role="status" className="border-b border-amber-100 bg-amber-50 px-4 py-2 text-[11px] text-amber-700">筛选条件已更改，请点击“应用筛选”更新表格和曲线。</p>}
@@ -77,5 +80,6 @@ export function OnlineTableExplorer({ title, sourceId, tableName, onClose }: {
       </div>
       {preview && <div className="border-t border-steel-200 px-4 py-2.5 text-[11px] text-steel-500 sm:px-5">{loading || error ? '正在更新或数据读取失败，表格为上次成功读取的结果' : `已显示匹配条件的最近 ${preview.preview_rows} 条 · 表格按 insert_time 倒序${preview.has_more ? ' · 还有更早记录未显示' : ''}`}</div>}
     </div>
+    {exportSnapshot && <OnlineDataExportDialog title={title} sourceId={sourceId} tableName={tableName} preview={exportSnapshot.preview} filters={exportSnapshot.filters} onClose={() => setExportSnapshot(null)} />}
   </div>;
 }

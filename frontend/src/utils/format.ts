@@ -37,18 +37,18 @@ export function shortId(id: string, head = 6, tail = 4): string {
 }
 
 const STAGE_LABELS: Record<string, string> = {
-  Router: '意图路由',
+  ROUTER: '意图路由',
   CHAT: '通用对话',
-  Parse: '参数解析',
+  PARSE: '参数解析',
   PROFILING: '数据画像',
-  Proposal: '方案规划',
+  PROPOSAL: '方案规划',
   CLARIFICATION: '人工确认',
   EXECUTION: '任务执行',
 };
 
 export function stageLabel(stage?: string | null): string {
   if (!stage) return '空闲';
-  return STAGE_LABELS[stage] ?? stage;
+  return STAGE_LABELS[stage.trim().toUpperCase()] ?? stage;
 }
 
 const TASK_LABELS: Record<string, string> = {

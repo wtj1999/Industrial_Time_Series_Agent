@@ -1,3 +1,4 @@
+import { CONTROL_PLAN_AGENT } from '../control-plan-analysis/config';
 import { Activity, BatteryCharging, BatteryMedium, BatteryWarning, Boxes, CarFront, Coins, Disc3, Factory, Flame, Gauge, Store, Wrench, Zap, type LucideIcon } from 'lucide-react';
 import { PRODUCTION_GROUPS, type ProductionGroupId } from './config';
 import { PRODUCTION_BI_AGENTS } from '../production-bi-analysis/config';
@@ -38,6 +39,7 @@ const market: CatalogAgent[] = [
  {...CELL_SOH_FORECAST_AGENT, icon: BatteryMedium, tag: '寿命预测'},
 ];
 const production: CatalogAgent[] = [
+ {...CONTROL_PLAN_AGENT, tag: 'Control Plan'},
  {...CELL_PRODUCTION_FORECAST_AGENT, icon: BatteryMedium, tag: '产量预测'},
  {...PACK_PRODUCTION_FORECAST_AGENT, icon: Boxes, tag: '产量预测'},
  {...FACTORY_ENERGY_FORECAST_AGENT, icon: Zap, tag: '能耗预测'},

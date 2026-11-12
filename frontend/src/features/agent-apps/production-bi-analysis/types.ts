@@ -102,6 +102,7 @@ export type BiResponse = BiNeedConfirmResponse | BiSuccessResponse | {
 };
 
 export interface BiQueryPayload {
+  factory_id?: string;
   tenant_id?: string;
   domain?: BiAnalysisDomain;
   analysis_query?: string;

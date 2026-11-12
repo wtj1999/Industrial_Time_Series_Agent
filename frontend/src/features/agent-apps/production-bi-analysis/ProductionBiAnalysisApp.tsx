@@ -69,7 +69,7 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
     abortRef.current = controller;
     setLoading(true);
     try {
-      const response = await queryProductionBi({ ...payload, ...(agent.tenantId ? { tenant_id: agent.tenantId } : {}), ...(agent.analysisDomain ? { domain: agent.analysisDomain } : {}) }, controller.signal, agent.endpoint);
+      const response = await queryProductionBi({ ...payload, ...(agent.tenantId ? { tenant_id: agent.tenantId } : {}), ...(agent.analysisDomain ? { domain: agent.analysisDomain } : {}), ...(agent.ngFactoryId ? { factory_id: agent.ngFactoryId } : {}) }, controller.signal, agent.endpoint);
       if (controller.signal.aborted) return false;
       appendResponse(response, payload.analysis_query || payload.query);
       return true;
@@ -149,6 +149,7 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
                     expired={turn.expired}
                     loadOptions={turn.confirm.confirmation_id ? (field, search, offset, signal) => queryNgOptions({
                       thread_id: turn.threadId, confirmation_id: turn.confirm.confirmation_id!, field, search, offset,
+                      ...(agent.ngFactoryId ? { factory_id: agent.ngFactoryId } : {}),
                     }, signal) : undefined}
                     onSubmit={(resume) => void submitConfirmation(turn.id, turn.threadId, resume, turn.confirm.confirmation_id, turn.analysisQuery)}
                   />

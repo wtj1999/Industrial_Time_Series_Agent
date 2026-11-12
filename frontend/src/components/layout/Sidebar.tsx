@@ -19,11 +19,11 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '@/context/SessionContext';
 import { useAuth } from '@/context/AuthContext';
-import { Badge } from '@/components/ui/Badge';
+import { PlatformBrand } from './PlatformBrand';
 import { AssetArtwork } from '@/components/ui/AssetCards';
 import './Sidebar.css';
 import { cn } from '@/utils/cn';
-import { formatRelative, shortId, stageLabel, taskLabel } from '@/utils/format';
+import { formatRelative, shortId } from '@/utils/format';
 
 interface ExamplePrompt {
   icon: typeof TrendingUp;
@@ -156,6 +156,7 @@ export function Sidebar({
 
   return (
     <aside className="app-sidebar catalog-theme-production hidden lg:flex" aria-label="侧边栏">
+      <div className="sidebar-brand"><PlatformBrand /></div>
       <div className="sidebar-top">
         <button type="button" className="sidebar-new-chat" disabled={streaming}
           onClick={() => navigate('/chat', { replace: true, state: { startNewSession: true } })}>
@@ -167,10 +168,6 @@ export function Sidebar({
           <SectionTitle icon={Bot} label="当前会话" />
           <div className="sidebar-card sidebar-session">
             <Row label="Session" value={<code>{shortId(sessionId, 10, 6)}</code>} />
-            <Row label="阶段" value={<Badge className="sidebar-badge">{stageLabel(sessionInfo?.current_stage)}</Badge>} />
-            <Row label="任务" value={sessionInfo?.current_task
-              ? <Badge dot className="sidebar-badge">{taskLabel(sessionInfo.current_task as string)}</Badge>
-              : <span className="sidebar-muted">未指定</span>} />
             <Row label="对话轮次" value={<span>{turns}</span>} />
             <Row label="分析结果" value={<span>{sessionInfo?.analysis_artifacts_count ?? 0}</span>} />
             <Row label="最近更新" value={<span className="sidebar-muted">{formatRelative(sessionInfo?.updated_at)}</span>} />

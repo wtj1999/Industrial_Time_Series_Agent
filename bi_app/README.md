@@ -1,6 +1,6 @@
 # 生产 BI 独立适配服务
 
-`bi_app` 与本地 `agent_app`/`OrchestratorAgent` 独立。原有四类生产 BI 继续转发远程服务；新增 NG 问数直接读取金寨三期工厂数据库。
+`bi_app` 与本地 `agent_app`/`OrchestratorAgent` 独立。原有四类生产 BI 继续转发远程服务；NG 问数按所选工厂直接读取金寨二期、金寨三期或芜湖一期数据库。
 
 - 本地接口：`POST /api/bi/query`
 - 健康检查：`GET /health`
@@ -91,7 +91,19 @@ sudo docker compose ps backend bi-backend
 - `POST /api/bi/ng/options`：`{thread_id, confirmation_id, field, search:"", offset:0}`；返回 `values/has_more/next_offset`。选项查询使用断点内冻结的日期。
 - 工作区隔离键由 Bearer 会话验证结果生成，BI 内部再通过 `X-User-Id` 传给 NG 工作流；它不是数据库 `tenant_id` 的权限控制。租户在本功能中是用户可选的业务筛选。
 
-配置：将 [ng.env.example](ng.env.example) 的设置填入 `bi_app/.env`。数据库密码只从 `BI_NG_DB_PASSWORD` 读取；LLM 的 `BI_NG_LLM_*` 可独立配置，也兼容环境中的 `MODEL_NAME/BASE_URL/API_KEY`，不读取 `agent_app` 代码或密钥文件。
+配置：将 [ng.env.example](ng.env.example) 的设置填入 `bi_app/.env`。工厂连接统一维护在 `ng/config.py` 的 `NG_FACTORIES` 中，凭据使用 `SecretStr`，不下发前端或写入日志。LLM 的 `BI_NG_LLM_*` 可独立配置，也兼容环境中的 `MODEL_NAME/BASE_URL/API_KEY`，不读取 `agent_app` 代码或密钥文件。
+
+NG `/api/bi/ng/query`（提问与确认）和 `/api/bi/ng/options`（筛选候选搜索/分页）均支持 `factory_id`，不是数据库租户筛选字段：
+
+| factory_id | 工厂 | 数据库地址 |
+| --- | --- | --- |
+| jinzhai-phase-2 | 金寨二期 | 10.36.94.9:19030 |
+| jinzhai-phase-3 | 金寨三期（未传字段时的默认值） | 10.52.94.75:19030 |
+| wuhu-phase-1 | 芜湖一期 | 10.53.195.56:19030 |
+
+三个连接均使用现有 `dwd` 库和 NG 固定查询模板。`NG_FACTORIES` 已配置各工厂连接，新增工厂时在此增加配置并给前端目录添加入口。可使用 `BI_NG_JINZHAI_PHASE_2_DB_HOST/PORT/USER/PASSWORD`、`BI_NG_WUHU_PHASE_1_DB_*` 或 `BI_NG_JINZHAI_PHASE_3_DB_*` 覆盖对应配置；金寨三期仍兼容原有 `BI_NG_DB_*` 配置。
+
+各工厂独立创建工作流、连接设置及 SQLite 断点文件；金寨三期保留原断点路径，另外两厂在文件名中附加工厂 ID，防止同用户/同 thread_id 串用确认状态。关闭服务时释放全部工作流。新工厂初次查询、确认和候选加载必须始终携带相同 `factory_id`；非法工厂返回 422，不允许浏览器指定数据库地址或凭据。
 
 内网模型连接默认不使用宿主机 HTTP 代理；若部署环境需要代理，可设置 `BI_NG_LLM_TRUST_ENV=true`。
 
@@ -123,3 +135,23 @@ SQLite checkpoint 默认保存在 `bi_app/.state/ng_checkpoints.sqlite3`，已�
 首次请求示例：`{"query":"统计最近30天设备运行时间","thread_id":"factory-thread","domain":"equipment","tenant_id":"14100001"}`。确认请求示例：`{"query":"","thread_id":"factory-thread","resume":{"device_type":[]},"domain":"equipment","tenant_id":"14100001"}`。
 
 部署需同步前端目录配置、BI 页面与类型，以及 `bi_app/schemas.py`、`bi_app/analysis.py`，重新构建前端并重启 BI 服务。远端 BI 服务也需支持 `tenant_id` 并按该租户过滤数据。
+
+
+## 锂电产线 Control Plan 查询
+
+入口：我的智能体 → 生产域 → 通用智能体 → 锂电产线Control Plan分析智能体，直接进入 BI 风格的对话页。
+
+- 浏览器调用 `POST /api/bi/control-plan/query`，由现有 BI 账户中间件验证登录。远程服务默认 `http://10.2.96.249:8767/api/query`，可通过环境变量 `CONTROL_PLAN_QUERY_URL` 覆盖；连接和请求超时复用 BI 配置。
+- 首次请求为 `{ "query": "滁州正极涂布参数", "session_id": "会话标识" }`。
+- 各层（基地 → 工艺路线 → 工序 → 参数）统一使用复选框，确认请求为 `{ "session_id": "会话标识", "confirm": { "option_ids": ["2048949299794657281"] } }`。ID 始终作为字符串，不转数值、不拆分或推断 tenant_id。后端兼容旧浏览器的 option_id，但转成 option_ids 才向远程发送。
+- 未勾选发送 `option_ids: []`，表示当前层全部候选。全选展示项发送实际勾选 ID，不用空数组代替，避免展示上限导致范围扩大。
+- 本地会话在后端按已认证用户和 session_id 派生远程会话 ID，避免不同账户复用远程对话；返回给浏览器的 session_id/thread_id 仍是原标识。整个确认链使用同一远程会话。
+- 按 status/content_type 分支，不使用阶段名 type。need_confirm/options 渲染复选框，依次优先使用非空 preselect、options[].selected、reply_with.payload.option_ids 初始化预选；服务端校验 ID 后移除 reply_with，不让它控制请求地址。支持名称/来源搜索、取消勾选、本地每页 10 项分页，翻页保留选择。新问题使旧确认失效，失败可重试。
+- success/table 使用动态 columns 顺序及中文标签展示（含基地、路线、工序来源），null 显示为空。empty=true 时仍展示列头和“暂无数据”，始终展示 message 中的跳过工序及空结果原因；tenant_id=null 原样保留。error/text 是 HTTP 200 业务错误，显示远程 message，不转换成格式错误、不触发 LLM。
+- 结果下方展示专用 Control Plan LLM 分析卡片，展示总结、数据观察、工艺管控与核查建议、优先级及验证方式；来源字段进入模型上下文，不将不同基地/路线下同名参数视为重复或矛盾。样式复用现有 BI 分析卡片。
+- 分析统计覆盖全部返回记录，关注标准定义、数值上下限倒置、自检标识与检验值个数。最多选取 24 条重点参数作为模型上下文；不把追溯参数缺少数值限值判为不合格，不用工艺标准推断实测超标、Cpk 或良率。返回记录少于服务报告总数时明确分析范围。
+- 模型复用 BI/不良品分析的 `BI_NG_LLM_*` 配置（当前 `DeepSeek-V4.1-Flash`），结构化输出、零自动重试、最长 45 秒。按用户、原始问题、完整结果及模型配置缓存成功分析 24 小时；空结果不调用模型，模型异常仅显示分析不可用提示并保留原始表格。
+- 前端在所有确认请求携带本地字段 `analysis_query`，保留原始问题用于最终分析；该字段不会转发到远程 Control Plan API。
+- 网络异常、超时、非法 JSON 和协议不匹配均返回受控错误；浏览器不直接连接内网远程地址，也不按返回的 reply_with 构造任意请求。
+
+部署需同步 `bi_app/control_plan.py`、`bi_app/control_plan_analysis.py`、`bi_app/analysis.py`、`bi_app/api.py` 和前端全部相关文件，重启 `bi-backend` 并加载新的前端。无新增依赖。测试使用模拟远程和模型响应，不代表已对真实基地数据做验收：`python -m pytest bi_app/test_control_plan.py bi_app/test_control_plan_analysis.py bi_app/test_analysis.py bi_app/test_api.py bi_app/test_auth.py -q`。

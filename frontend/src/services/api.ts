@@ -17,6 +17,7 @@ import type {
   CSVPreview,
   DatasetsResponse,
   DatasetTablePreview,
+  DatasetEntry,
   OnlineSource,
   OnlineTable,
   OnlineTableMetrics,
@@ -189,6 +190,13 @@ export async function listPublicDatasets(): Promise<DatasetsResponse> {
 
 export async function previewPublicDataset(fileName: string): Promise<DatasetTablePreview> {
   return getJson(`/api/public-datasets/${encodeURIComponent(fileName)}/preview`, { method: 'GET' }, '预览公共文件失败');
+}
+
+export async function exportOnlinePreview(payload: {
+  source_id: string; table_name: string; display_name: string;
+  columns: string[]; selected_columns: string[]; rows: DatasetTablePreview['rows'];
+}, signal?: AbortSignal): Promise<{ success: boolean; row_count: number; column_count: number; dataset: DatasetEntry }> {
+  return getJson('/api/data-selection/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal }, '导出数据失败');
 }
 
 export async function listOnlineSources(): Promise<{ sources: OnlineSource[] }> {

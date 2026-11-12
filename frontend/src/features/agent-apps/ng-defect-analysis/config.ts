@@ -6,7 +6,7 @@ export const NG_DEFECT_AGENT = {
   name: '不良品类型分析智能体',
   category: 'NG类型',
   icon: ScanSearch,
-  description: '查询金寨三期工厂一次合格口径下的NG数量，支持按日期、设备、工序、产线、班次等维度筛选和分组统计。',
+  description: '查询一次合格口径下的NG数量，支持按日期、设备、工序、产线、班次等维度筛选和分组统计。',
   endpoint: '/api/bi/ng/query',
   footerText: '金寨三期工厂 · 先确认日期和筛选条件，再汇总NG类型数量',
   suggestions: [

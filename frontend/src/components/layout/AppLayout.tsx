@@ -22,17 +22,17 @@ export function AppLayout() {
   const [pendingExample, setPendingExample] = useState<string>('');
 
   return (
-    <div className="flex h-full flex-col">
-      <Header />
-      <AccountSecurityNotice />
-      <div className="flex min-h-0 flex-1">
-        <Sidebar
-          onPickExample={(p) => {
-            setPendingExample(p);
-            navigate('/chat');
-          }}
-        />
-        <main className="relative flex min-w-0 flex-1 flex-col">
+    <div className="flex h-full min-h-0">
+      <Sidebar
+        onPickExample={(p) => {
+          setPendingExample(p);
+          navigate('/chat');
+        }}
+      />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <Header />
+        <AccountSecurityNotice />
+        <main className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <Outlet
             context={
               {

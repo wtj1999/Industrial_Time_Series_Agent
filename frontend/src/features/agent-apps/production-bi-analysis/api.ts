@@ -37,7 +37,7 @@ export async function queryProductionBi(
 }
 
 export async function queryNgOptions(
-  payload: { thread_id: string; confirmation_id: string; field: string; search: string; offset: number },
+  payload: { thread_id: string; confirmation_id: string; field: string; search: string; offset: number; factory_id?: string },
   signal: AbortSignal,
 ): Promise<BiOptionsPage> {
   const response = await fetch(`${API_BASE}/api/bi/ng/options`, {

@@ -1,3 +1,5 @@
+import { ControlPlanAnalysisApp } from '@/features/agent-apps/control-plan-analysis/ControlPlanAnalysisApp';
+import { CONTROL_PLAN_AGENT } from '@/features/agent-apps/control-plan-analysis/config';
 import { useState } from 'react';
 import { ArrowLeft, Bot } from 'lucide-react';
 import { useSession } from '@/context/SessionContext';
@@ -35,7 +37,7 @@ import { ProductionCatalog, DomainCatalog } from '@/features/agent-apps/producti
 import type { ProductionGroupId } from '@/features/agent-apps/production-catalog/config';
 import { DOMAIN_META, CATALOG_AGENTS, getDomainGroups, type AgentDomain } from '@/features/agent-apps/production-catalog/domainConfig';
 
-const PRODUCTION_QUERY_AGENTS: readonly ProductionBiAgent[] = [...PRODUCTION_BI_AGENTS, NG_DEFECT_AGENT];
+const PRODUCTION_QUERY_AGENTS: readonly ProductionBiAgent[] = [...PRODUCTION_BI_AGENTS, NG_DEFECT_AGENT, CONTROL_PLAN_AGENT];
 
 export function MyAgentsView({ onBack }: { onBack: () => void }) {
   const { initNewSession } = useSession();
@@ -61,7 +63,8 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
     setActiveAgent(agentId);
   };
   const renderAgent = () => {
-    if (activeBiAgent) return <ProductionBiAnalysisApp key={`${activeGroup}:${activeBiAgent.id}`} agent={{ ...activeBiAgent, ...(activeBiAgent.analysisDomain && groupMeta?.tenantId ? { tenantId: groupMeta.tenantId } : {}) }} />;
+    if (activeAgent === CONTROL_PLAN_AGENT.id) return <ControlPlanAnalysisApp />;
+    if (activeBiAgent) return <ProductionBiAnalysisApp key={`${activeGroup}:${activeBiAgent.id}`} agent={{ ...activeBiAgent, ...(activeBiAgent.analysisDomain && groupMeta?.tenantId ? { tenantId: groupMeta.tenantId } : {}), ...(activeBiAgent.id === NG_DEFECT_AGENT.id && activeGroup ? { ngFactoryId: activeGroup } : {}) }} />;
     if (activeVehicleSalesAgent) return <NewEnergyVehicleSalesApp key={activeVehicleSalesAgent.id} agent={activeVehicleSalesAgent} />;
     switch (activeAgent) {
       case BATTERY_INSTALLATION_AGENT.id: return <BatteryInstallationForecastApp />;
