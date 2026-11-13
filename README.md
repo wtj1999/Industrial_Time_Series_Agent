@@ -1,515 +1,465 @@
 <div align="center">
 
-# Industrial Time Series Agent
+<img src="frontend/public/brand/signal-slices.svg" alt="工业时序智能体 Logo" width="88" />
 
-### 工业时间序列多智能体分析平台
+# 工业时序智能体
 
-面向工业数据的对话式分析、异常检测、时序预测与根因诊断系统
+**Industrial Time Series Agent**
+
+让工业数据从自然语言问题，走向可执行的分析、预测与业务洞察。
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat-square&logo=fastapi&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-1.x-1C3C3C?style=flat-square)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
+
+[产品界面](#产品界面) · [核心能力](#核心能力) · [业务智能体](#业务智能体) · [系统架构](#系统架构) · [快速开始](#快速开始) · [开发与验证](#开发与验证)
 
 </div>
 
 ## 项目简介
 
-Industrial Time Series Agent 是一个面向工业时序数据的多智能体应用。用户可以上传或复用 CSV 数据，通过自然语言对话或结构化业务入口发起任务，系统自动完成数据画像、字段映射、任务路由、方案确认、工具执行、结果解释与可视化。
+工业时序智能体是面向设备、工艺、生产与市场数据的多智能体分析平台。用户可以上传数据、复用已有资产，或进入业务智能体，用自然语言和结构化配置完成数据分析、异常检测、时序预测、根因分析与生产业务查询。
 
-当前系统覆盖三类核心任务：
+平台提供两类工作方式：**通用对话工作台**负责画像、字段映射、方案选择和专业工具执行；**业务智能体工作区**按设备域、生产域、市场域组织应用，让任务配置与工厂场景直接对应。制造、品质、成本、设备 BI，以及 NG 问数和 Control Plan 查询通过独立服务接入各自的数据与确认流程。
 
-- 数据分析：统计分析、趋势、分布、相关性、变点、SPC、过程能力，以及基于 CatBoost 和 TreeSHAP 的根因分析。
-- 异常检测：支持自动推荐、模型训练与持久化、加载已有模型检测、阈值处理、评估对比和异常解释。
-- 时序预测：调用外部时序基础模型服务完成单模型预测、多模型比较、集成预测、回测与微调。
-
-系统同时提供“我的数据”“我的模型”“我的智能体”等资产入口。通用 Agent 编排层和业务智能体共用同一套后端能力，业务智能体只负责把用户配置编译成结构化任务，不复制核心分析流程。
+- **从提问到执行**：识别意图、生成方案、解析参数，在需要时请求人工确认，再调用分析工具。
+- **让结果可检查**：展示结构化指标、交互图表、训练进度、字段映射与查询筛选条件。
+- **让资产可复用**：统一管理私有数据、公共数据和三类模型，业务入口共用数据选择器。
+- **连接业务现场**：工厂目录承载专属 BI 与 NG 应用，通用目录承载配置型分析和预测任务。
 
 ## 产品界面
 
-### 登录与注册
+以下图片于 **2026-11-12** 从当前前端实际渲染采集，包含新版 Logo、居中的侧栏品牌区和按场景显示的对话状态栏。账户、文件和模型元数据使用隔离的演示响应，不含真实账户、业务数据或模型验收结果；登录场景自带的采样值也是演示数据。截图不代表外部模型、数据库或 BI 服务已完成联调。[截图说明](docs/images/README.md)
 
-支持邮箱验证码注册、用户名或邮箱登录、忘记密码后通过邮箱验证码重置密码，以及旧账户登录后绑定邮箱。部署前请按[账户与邮件配置说明](agent_app/auth/README.md)配置 SMTP；示例见 [`agent_app/auth.env.example`](agent_app/auth.env.example)。
+### 通用对话工作台
 
-<p align="center">
-  <img src="./登录页面.png" alt="登录与注册页面" width="90%" />
-</p>
+在同一工作区完成自然语言提问、数据上传、历史会话访问和任务准备状态查看。阶段与准备状态仅在通用对话页面显示，资源管理与业务应用使用自己的页面标题。
 
-### 主对话页面与资产管理
+![通用对话工作台](docs/images/03-chat.png)
 
-<p align="center">
-  <img src="./主页面.png" alt="工业时间序列智能体主页面" width="90%" />
-</p>
+### 数据与模型资产
 
-### 数据资产管理
+<table>
+<tr>
+<td width="50%"><strong>我的数据</strong><br/>在线工厂数据与离线文件分开管理。<br/><img src="docs/images/04-data.png" alt="在线与离线数据入口" /></td>
+<td width="50%"><strong>我的模型</strong><br/>按数据分析、异常检测和时序预测分类。<br/><img src="docs/images/06-models.png" alt="三类模型资产目录，模型数量为演示数据" /></td>
+</tr>
+</table>
 
-<p align="center">
-  <img src="./我的数据.png" alt="数据资产主页面" width="90%" />
-</p>
+### 业务领域与工厂空间
 
-### 模型资产管理
+<table>
+<tr>
+<td width="50%"><strong>业务领域</strong><br/>设备域、生产域、市场域统一入口。<br/><img src="docs/images/07-agents.png" alt="三个业务领域的智能体目录" /></td>
+<td width="50%"><strong>工厂智能体</strong><br/>制造、品质、成本、设备 BI 与不良品分析。<br/><img src="docs/images/09-factory.png" alt="工厂专属的五类业务智能体" /></td>
+</tr>
+</table>
 
-<p align="center">
-  <img src="./我的模型.png" alt="模型资产主页面" width="90%" />
-</p>
+### BI 与 Control Plan
 
-### 智能体资产管理
+<table>
+<tr>
+<td width="50%"><strong>制造 BI 分析</strong><br/>用业务语言查询投入产出、工时和物料指标。<br/><img src="docs/images/10-bi.png" alt="制造 BI 对话入口" /></td>
+<td width="50%"><strong>Control Plan 工艺参数查询</strong><br/>按基地、路线、工序逐层确认参数范围。<br/><img src="docs/images/11-control-plan.png" alt="Control Plan 查询与分析入口" /></td>
+</tr>
+</table>
 
-<p align="center">
-  <img src="./我的智能体.png" alt="数据资产主页面" width="90%" />
-</p>
+<details>
+<summary><strong>展开更多界面：三维登录、账户、离线文件、生产目录和设备智能体</strong></summary>
 
-## 主要能力
+### 三维登录首页
 
-| 模块 | 能力 |
+基于 Three.js 的时序档案室，支持切换信号通道与采样窗口，并进入登录工作台。
+
+![三维登录首页](docs/images/01-login.png)
+
+### 账户登录
+
+支持用户名或邮箱登录、邮箱验证码注册、密码找回与旧账户邮箱绑定。
+
+![账户登录弹窗](docs/images/02-account.png)
+
+### 私有离线数据
+
+![私有数据文件列表，使用演示文件元数据](docs/images/05-datasets.png)
+
+### 生产域目录
+
+![通用能力与工厂专属空间](docs/images/08-production.png)
+
+### 设备域通用智能体
+
+![涂布分析、异常检测与设备根因分析入口](docs/images/12-equipment.png)
+
+</details>
+
+## 核心能力
+
+| 能力 | 当前实现 |
 | --- | --- |
-| 多智能体编排 | LangGraph 状态图、意图路由、数据画像、参数解析、技术方案、专业任务 Agent、通用对话 |
-| Human-in-the-Loop | 文件上传、历史数据复用、字段澄清、技术路径选择、模型选择与任务恢复 |
-| 数据分析 | 数据质量、描述统计、分布、趋势、相关性、互信息、自相关、季节性、分解、平稳性、变点、SPC、过程能力、组间比较 |
-| 根因分析 | 使用 `feature_columns` 预测各 `target_columns`，分别训练 CatBoost 模型，输出评估指标、特征重要性和 TreeSHAP |
-| 异常检测 | PyOD 体系、原生时序检测器、滑窗桥接、训练/加载、集成、阈值、评估和解释 |
-| 时序预测 | 单模型、多模型、集成预测、概率区间、回测、模型微调与模型资产复用 |
-| 模型资产 | 数据分析、异常检测、时序预测三类模型统一展示，并支持在上传数据时选择已训练模型 |
-| 可视化 | 预测曲线、回测、异常点/区间、训练进度、控制图、相关性热力图、直方图、时序分解、ACF/PACF、变点、FeatureImportance 和 TreeSHAP |
-| 多租户隔离 | 用户数据、会话、模型文件按用户命名空间隔离；模型路径由后端 runtime 安全解析 |
-| 流式交互 | `/api/query` 使用 NDJSON 推送状态、文本、工具结果、图表和中断事件 |
+| 多智能体编排 | LangGraph 编排意图路由、通用对话、技术方案、数据画像、参数解析和专业任务执行 |
+| 人工确认 | 技术路径选择、文件补充、字段映射澄清、模型选择，以及业务查询的分步确认与恢复 |
+| 数据分析 | 描述统计、质量检查、分布、趋势、相关性、互信息、时序分解、平稳性、变点、SPC、过程能力和组间比较 |
+| 根因分析 | CatBoost 目标建模、FeatureImportance 与 TreeSHAP，支持保存和复用分析模型 |
+| 异常检测 | PyOD 扩展、时序检测器、滑窗桥接、自动推荐、训练与加载、阈值、集成、评估及解释 |
+| 时序预测 | 七个外部时序基础模型、分位数预测、多模型比较、集成、回测和指定模型的远程微调 |
+| 结果展示 | 预测与回测图、异常点及区间、训练进度、直方图、相关性热力图、分解图、控制图、ACF/PACF、根因图表 |
+| 数据资产 | CSV / XLSX / Parquet 文件、私有与公共离线数据、在线表预览、筛选、质量概览和展示快照导出 |
+| 模型资产 | 分析与异常检测模型本地持久化；远程微调模型保存本地索引并在后续任务中复用 |
+| 会话与认证 | Bearer token、历史对话重放、用户与会话归属校验、用户命名空间内的数据和模型资产 |
+| 生产业务查询 | 制造 / 品质 / 成本 / 设备 BI、NG 不良品类型统计、Control Plan 查询及结果分析 |
+
+### 分析、检测与预测
+
+分析工具位于 [analysis_tools](agent_app/tools/analysis_tools/)，读取运行时注入的 DataFrame、目标列与特征列。工具执行结果形成统一结构，再由专业 Agent 解释。根因分析提供模型与统计层面的影响线索，不直接证明因果关系。
+
+异常检测工具位于 [anomaly_detection_tools](agent_app/tools/anomaly_detection_tools/)。除通用检测器外，包含 SpectralResidual、MatrixProfile、SAND、TimeSeriesOD、LSTMAD、AnomalyTransformer 等时序能力；具体可选模型以对应业务表单及运行环境为准。
+
+预测工具位于 [prediction_tools](agent_app/tools/prediction_tools/)，当前模型注册表包含：
+
+| 模型 ID | 模型 ID | 模型 ID |
+| --- | --- | --- |
+| `sundial` | `toto-2` | `timer-s1` |
+| `chronos-2` | `timesfm-2.5` | `moirai-2.0-R-small` |
+| `tirex-1.1-gifteval` | | |
+
+预测由外部 HTTP 服务执行，输出统一为点预测与分位数等结构。Chronos-2 支持 full / LoRA 微调，TimesFM 2.5 支持 LoRA 微调；微调权重保留在远程服务，本地记录模型索引。需要自行接入可访问的推理与微调服务，仓库不附带这些模型权重或服务。
+
+### 数据接入与复用
+
+- **私有数据**：按当前账户隔离的历史上传文件，可预览并用于后续任务。
+- **公共数据**：来自 `agent_app/public_datasets/` 的只读共享文件。
+- **在线数据**：读取配置中的工厂数据源，提供数据表目录、字段信息、字符列筛选、预览图表及质量概览。当前在线表要求存在 `insert_time` 字段。
+- **配置型任务选数**：在线表先限定最近 5,000 条记录，再按时间升序准备为任务文件；公共文件或在线数据副本进入原有上传及分析链路。
+- **预览快照导出**：将界面当前已展示的记录及所选字段导出为私有 CSV，不重新查询整表；与上面的 5,000 条任务选数范围不同。导出接口最多接收 500 行。
+
+文件接入支持 CSV、XLSX、Parquet，默认上限为 100 MB；部分业务表单仍限定 CSV，以表单提示为准。在线预览、质量概览和任务选数都有取样范围，不能将样本指标视作整表统计。
 
 ## 业务智能体
 
-“我的智能体”采用领域二级目录，目前包含以下结构化任务入口：
+业务入口按照 **领域 → 通用能力 / 工厂空间 → 智能体** 组织。入口数量会因工厂复用而增加，不等同于独立算法数量。
 
-| 领域 | 智能体 | 核心能力 |
+| 领域 | 当前业务入口 | 任务方向 |
 | --- | --- | --- |
-| 设备域 | 锂电涂布面密度分析智能体 | SPC、稳定性、过程能力、趋势、分布、变点、相关性和综合诊断 |
-| 设备域 | 锂电涂布面密度异常检测智能体 | 面密度异常点、连续异常区间及异常分区检测 |
-| 设备域 | 锂电气缸设备异常检测智能体 | 按气缸压力、位移、速度、温度、振动和动作周期等关键特征检测异常 |
-| 设备域 | 锂电伺服电机异常检测智能体 | 按电流、扭矩、转速、温度、振动和位置跟随误差等关键特征检测异常 |
-| 设备域 | 锂电焊接设备异常检测智能体 | 按激光功率、焊接电流、电压、速度、焦点和熔池温度等特征检测异常 |
-| 设备域 | 锂电分容容量偏低根因分析智能体 | 基于分容容量和工艺参数训练树模型，输出特征重要性与 TreeSHAP |
-| 市场域 | 动力电池装车量预测智能体 | 按电池类型和外生变量预测未来装车量 |
-| 市场域 | 新能源汽车销量预测智能体 | 按 BEV、PHEV、EREV、乘用车、商用车等维度预测销量 |
-| 市场域 | 零跑汽车销量预测智能体 | 基于零跑汽车历史销量，按月度或季度预测品牌销量 |
-| 市场域 | 吉利汽车销量预测智能体 | 基于吉利汽车历史销量，按月度或季度预测品牌销量 |
-| 市场域 | 长城汽车销量预测智能体 | 基于长城汽车历史销量，按月度或季度预测品牌销量 |
-| 市场域 | 锂电原材料价格预测智能体 | 按原材料品类结合供需、库存和下游需求变量预测未来价格走势 |
-| 市场域 | 锂电电芯SOH预测智能体 | 根据历史容量衰减序列自动推断预测步长，估计达到目标SOH所需圈数 |
-| 生产域 | 锂电电芯产量预测智能体 | 结合历史产量、产线运行与质量数据预测未来产量和产能缺口 |
-| 生产域 | 锂电PACK产量预测智能体 | 结合电芯齐套、PACK产线运行与质量数据预测未来PACK产量和产能缺口 |
-| 生产域 | 锂电工厂能耗预测智能体 | 按工段、PACK、公共设备和总计维度预测未来能耗及单位产量能耗变化 |
+| 设备域 | 涂布面密度分析、涂布面密度异常检测 | 稳定性、SPC、过程能力、时序波动和异常区间 |
+| 设备域 | 气缸、伺服电机、焊接设备异常检测 | 压力、位移、电流、扭矩、振动及焊接工艺参数等 |
+| 设备域 | 电芯分容容量偏低根因分析 | 关键影响因素建模与解释 |
+| 市场域 | 动力电池装车量预测 | 电池类型、历史装车量及外生变量 |
+| 市场域 | 新能源汽车、零跑、吉利、长城汽车销量预测 | 品牌 / 车型选择与月度、季度预测 |
+| 市场域 | 锂电原材料价格预测、电芯 SOH 预测 | 原材料价格走势与容量衰减 |
+| 生产域 · 通用 | 电芯产量、PACK 产量、工厂能耗预测 | 产出、产能缺口及能耗走势 |
+| 生产域 · 通用 | 锂电产线 Control Plan 分析 | 工艺参数、标准范围和检验要求查询 |
+| 生产域 · 工厂 | 制造、品质、成本、设备 BI 分析 | 投入产出、A 品率、成本、能耗、OEE、MTBF / MTTR 等 |
+| 生产域 · 工厂 | 不良品类型分析 | 按 NG 类型及日期、设备、工序等白名单维度统计 |
 
-业务智能体注册位于 `agent_app/applications/registry.py`，前端页面位于 `frontend/src/features/agent-apps/`。
+当前生产域包含通用智能体、金寨二期、金寨三期、芜湖一期和新站二期目录。前三个工厂目录已配置四类 BI 与 NG 入口；新站二期目录目前为空。前端配置分别传递 BI 的工厂租户和 NG 的工厂标识，二者不应混用。
 
-零跑、吉利、长城销量预测入口复用新能源汽车销量预测表单和通用预测流程，分别注册为 `leapmotor-sales-forecast`、`geely-sales-forecast`、`great-wall-sales-forecast`。支持选择已有数据或上传 CSV/XLSX/Parquet、选择模型、月度/季度粒度、1至36期及分析维度；预测目标固定为对应品牌销量。品牌入口按具体车型型号多选：零跑提供C01/C10/C11/C16/B01/B10/T03，吉利提供星瑞/星越L/帝豪/博越L/缤越/豪越L/吉利星愿，长城提供哈弗H6/哈弗大狗/坦克300/坦克500/魏牌蓝山/魏牌高山/欧拉好猫/长城炮。未选时按全部车型处理；品牌入口不接受BEV/PHEV等分类作为车型型号。车型名称参考[零跑官网](https://cn.leapmotor.com/C10-select-type.html?APPFullScreen=true&isNewReserve=true&newwebsite=true&platform=web&type=C10)、[吉利官网](https://dh.geely.com/Home)、[长城官网](https://www.gwm.com.cn/index.html)，按车系名称展示，不展开年款或动力版本。应提供对应品牌的历史数据，包含多个品牌时需先确认并筛选品牌范围。
+配置型分析 / 预测任务由 [applications/registry.py](agent_app/applications/registry.py) 校验并编译为通用任务；BI、NG、Control Plan 走独立的 `bi_app` 接口，不要求经过通用对话的数据画像和规格确认流程。
+
+### 生产查询的三条链路
+
+| 链路 | 数据来源与执行方式 | 交互与结果 |
+| --- | --- | --- |
+| 四类 BI | 独立适配层转发远程 BI 服务，携带工厂租户参数 | 字段筛选确认、结果表格及对应领域的 LLM 分析 |
+| NG 问数 | LangGraph 工作流解析问题、匹配数据库真实候选，执行固定的只读 SQL 模板 | 可搜索和分页的筛选、多维统计、图表、断点恢复 |
+| Control Plan | 独立适配层调用远程工艺参数服务 | 基地 → 路线 → 工序 → 参数的多选确认，动态表格及专用分析 |
+
+BI 和 Control Plan 的结果分析失败时保留原始查询表格；分析基于本次返回数据，不推断未提供的预算、阈值、实测超标或严格因果。NG 会话按账户、工厂和线程隔离；当前工厂租户选择不等同于完整的企业数据权限系统。
 
 ## 系统架构
 
 ```mermaid
-flowchart LR
-    U[用户] --> UI[React 前端]
-    UI -->|NDJSON / REST| API[FastAPI API]
-    API --> G[LangGraph Orchestrator]
-
-    G --> R[意图路由]
-    R --> C[通用对话]
-    R --> P[数据画像与字段映射]
-    P --> S[任务解析与技术方案]
-    S --> A[Analysis Agent]
-    S --> O[Anomaly Agent]
-    S --> F[Prediction Agent]
-
-    A --> AT[分析工具]
-    O --> OT[异常检测工具]
-    F --> FT[预测工具]
-
-    AT --> V[结构化结果与图表]
-    OT --> V
-    FT --> V
-    V --> UI
-
-    G <--> DB[(SQLite Checkpoint / 会话索引)]
-    AT <--> MA[(分析模型资产)]
-    OT <--> MO[(异常检测模型资产)]
-    FT <--> MF[(预测模型资产)]
-    FT --> TS[外部时序模型服务]
+flowchart TB
+    UI[React 工作台与业务智能体]
+    UI -->|REST / NDJSON| API[agent_app · FastAPI]
+    API --> AUTH[账户认证与用户命名空间]
+    API --> GRAPH[LangGraph 编排]
+    GRAPH --> PREP[意图路由 / 技术方案 / 画像 / 参数澄清]
+    PREP --> TASK[分析 / 异常检测 / 预测 Agent]
+    TASK --> TOOLS[专业工具与结构化图表]
+    TOOLS --> FORECAST[外部时序推理与微调服务]
+    GRAPH <--> STATE[(SQLite checkpoint / 会话索引)]
+    TOOLS <--> ASSETS[(用户数据 / 模型资产)]
+    API --> ONLINE[在线表 / 公共文件 / 数据准备]
+    UI -->|REST| BI[bi_app · 独立 FastAPI 服务]
+    BI -->|验证 Bearer token| AUTH
+    BI --> REMOTE[远程制造 / 品质 / 成本 / 设备 BI]
+    BI --> NG[本地 NG 工作流与只读数据库查询]
+    BI --> CP[远程 Control Plan 服务]
+    BI --> INSIGHT[结果分析 / 确认状态 / 缓存]
 ```
 
-### 一次工业任务的典型流程
+通用对话的典型过程是：**提出任务 → 方案选择 → 上传或复用数据 → 数据画像与参数映射 → 必要时澄清 → 专业 Agent 执行 → 图表与解释**。具体节点由任务状态决定，并非每轮都重复执行全部流程。
 
-```mermaid
-sequenceDiagram
-    participant User as 用户
-    participant UI as 前端
-    participant API as FastAPI
-    participant Graph as Orchestrator
-    participant Agent as 专业 Agent
-    participant Tool as 工具
+主接口使用 **multipart/form-data 请求 + NDJSON 流式响应**，不是 WebSocket。业务 BI 接口返回 JSON，并通过线程及确认字段续接查询。
 
-    User->>UI: 输入任务或提交结构化配置
-    UI->>API: query + file/existing_file + session_id
-    API->>Graph: 创建或恢复任务状态
-    Graph->>Graph: 路由、画像、字段映射、参数解析
-    Graph-->>UI: 必要时中断并请求确认
-    UI->>Graph: resume_value
-    Graph->>Agent: 注入 DataFrame、目标列、特征列和模型引用
-    Agent->>Tool: 调用分析/检测/预测工具
-    Tool-->>UI: 训练进度、图表、指标
-    Agent-->>UI: 最终结论与建议
+### 技术栈
+
+| 层次 | 技术 |
+| --- | --- |
+| 前端 | React 18、TypeScript、Vite 5、Tailwind CSS、React Router、Recharts、Lucide、Three.js |
+| Agent 编排 | LangChain、LangGraph、OpenAI 兼容 Chat Completions 接口 |
+| 主服务与业务服务 | FastAPI、Uvicorn、Pydantic v2、HTTPX、PyMySQL |
+| 分析与模型 | pandas、NumPy、SciPy、scikit-learn、statsmodels、CatBoost、PyOD 扩展、PyTorch |
+| 持久化 | SQLite 账户库、会话索引、LangGraph checkpoint、本地模型资产与远程模型索引 |
+| 部署 | Python 3.12 / Node 20 镜像、Docker Compose、可选 Nginx 静态前端与反向代理 |
+
+## 快速开始
+
+### 1. 配置服务
+
+主服务需要可用的 OpenAI 兼容模型接口。在 `agent_app/.env` 中配置，已有配置请保留并按需修改：
+
+```dotenv
+MODEL_NAME=your-chat-model
+BASE_URL=https://your-model-service.example/v1
+API_KEY=your-api-key
+TEMPERATURE=0.7
+TIMEOUT=600
+MAX_FILE_SIZE_MB=100
 ```
 
-## 工具与模型
+邮箱注册、找回密码和绑定邮箱需要 SMTP，按 [账户与邮件配置说明](agent_app/auth/README.md) 将 [auth.env.example](agent_app/auth.env.example) 中的设置补入该文件。未配置 SMTP 时不能正常申请验证码，已有账户仍可登录。
 
-### 数据分析
+业务服务配置放在 `bi_app/.env`，按所需能力填写：
 
-分析工具位于 `agent_app/tools/analysis_tools/`，采用统一的 `AnalysisContext`：
+```dotenv
+AUTH_SERVICE_URL=http://127.0.0.1:8000
+BI_REMOTE_QUERY_URL=http://your-bi-service.example/api/query
+CONTROL_PLAN_QUERY_URL=http://your-control-plan-service.example/api/query
+```
+
+NG 数据库及结果分析模型设置见 [ng.env.example](bi_app/ng.env.example)；更多配置见 [BI 服务说明](bi_app/README.md)。在线数据库连接维护在 [online_sources.py](agent_app/config/online_sources.py)，预测服务路由维护在 [prediction_tools/_common.py](agent_app/tools/prediction_tools/_common.py)，微调配置见 [finetuning_tools.py](agent_app/tools/prediction_tools/finetuning_tools.py)。这些集成需要对应服务和网络访问，不能仅安装 Python 依赖后直接获得全部能力。
+
+### 2. 本地开发
+
+从仓库根目录创建虚拟环境。后端依赖以 [requirements.txt](requirements.txt) 为准，Python 版本可与 Docker 保持为 3.12；前端可使用 Node 20。
+
+```bash
+python -m venv .venv
+```
+
+激活环境：
+
+```powershell
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+```
+
+```bash
+# Linux / macOS
+source .venv/bin/activate
+```
+
+安装依赖并在两个终端分别启动主服务、业务服务：
+
+```bash
+python -m pip install -r requirements.txt
+
+# 终端一：主后端
+python -m uvicorn agent_app.api:app --env-file agent_app/.env --host 0.0.0.0 --port 8000 --reload
+
+# 终端二：BI / NG / Control Plan
+python -m uvicorn bi_app.api:app --env-file bi_app/.env --host 0.0.0.0 --port 8010 --reload
+```
+
+第三个终端启动前端，Vite 的两个代理均需指向本机服务：
+
+```powershell
+# Windows PowerShell
+cd frontend
+npm ci
+$env:VITE_PROXY_TARGET="http://127.0.0.1:8000"
+$env:VITE_BI_PROXY_TARGET="http://127.0.0.1:8010"
+npm run dev
+```
+
+```bash
+# Linux / macOS
+cd frontend
+npm ci
+VITE_PROXY_TARGET=http://127.0.0.1:8000 VITE_BI_PROXY_TARGET=http://127.0.0.1:8010 npm run dev
+```
+
+前端访问 [localhost:5173](http://localhost:5173)，主后端文档访问 [localhost:8000/docs](http://localhost:8000/docs)，业务服务文档访问 [localhost:8010/docs](http://localhost:8010/docs)。两个后端均提供 `/health`。
+
+### 3. Docker Compose
+
+使用支持当前 Compose 文件语法的 Docker Compose v2。当前配置偏向开发：源码挂载、Uvicorn reload、Vite 开发服务器；不应将其描述为已加固的生产部署。
+
+主后端的 `build` 配置目前被注释，使用本地镜像 `ts_agent-backend:custom-20261029`。首次部署先构建该镜像：
+
+```bash
+docker build --target backend -t ts_agent-backend:custom-20261029 .
+docker compose up -d --build
+docker compose ps
+```
+
+Compose 从 `agent_app/.env` 和 `bi_app/.env` 注入环境。`AUTH_SERVICE_URL` 已在 Compose 中指定为 `http://backend:8000`。`BI_REMOTE_QUERY_URL` 则由 Compose 的 `environment` 显式赋值，优先于业务服务的 `env_file`：使用 Compose 时，应在**仓库根目录 `.env`** 设置该变量，或通过运行 Compose 的 shell 传入自己的地址。
+
+```dotenv
+# 仓库根目录 .env 中的 Compose 覆盖项
+BI_REMOTE_QUERY_URL=http://your-bi-service.example/api/query
+FRONTEND_PORT=5173
+BACKEND_PORT=8000
+```
+
+前端与主后端默认暴露 5173、8000 端口；`bi-backend` 的 8010 端口默认仅供容器网络内部使用。查看日志：
+
+```bash
+docker compose logs -f backend bi-backend frontend
+```
+
+Dockerfile 还提供最终 `frontend` 构建阶段，使用 Nginx 托管静态文件；当前 Compose 选择的是 `frontend-build` 阶段并运行 Vite。切换静态部署时需配合 [nginx.conf](docker/nginx.conf) 调整服务与端口，保留通用对话流式接口的禁缓冲及业务查询的超时配置。
+
+## 配置与持久化
+
+| 配置 | 用途与位置 |
+| --- | --- |
+| `MODEL_NAME` / `BASE_URL` / `API_KEY` | 主 Agent 的模型服务，显式配置自己的服务与密钥 |
+| `TEMPERATURE` / `TIMEOUT` | 主模型温度与超时，默认 0.7 / 600 秒 |
+| `MAX_FILE_SIZE_MB` | 文件接入默认上限 100 MB；部分专用接口另有固定上限 |
+| `SMTP_*` | 邮箱验证码发送，配置在主服务环境 |
+| `AUTH_DB_PATH` | 账户 SQLite 路径，默认 `agent_app/auth/auth.sqlite3` |
+| `AUTH_SERVICE_URL` | BI 用于校验 token 的主服务地址 |
+| `BI_REMOTE_QUERY_URL` | 四类 BI 的上游服务地址 |
+| `CONTROL_PLAN_QUERY_URL` | 工艺参数上游服务地址 |
+| `BI_NG_LLM_*` / 工厂数据库变量 | NG、业务结果分析和工厂连接，见业务服务配置示例 |
+| `VITE_PROXY_TARGET` / `VITE_BI_PROXY_TARGET` | 开发服务器的主服务与业务服务代理目标 |
+| `VITE_API_BASE_URL` | 前端 API 基址，留空时使用同源代理 |
+
+主要持久化位置：
 
 ```text
-ctx.df
-ctx.target_columns
-ctx.feature_columns
+uploads/<user_id>/                           # 私有任务数据
+agent_app/public_datasets/                    # 只读公共离线文件
+agent_app/auth/auth.sqlite3                   # 账户、验证码及登录会话
+agent_app/sessions.db                         # 用户会话索引
+agent_app/orchestrator.db                     # 主编排 checkpoint
+agent_app/artifacts/analysis_models/          # 分析模型
+agent_app/artifacts/anomaly_detection/        # 异常模型
+agent_app/artifacts/prediction_models/        # 远程预测模型本地索引
+bi_app/.state/                               # NG checkpoint 与分析缓存
 ```
 
-主要工具族包括：
+主编排实际 checkpoint 路径在 `orchestrator_graph.py` 中定义，不应仅修改通用 `DB_*` 配置就假定完成了迁移。SQLite 初始化失败时会降级到内存，届时重启不能保留该编排状态。当前 NG 工作流使用进程内串行锁，建议按现有单 worker 方式运行；多实例需要另行设计共享锁和持久化。
 
-- 数据质量：缺失值、重复值、常量/低方差列。
-- 分布与趋势：描述统计、分布形态、直方图、线性趋势、Mann-Kendall、滚动趋势。
-- 关系分析：Pearson/Spearman/Kendall 相关性、交叉相关、互信息。
-- 时序结构：ACF/PACF、季节性、STL/经典分解、平稳性。
-- 变点与稳定性：均值变点、方差变点、CUSUM、稳定性、控制图、过程能力。
-- 组间比较：分组统计、分布比较和两组检验。
-- 根因分析：`analyze_root_causes_catboost`。
+## API 速览
 
-根因模型按用户、会话和数据集持久化：
+受保护接口使用 `Authorization: Bearer <token>`。服务端从 token 推导用户身份；客户端自行提交 `X-User-Id` 不能作为认证凭证。
 
-```text
-agent_app/artifacts/analysis_models/<user>/<thread>/<dataset>_analysis/<save_name>.joblib
+| 服务 | 方法与路径 | 用途 |
+| --- | --- | --- |
+| 主服务 | `POST /api/query` | 通用对话与配置型任务，multipart 请求 / NDJSON 响应 |
+| 主服务 | `GET /api/session/{id}` / `DELETE /api/session/{id}/reset` | 查询状态 / 重置当前任务 |
+| 主服务 | `GET /api/sessions` / `GET /api/sessions/{id}/messages` | 会话目录 / 历史重放 |
+| 主服务 | `DELETE /api/sessions/{id}` | 删除当前用户的会话 |
+| 主服务 | `GET /api/datasets` / `GET /api/public-datasets` | 私有 / 公共数据 |
+| 主服务 | `GET /api/online-sources` 及其表格子接口 | 工厂、表目录、预览、筛选候选与质量指标 |
+| 主服务 | `POST /api/data-selection` | 准备公共文件或在线表任务数据 |
+| 主服务 | `POST /api/data-selection/export` | 当前表格快照导出到私有数据 |
+| 主服务 | `GET /api/models` | 三类模型资产 |
+| 主服务 | `/api/auth/*` | 验证码、注册、登录、找回、绑定、退出及会话校验 |
+| 业务服务 | `POST /api/bi/query` | 制造 / 品质 / 成本 / 设备 BI |
+| 业务服务 | `POST /api/bi/ng/query` / `POST /api/bi/ng/options` | NG 查询恢复 / 真实筛选候选 |
+| 业务服务 | `POST /api/bi/control-plan/query` | Control Plan 查询与多选确认 |
+
+通用任务示例，`curl.exe` 可用于 Windows，Linux / macOS 使用 `curl`：
+
+```bash
+curl -N http://localhost:8000/api/query \
+  -H "Authorization: Bearer <your-token>" \
+  -F "session_id=demo-analysis-001" \
+  -F "query=分析这份传感器数据的整体趋势与稳定性" \
+  -F "file=@./sensor.csv"
 ```
 
-加载已有模型时不会重新训练；系统使用新数据预测并重新计算当前数据的 TreeSHAP。模型全局 FeatureImportance 来源于已训练树结构。
-
-### 异常检测
-
-异常检测工具位于 `agent_app/tools/anomaly_detection_tools/`，包含知识查询、模型推荐、训练与检测、模型加载、评估、集成、阈值和解释能力。
-
-结构化涂布异常检测入口支持 SpectralResidual、MatrixProfile、SAND、TimeSeriesOD + ECOD、TimeSeriesOD + IForest、LSTMAD 和 AnomalyTransformer。底层还包含 PyOD 检测器及 KShape、TimeSeriesOD 等时序能力。
-
-异常模型保存在：
-
-```text
-agent_app/artifacts/anomaly_detection/<user>/<thread>/<dataset>_anomaly_detection/
-```
-
-### 时序预测
-
-预测工具位于 `agent_app/tools/prediction_tools/`。当前统一接入七个时序基础模型：
-
-- `sundial`
-- `toto-2`
-- `timer-s1`
-- `chronos-2`
-- `timesfm-2.5`
-- `moirai-2.0-R-small`
-- `tirex-1.1-gifteval`
-
-不同模型的原始输出会归一化为统一的点预测、分位数/样本和形状描述。预测工具依赖可访问的外部时序模型 HTTP 服务；服务地址和模型路由目前配置在 `agent_app/tools/prediction_tools/_common.py`。微调服务相关配置见 `agent_app/tools/prediction_tools/finetuning_tools.py`。
-
-## 技术栈
-
-### 后端
-
-- Python 3.12（Docker 镜像）
-- FastAPI、Uvicorn
-- LangChain、LangGraph、SQLite Checkpoint
-- Pydantic v2
-- pandas、NumPy、SciPy、scikit-learn、statsmodels
-- CatBoost、joblib
-- PyOD 扩展与 PyTorch 时序异常检测模型
-- Matplotlib、Plotly
-
-### 前端
-
-- React 18、TypeScript 5.5
-- Vite 5、Tailwind CSS 3
-- Recharts
-- React Markdown、highlight.js
-- Lucide React
+也可提交 `existing_file_name` 复用私有文件，通过 `application_id` 和 JSON 字符串 `application_params` 发起配置型任务，或以 `resume_value` 恢复中断。必填字段、确认协议和响应结构以当前服务的 `/docs` 为准。
 
 ## 项目结构
 
 ```text
 Industrial_Time_Series_Agent/
 ├── agent_app/
-│   ├── agents/                  # Agent 与 LangGraph 编排
-│   ├── applications/            # 结构化业务智能体后端适配器
-│   ├── artifacts/               # 分析、异常检测、预测模型资产
-│   ├── auth/                    # 用户注册、登录与用户存储
-│   ├── charts/                  # 后端图表事件构建器
-│   ├── config/                  # LLM、数据库和运行配置
-│   ├── models/                  # Pydantic 状态与接口模型
-│   ├── prompts/                 # 各 Agent 系统提示词
-│   ├── skills/                  # 分析、异常检测、预测技能说明
-│   ├── state/                   # 会话状态与对话记忆
-│   ├── tools/                   # 分析、异常检测、预测和画像工具
-│   ├── api.py                   # FastAPI 入口
-│   └── main.py                  # 系统门面类
+│   ├── agents/                 # 编排、路由、画像、解析与三个专业 Agent
+│   ├── applications/           # 配置型业务任务参数与 query 构建器
+│   ├── auth/                   # 邮箱验证、账户与 Bearer 会话
+│   ├── charts/                 # 结构化图表事件构建
+│   ├── config/                 # 模型配置与在线数据源
+│   ├── models/                 # 状态和接口模型
+│   ├── prompts/                # Agent 提示词
+│   ├── state/                  # 会话状态和记忆
+│   ├── tools/                  # 分析、检测、预测、画像与内置 PyOD 扩展
+│   ├── api.py                  # 主 API 和资产接口
+│   ├── data_selection_api.py    # 跨来源任务选数和预览导出
+│   └── public_datasets_api.py   # 公共文件接口
+├── bi_app/
+│   ├── api.py                  # 独立业务服务入口
+│   ├── analysis.py             # BI 领域分析与缓存
+│   ├── control_plan.py         # Control Plan 协议适配
+│   ├── control_plan_analysis.py # 工艺标准分析
+│   └── ng/                     # NG 解析、匹配、只读查询与断点工作流
 ├── frontend/
-│   ├── src/components/          # 对话、图表、中断、资产与布局组件
-│   ├── src/context/             # 会话与认证状态
-│   ├── src/features/agent-apps/ # 结构化业务智能体页面
-│   ├── src/services/            # API 客户端
-│   └── src/types/               # 前端事件与数据类型
-├── uploads/                     # 按用户隔离的上传数据
-├── docker/nginx.conf            # 生产前端反向代理配置
-├── Dockerfile                   # 多阶段镜像
-├── docker-compose.yml           # 本地容器化开发编排
-├── requirements.txt             # Docker 后端依赖源
-└── README.md
+│   ├── public/brand/           # 新版 SVG Logo
+│   ├── src/components/         # 对话、图表、资产、认证与布局
+│   ├── src/context/            # 账户与通用会话状态
+│   ├── src/features/agent-apps/ # 业务目录、配置表单、BI 与 Control Plan 页面
+│   ├── src/services/           # API 客户端
+│   └── scripts/                # 前端业务逻辑检查
+├── docs/images/                # 当前 README 的 12 张界面截图
+├── docker/nginx.conf           # 静态前端反向代理配置
+├── docker-compose.yml
+├── Dockerfile
+└── requirements.txt
 ```
 
-## 快速开始
+## 开发与验证
 
-### 方案一：Docker Compose
-
-前置要求：Docker Engine 与 Docker Compose v2。
-
-1. 创建 `agent_app/.env`：
-
-```dotenv
-MODEL_NAME=your-model-name
-BASE_URL=http://your-openai-compatible-service/v1
-API_KEY=your-api-key
-TEMPERATURE=0.7
-TIMEOUT=600
-
-DB_BACKEND=sqlite
-DB_CONNECTION_STRING=sqlite:///sessions.db
-DB_TABLE_NAME=sessions
-
-MAX_CONVERSATION_HISTORY=50
-SESSION_TIMEOUT_MINUTES=30
-DEFAULT_PREDICTION_STEPS=25
-MAX_PREDICTION_STEPS=100
-MAX_FILE_SIZE_MB=100
-```
-
-2. 构建并启动：
-
-```bash
-docker compose up -d --build
-```
-
-3. 查看状态和日志：
-
-```bash
-docker compose ps
-docker compose logs -f backend
-docker compose logs -f frontend
-```
-
-4. 访问服务：
-
-- 前端：`http://localhost:5173`
-- 后端健康检查：`http://localhost:8000/health`
-- Swagger：`http://localhost:8000/docs`
-
-只重建后端容器：
-
-```bash
-docker compose up -d --force-recreate backend
-```
-
-### 方案二：本地开发
-
-后端：
-
-```bash
-python -m venv .venv
-```
-
-Windows PowerShell：
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -m uvicorn agent_app.api:app --host 0.0.0.0 --port 8000 --reload
-```
-
-Linux/macOS：
-
-```bash
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m uvicorn agent_app.api:app --host 0.0.0.0 --port 8000 --reload
-```
-
-前端：
+前端构建与现有业务逻辑检查：
 
 ```bash
 cd frontend
-npm install
-```
-
-本地启动时，Vite 代理需要指向本机后端。
-
-Windows PowerShell：
-
-```powershell
-$env:VITE_PROXY_TARGET="http://localhost:8000"
-npm run dev
-```
-
-Linux/macOS：
-
-```bash
-VITE_PROXY_TARGET=http://localhost:8000 npm run dev
-```
-
-## 配置说明
-
-### LLM 配置
-
-系统使用 OpenAI 兼容的 Chat Completions 接口。
-
-| 变量 | 作用 | 代码默认值 |
-| --- | --- | --- |
-| `MODEL_NAME` | 模型服务识别的模型名称 | `DeepSeek-V4-Flash` |
-| `BASE_URL` | OpenAI 兼容 API 基址，通常以 `/v1` 结尾 | 项目内开发地址；部署时必须显式覆盖 |
-| `API_KEY` | 模型服务密钥 | `EMPTY` |
-| `TEMPERATURE` | 生成温度 | `0.7` |
-| `TIMEOUT` | LLM 请求超时秒数 | `600` |
-
-### 会话与文件配置
-
-| 变量 | 作用 | 默认值 |
-| --- | --- | --- |
-| `DB_BACKEND` | 会话状态后端 | `sqlite` |
-| `DB_CONNECTION_STRING` | 数据库连接串 | `sqlite:///sessions.db` |
-| `DB_TABLE_NAME` | 状态表名称 | `sessions` |
-| `MAX_CONVERSATION_HISTORY` | 最大对话历史轮数 | `50` |
-| `SESSION_TIMEOUT_MINUTES` | 会话超时时间 | `30` |
-| `DEFAULT_PREDICTION_STEPS` | 默认预测步数 | `25` |
-| `MAX_PREDICTION_STEPS` | 最大预测步数 | `100` |
-| `MAX_FILE_SIZE_MB` | API 上传文件上限 | `100` |
-| `API_HOST` | API 监听地址 | `0.0.0.0` |
-| `API_PORT` | API 端口 | `8000` |
-| `API_WORKERS` | Uvicorn worker 数量 | `1` |
-
-## API 速览
-
-| 方法 | 路径 | 说明 |
-| --- | --- | --- |
-| `POST` | `/api/query` | 主查询接口；multipart/form-data + NDJSON 流式响应 |
-| `GET` | `/api/session/{session_id}` | 获取当前会话状态 |
-| `DELETE` | `/api/session/{session_id}/reset` | 清空任务状态并保留会话 |
-| `GET` | `/api/sessions` | 获取当前用户的历史会话 |
-| `GET` | `/api/sessions/{session_id}/messages` | 获取历史消息 |
-| `DELETE` | `/api/sessions/{session_id}` | 删除会话及 checkpoint |
-| `GET` | `/api/datasets` | 获取当前用户的数据资产 |
-| `GET` | `/api/models` | 获取数据分析、异常检测与预测模型资产 |
-| `POST` | `/api/auth/register` | 注册 |
-| `POST` | `/api/auth/login` | 登录 |
-| `GET` | `/api/auth/me` | 校验当前用户 |
-| `GET` | `/health` | 健康检查 |
-
-`POST /api/query` 的主要表单字段：
-
-| 字段 | 说明 |
-| --- | --- |
-| `session_id` | 必填，会话 ID |
-| `query` | 自然语言任务；结构化应用可由后端生成 |
-| `file` | 新上传的数据文件 |
-| `existing_file_name` | 复用“我的数据”中的文件 |
-| `resume_value` | 恢复 Human-in-the-Loop 中断的 JSON 字符串 |
-| `application_id` | 结构化业务智能体 ID |
-| `application_params` | 结构化应用参数 JSON |
-| `X-User-Id` | 用户命名空间，由前端认证流程提供 |
-
-示例：
-
-```bash
-curl -N http://localhost:8000/api/query \
-  -H "X-User-Id: <user-id>" \
-  -F "session_id=<session-id>" \
-  -F "query=分析这份传感器数据的整体趋势" \
-  -F "file=@./sensor.csv"
-```
-
-## 数据与模型资产
-
-运行期间会写入以下目录：
-
-```text
-uploads/<user_id>/
-agent_app/artifacts/analysis_models/<user_id>/
-agent_app/artifacts/anomaly_detection/<user_id>/
-agent_app/artifacts/prediction_models/<user_id>/
-```
-
-生产部署时应将 `uploads` 和 `agent_app/artifacts` 挂载到持久卷，并制定备份与清理策略。不要将真实生产数据、模型权重、`.env`、用户文件或会话数据库提交到版本库。
-
-## 测试与构建
-
-运行后端测试：
-
-```bash
-python -m pytest agent_app -q
-```
-
-部分异常检测测试或预测集成测试可能依赖 PyTorch、外部模型服务或较长运行时间。开发时可以先运行目标模块：
-
-```bash
-python -m pytest agent_app/tools/analysis_tools/test_root_cause_tools.py -q
-python -m pytest agent_app/applications -q
-```
-
-前端类型检查与生产构建：
-
-```bash
-cd frontend
-npm run lint
 npm run build
+npm run test:bi-analysis
+npm run test:ng-chart
+npm run test:online-metrics
+npm run test:vehicle-sales
 ```
 
-## 生产部署注意事项
+后端按改动范围运行测试，例如在已安装项目依赖的虚拟环境中：
 
-- 必须覆盖代码中的开发默认 `BASE_URL`，并通过密钥管理系统注入 `API_KEY`。
-- 当前 CORS 配置允许所有来源，生产环境应限制可信域名。
-- `docker-compose.yml` 面向开发，后端启用了 `--reload`，前端运行 Vite dev server；生产环境应使用 Dockerfile 的 `frontend` Nginx target，并关闭 reload。
-- 持久化上传文件、模型资产和 SQLite checkpoint；多 worker 或多副本部署前应评估 checkpoint 和文件存储的一致性。
-- 外部时序模型服务通常计算时间较长，应保持反向代理读取超时与后端超时一致。
-- 模型文件使用 joblib 等方式加载，只允许加载系统自身在受控目录中生成的可信模型。
+```bash
+python -m pip install pytest
+python -m pytest agent_app/auth/test_auth.py agent_app/test_session_ownership.py -q
+python -m pytest agent_app/test_data_selection.py agent_app/test_online_preview_export.py -q
+python -m pytest bi_app/test_api.py bi_app/test_auth.py bi_app/test_analysis.py -q
+python -m pytest bi_app/test_control_plan.py bi_app/test_control_plan_analysis.py bi_app/ng/test_ng.py -q
+```
 
-## 当前边界
+这些测试大量使用临时数据库、模拟远程接口及模型响应，不能替代真实 SMTP 投递、数据库连接、模型推理和生产 BI 的端到端验收。
 
-- 预测能力依赖外部时序基础模型服务，不是完全离线运行。
-- 字段映射依赖数据画像和 LLM 判断，歧义字段仍可能需要用户确认。
-- 根因分析提供的是统计与模型层面的影响线索，不自动建立严格因果关系。
-- 用户与会话存储目前适合内部验证和单机部署；正式生产应进一步接入企业身份、数据库和对象存储。
+### 扩展入口
 
----
+- 新增配置型任务：在 `agent_app/applications/` 增加参数校验与 query 构建器，注册到 `registry.py`，再添加前端表单及目录元数据。
+- 新增工厂应用：更新前端 `production-catalog` 目录，分别配置 BI 租户和 NG 工厂连接；仅增加卡片不会自动建立后端数据权限或服务连接。
+- 新增分析工具：遵循运行时上下文和统一返回结构，注册工具，必要时补充图表提取器及前端图表组件。
 
-进一步阅读：
+### 部署边界
 
-- [`agent_app/tools/README.md`](agent_app/tools/README.md)
-- [`agent_app/tools/finetuning_README.md`](agent_app/tools/finetuning_README.md)
-- [`agent_app/tools/prediction_tools/finetuning_SPEC.md`](agent_app/tools/prediction_tools/finetuning_SPEC.md)
-- [`agent_app/API_USAGE.md`](agent_app/API_USAGE.md)
+当前代码面向单机及内网集成，包含开发环境的默认服务地址和数据源连接配置。部署或公开仓库前应替换其中的实际连接信息、移除明文凭据，并持久化账户、checkpoint、上传文件和模型资产；文档中的示例均使用占位地址。
 
+模型结果依赖数据质量与上游服务。根因解释属于影响线索，预测属于模型估计；Control Plan 标准查询不等于实测质量判定。模型文件应只从可信的系统资产目录加载。
 
-### 配置型智能体的数据选择
+## 进一步阅读
 
-全部配置型智能体共用三级数据选择器：在线数据源 → 基地 → 数据表，或离线数据源 → 私有/公共数据 → 文件。上传新数据保留原有入口和格式、大小校验；只接受 CSV 的应用继续过滤 XLSX/Parquet 文件。
-
-私有文件沿用当前用户的历史上传引用。公共文件及在线表通过 `POST /api/data-selection` 准备为本次任务数据，再交给现有上传与 Agent 执行链路。在线表使用已配置的基地、经元数据校验的数据表，先按 `insert_time` 降序在数据库内限定最近 5,000 条，再按时间升序分批导出；不足 5,000 条时读取全部。选择器会显示该范围，避免将样本视为整表。CSV 导出及公共文件上限为 100MB；超限会明确报错，不截断后继续分析。在线导出使用临时文件，下载完成或导出失败后清理；本次任务提交后数据副本按现有规则进入当前用户上传目录，不修改数据库或公共原文件。
-
-切换来源/基地会清除原选择，读取失败可重试；上传新文件会取消待完成的选择读取。界面在宽屏横向排列，窄屏自动分行。部署需同步 `agent_app/data_selection_api.py` 与路由注册，重启主后端并重新构建前端，无新增 Python/npm 依赖。在线数据读取沿用基地连接与只读查询配置。
-
-
-### 在线表展示数据导出到私有数据
-
-“我的数据 → 在线数据源 → 工厂 → 表格预览”工具栏增加“数据导出”。用户先应用筛选，再打开字段选择弹窗；默认全选字段，可搜索、全选或取消全选，至少保留一列。导出范围固定为当前成功显示的记录（默认最近100条，或预览设置的50/100/500条）；包含已应用筛选结果，未应用的草稿筛选或读取失败状态下不能导出。
-
-`POST /api/data-selection/export` 将当前展示快照按所选字段保存为 UTF-8 BOM CSV，不重新查询数据库，也不导出未显示的匹配行。保留表格行顺序、原字段顺序和原字段名。服务端校验字段子集、行列形状及上限，通过已认证身份保存到现有用户上传目录，文件名唯一；暂存文件写完后原子发布，失败时清理。导出成功可直接跳转“离线数据源 → 私有数据”，新文件支持现有预览及配置型智能体复用。本接口接收的是用户可见快照，不把客户端快照当作数据库原始记录的可信证明。
-
-同步部署文件：`agent_app/data_selection_api.py`、`frontend/src/services/api.ts`、`frontend/src/components/datasets/OnlineTableExplorer.tsx` 和新增 `OnlineDataExportDialog.tsx`；重新加载主后端及前端即可，无新增依赖。
+- [账户与邮件配置](agent_app/auth/README.md)
+- [BI、NG、Control Plan 服务与部署说明](bi_app/README.md)
+- [工具组织说明](agent_app/tools/README.md)
+- [预测微调说明](agent_app/tools/finetuning_README.md)
+- [微调接口规格](agent_app/tools/prediction_tools/finetuning_SPEC.md)
+- [API 补充文档](agent_app/API_USAGE.md)（与代码不一致时以当前 `/docs` 为准）
+- [登录场景的 RhineLabUI 集成与第三方许可](frontend/src/components/auth/rhine/README.md)
+- [截图来源与演示数据说明](docs/images/README.md)
