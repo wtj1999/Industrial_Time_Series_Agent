@@ -2,17 +2,19 @@ import { Check, Circle, MessageSquare, RefreshCw, RotateCcw } from 'lucide-react
 import { useLocation } from 'react-router-dom';
 import { useSession } from '@/context/SessionContext';
 import { IconButton } from '@/components/ui/IconButton';
-import { stageLabel, taskLabel } from '@/utils/format';
+import { shortId, stageLabel, taskLabel } from '@/utils/format';
+import { AnnouncementCenter } from '@/components/announcements/AnnouncementCenter';
 import { PlatformBrand } from './PlatformBrand';
 import './Header.css';
 
 export function Header() {
   const { pathname } = useLocation();
-  const { sessionInfo, streaming, resetTask, refreshSessionInfo } = useSession();
+  const { sessionInfo, sessionId, items, streaming, resetTask, refreshSessionInfo } = useSession();
+  const turns = items.filter(item => item.kind === 'message').length;
   const isChat = pathname === '/chat' || pathname.startsWith('/chat/');
 
   if (!isChat) {
-    return <div className="workspace-mobile-brand workspace-mobile-brand-standalone"><PlatformBrand /></div>;
+    return <div className="workspace-mobile-brand workspace-mobile-brand-standalone"><div className="workspace-mobile-brand-row"><PlatformBrand /><AnnouncementCenter compact /></div></div>;
   }
 
   return (
@@ -30,6 +32,7 @@ export function Header() {
           </span>
         </div>
         <div className="workspace-actions">
+          <span className="workspace-mobile-announcements"><AnnouncementCenter compact /></span>
           <IconButton title="刷新会话信息" onClick={() => void refreshSessionInfo()} disabled={streaming}>
             <RefreshCw className="h-4 w-4" />
           </IconButton>
@@ -39,6 +42,8 @@ export function Header() {
         </div>
       </div>
       <div className="workspace-readiness" aria-label="任务准备状态">
+        <span className="workspace-session" title={sessionId || '尚未创建会话'}>Session <code>{shortId(sessionId, 10, 6)}</code></span>
+        <span className="workspace-turns">对话轮次 <b>{turns}</b></span>
         <span className="workspace-readiness-label">准备状态</span>
         <PreparationItem ready={!!sessionInfo?.has_csv_profile} complete="CSV 已画像" pending="等待数据画像" />
         <PreparationItem ready={!!sessionInfo?.has_confirmed_spec} complete="规格已确认" pending="等待规格确认" />

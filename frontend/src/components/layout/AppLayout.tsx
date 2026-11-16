@@ -4,6 +4,7 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useSession } from '@/context/SessionContext';
 import { AccountSecurityNotice } from '@/components/auth/AccountSecurityNotice';
+import { AnnouncementProvider } from '@/components/announcements/AnnouncementCenter';
 
 /** Context shape passed via <Outlet context={...}> to child routes.
  *  ChatRoute consumes it so AppLayout owns the composer state while the
@@ -22,7 +23,7 @@ export function AppLayout() {
   const [pendingExample, setPendingExample] = useState<string>('');
 
   return (
-    <div className="flex h-full min-h-0">
+    <AnnouncementProvider><div className="flex h-full min-h-0">
       <Sidebar
         onPickExample={(p) => {
           setPendingExample(p);
@@ -46,6 +47,6 @@ export function AppLayout() {
           />
         </main>
       </div>
-    </div>
+    </div></AnnouncementProvider>
   );
 }

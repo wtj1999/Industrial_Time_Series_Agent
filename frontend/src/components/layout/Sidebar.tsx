@@ -21,6 +21,7 @@ import { useSession } from '@/context/SessionContext';
 import { useAuth } from '@/context/AuthContext';
 import { PlatformBrand } from './PlatformBrand';
 import { AssetArtwork } from '@/components/ui/AssetCards';
+import { AnnouncementCenter } from '@/components/announcements/AnnouncementCenter';
 import './Sidebar.css';
 import { cn } from '@/utils/cn';
 import { formatRelative, shortId } from '@/utils/format';
@@ -98,9 +99,6 @@ export function Sidebar({
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const {
-    sessionInfo,
-    sessionId,
-    items,
     streaming,
     sessions,
     sessionsLoading,
@@ -111,7 +109,6 @@ export function Sidebar({
   const [logoutError, setLogoutError] = useState('');
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const turns = items.filter((i) => i.kind === 'message').length;
 
   // Derive which top-level view is active from the URL. Falling back to
   // 'chat' keeps the highlight sensible for any /chat[/:id] path.
@@ -164,15 +161,7 @@ export function Sidebar({
         </button>
       </div>
       <div className="sidebar-scroll">
-        <section aria-label="当前会话">
-          <SectionTitle icon={Bot} label="当前会话" />
-          <div className="sidebar-card sidebar-session">
-            <Row label="Session" value={<code>{shortId(sessionId, 10, 6)}</code>} />
-            <Row label="对话轮次" value={<span>{turns}</span>} />
-            <Row label="分析结果" value={<span>{sessionInfo?.analysis_artifacts_count ?? 0}</span>} />
-            <Row label="最近更新" value={<span className="sidebar-muted">{formatRelative(sessionInfo?.updated_at)}</span>} />
-          </div>
-        </section>
+        <AnnouncementCenter />
 
         <section aria-label="我的资源">
           <SectionTitle icon={Sparkles} label="我的资源" />
@@ -254,8 +243,4 @@ function SectionTitle({
   inline?: boolean;
 }) {
   return <div className={cn('sidebar-section-title', !inline && 'sidebar-section-title-spaced')}><Icon size={13} strokeWidth={1.5}/>{label}</div>;
-}
-
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
-  return <div className="sidebar-session-row"><span>{label}</span><span>{value}</span></div>;
 }
