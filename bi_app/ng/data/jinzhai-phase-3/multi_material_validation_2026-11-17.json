@@ -1,0 +1,1154 @@
+{
+  "generated_at": "2026-11-17T03:04:58.683040+00:00",
+  "period": {
+    "start_date": "2026-11-15",
+    "end_date": "2026-11-15"
+  },
+  "target_id": "C3100.dwd_qual_ocv3_param_pim.volt",
+  "feature_ids": [
+    "C1400.dwd_qual_winding_slit_param_pim.12_ac_avg_dist",
+    "C1400.dwd_qual_winding_slit_param_pim.num34_ac_avg_dist"
+  ],
+  "runs": [
+    {
+      "route": "314ah",
+      "status": "success",
+      "result": {
+        "status": "success",
+        "ng_type": "NG-E-OCV3009",
+        "ng_name": "容量不及格",
+        "period": {
+          "start_date": "2026-11-15",
+          "end_date": "2026-11-15"
+        },
+        "filters": {
+          "tenant_id": [
+            "11300001"
+          ],
+          "technics_line_name": [
+            "金寨三期314Ah"
+          ]
+        },
+        "row_dimensions": {
+          "technics_process_name": "OCV3"
+        },
+        "target": {
+          "id": "C3100.dwd_qual_ocv3_param_pim.volt",
+          "name": "电压",
+          "process_name": "OCV3",
+          "date_filter_field": "shift_date",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "latest"
+          },
+          "groups": {
+            "NG": {
+              "count": 135,
+              "missing_count": 0,
+              "min": 2735.021,
+              "q1": 3244.5150000000003,
+              "median": 3264.521,
+              "q3": 3333.364,
+              "max": 3434.584,
+              "mean": 3266.9491851851853,
+              "whisker_low": 3128.173,
+              "whisker_high": 3434.584,
+              "outlier_count": 6,
+              "outliers": [
+                2735.021,
+                2747.868,
+                2778.915,
+                2817.721,
+                2882.729,
+                2960.75
+              ]
+            },
+            "OK": {
+              "count": 14291,
+              "missing_count": 0,
+              "min": 3241.051,
+              "q1": 3242.699,
+              "median": 3243.126,
+              "q3": 3243.6825,
+              "max": 3249.818,
+              "mean": 3243.3661530333775,
+              "whisker_low": 3241.275,
+              "whisker_high": 3245.157,
+              "outlier_count": 1142,
+              "outliers": [
+                3241.051,
+                3245.167,
+                3245.189,
+                3245.204,
+                3245.22,
+                3245.234,
+                3245.253,
+                3245.266,
+                3245.278,
+                3245.292,
+                3245.306,
+                3245.317,
+                3245.334,
+                3245.344,
+                3245.365,
+                3245.38,
+                3245.401,
+                3245.419,
+                3245.431,
+                3245.458,
+                3245.482,
+                3245.496,
+                3245.511,
+                3245.528,
+                3245.548,
+                3245.562,
+                3245.584,
+                3245.596,
+                3245.616,
+                3245.636,
+                3245.649,
+                3245.666,
+                3245.69,
+                3245.722,
+                3245.746,
+                3245.765,
+                3245.781,
+                3245.806,
+                3245.827,
+                3245.851,
+                3245.87,
+                3245.896,
+                3245.912,
+                3245.933,
+                3245.956,
+                3245.994,
+                3246.016,
+                3246.056,
+                3246.082,
+                3246.105,
+                3246.127,
+                3246.164,
+                3246.181,
+                3246.2,
+                3246.23,
+                3246.251,
+                3246.279,
+                3246.309,
+                3246.36,
+                3246.394,
+                3246.446,
+                3246.48,
+                3246.539,
+                3246.576,
+                3246.618,
+                3246.656,
+                3246.685,
+                3246.738,
+                3246.82,
+                3246.889,
+                3246.956,
+                3247.04,
+                3247.155,
+                3247.218,
+                3247.414,
+                3247.559,
+                3248.081,
+                3248.489,
+                3249.046,
+                3249.818
+              ]
+            }
+          }
+        },
+        "counts": {
+          "NG": 135,
+          "OK": 14291,
+          "excluded": 101
+        },
+        "boxes": [
+          {
+            "field_id": "C1400.dwd_qual_winding_slit_param_pim.12_ac_avg_dist",
+            "name": "1#2#AC均值(外侧负极到正极距离)",
+            "process_name": "切卷",
+            "sample_unit": "cell_material_association",
+            "groups": {
+              "NG": {
+                "count": 270,
+                "missing_count": 0,
+                "min": 1.1288,
+                "q1": 1.52455,
+                "median": 1.7776,
+                "q3": 2.00605,
+                "max": 3.085,
+                "mean": 1.7851214814814815,
+                "whisker_low": 1.1288,
+                "whisker_high": 2.6098,
+                "outlier_count": 2,
+                "outliers": [
+                  2.9195,
+                  3.085
+                ],
+                "target_products": 135,
+                "missing_products": 0,
+                "matched_products": 135,
+                "direct_products": 0,
+                "input_code_products": 0,
+                "ads_products": 135,
+                "ambiguous_products": 0,
+                "expected_samples": 270,
+                "valid_products": 135,
+                "complete_products": 135,
+                "partial_products": 0,
+                "trace_missing_products": 0,
+                "multi_code_products": 135
+              },
+              "OK": {
+                "count": 28588,
+                "missing_count": 0,
+                "min": 0.0,
+                "q1": 1.4531,
+                "median": 1.7289,
+                "q3": 2.0747,
+                "max": 3.2058,
+                "mean": 1.7712943227927802,
+                "whisker_low": 0.7625,
+                "whisker_high": 2.9956,
+                "outlier_count": 17,
+                "outliers": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  0.0,
+                  3.0073,
+                  3.0095,
+                  3.0168,
+                  3.0318,
+                  3.0476,
+                  3.052,
+                  3.0528,
+                  3.0618,
+                  3.0782,
+                  3.1404,
+                  3.2058
+                ],
+                "target_products": 14291,
+                "missing_products": 0,
+                "matched_products": 14291,
+                "direct_products": 0,
+                "input_code_products": 0,
+                "ads_products": 14291,
+                "ambiguous_products": 0,
+                "expected_samples": 28588,
+                "valid_products": 14291,
+                "complete_products": 14291,
+                "partial_products": 0,
+                "trace_missing_products": 0,
+                "multi_code_products": 14291
+              }
+            }
+          },
+          {
+            "field_id": "C1400.dwd_qual_winding_slit_param_pim.num34_ac_avg_dist",
+            "name": "3#4#AC均值(内侧负极到正极距离)",
+            "process_name": "切卷",
+            "sample_unit": "cell_material_association",
+            "groups": {
+              "NG": {
+                "count": 270,
+                "missing_count": 0,
+                "min": 1.0728,
+                "q1": 1.4824,
+                "median": 1.5993,
+                "q3": 1.82825,
+                "max": 2.4146,
+                "mean": 1.6517840740740741,
+                "whisker_low": 1.0728,
+                "whisker_high": 2.2888,
+                "outlier_count": 1,
+                "outliers": [
+                  2.4146
+                ],
+                "target_products": 135,
+                "missing_products": 0,
+                "matched_products": 135,
+                "direct_products": 0,
+                "input_code_products": 0,
+                "ads_products": 135,
+                "ambiguous_products": 0,
+                "expected_samples": 270,
+                "valid_products": 135,
+                "complete_products": 135,
+                "partial_products": 0,
+                "trace_missing_products": 0,
+                "multi_code_products": 135
+              },
+              "OK": {
+                "count": 28588,
+                "missing_count": 0,
+                "min": 0.0,
+                "q1": 1.4408,
+                "median": 1.6073,
+                "q3": 1.853025,
+                "max": 2.737,
+                "mean": 1.6554911221491535,
+                "whisker_low": 0.8498,
+                "whisker_high": 2.4703,
+                "outlier_count": 233,
+                "outliers": [
+                  0.0,
+                  0.0,
+                  0.6487,
+                  2.472,
+                  2.4749,
+                  2.4808,
+                  2.4819,
+                  2.4857,
+                  2.4873,
+                  2.4899,
+                  2.4974,
+                  2.5096,
+                  2.5213,
+                  2.5239,
+                  2.5279,
+                  2.5343,
+                  2.5362,
+                  2.5385,
+                  2.5394,
+                  2.5431,
+                  2.5442,
+                  2.5453,
+                  2.5473,
+                  2.5485,
+                  2.5492,
+                  2.5501,
+                  2.5524,
+                  2.5528,
+                  2.555,
+                  2.5567,
+                  2.5579,
+                  2.5588,
+                  2.5593,
+                  2.5596,
+                  2.5606,
+                  2.5611,
+                  2.5628,
+                  2.5631,
+                  2.5648,
+                  2.5673,
+                  2.5684,
+                  2.569,
+                  2.5702,
+                  2.5706,
+                  2.5712,
+                  2.5721,
+                  2.5724,
+                  2.5737,
+                  2.5745,
+                  2.5747,
+                  2.575,
+                  2.5752,
+                  2.5768,
+                  2.5784,
+                  2.5805,
+                  2.5813,
+                  2.5822,
+                  2.5832,
+                  2.5861,
+                  2.5875,
+                  2.5886,
+                  2.5889,
+                  2.5904,
+                  2.5911,
+                  2.593,
+                  2.595,
+                  2.5965,
+                  2.598,
+                  2.5989,
+                  2.6006,
+                  2.6021,
+                  2.6045,
+                  2.6106,
+                  2.6111,
+                  2.6245,
+                  2.6442,
+                  2.6471,
+                  2.6621,
+                  2.679,
+                  2.737
+                ],
+                "target_products": 14291,
+                "missing_products": 0,
+                "matched_products": 14291,
+                "direct_products": 0,
+                "input_code_products": 0,
+                "ads_products": 14291,
+                "ambiguous_products": 0,
+                "expected_samples": 28588,
+                "valid_products": 14291,
+                "complete_products": 14291,
+                "partial_products": 0,
+                "trace_missing_products": 0,
+                "multi_code_products": 14291
+              }
+            }
+          }
+        ],
+        "timing": {
+          "total_seconds": 28.0364,
+          "target_query": {
+            "table": "dwd_qual_ocv3_param_pim",
+            "seconds": 11.258,
+            "rows": 14527,
+            "source_rows": 14527,
+            "product_count": 14527,
+            "duplicate_rows": 0,
+            "invalid_product_rows": 0,
+            "date_filter_field": "shift_date",
+            "sort_time_field": "end_time",
+            "record_selection": {
+              "mode": "latest"
+            }
+          },
+          "feature_wall_seconds": 8.2088,
+          "feature_queries": [
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 3.4556,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 4.5801,
+              "rows": 1999,
+              "eligible_source_rows": 1999,
+              "product_batch_size": 1999,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 2.9707,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 2.8857,
+              "rows": 1998,
+              "eligible_source_rows": 1998,
+              "product_batch_size": 1998,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 6.5674,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 3.9001,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 4.4003,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 5.941,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 3.3287,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 3.2042,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 3.2993,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 3.5261,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 3.2515,
+              "rows": 1999,
+              "eligible_source_rows": 1999,
+              "product_batch_size": 1999,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 3.3886,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 1.3858,
+              "rows": 856,
+              "eligible_source_rows": 856,
+              "product_batch_size": 856,
+              "lookup_count": 856,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            }
+          ],
+          "workers": 8,
+          "trace_wall_seconds": 8.09,
+          "trace_queries": [
+            {
+              "route": "314ah",
+              "table": "ads_trace_cell_coding_314ah_pim",
+              "seconds": 7.2349,
+              "rows": 4000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest"
+            },
+            {
+              "route": "314ah",
+              "table": "ads_trace_cell_coding_314ah_pim",
+              "seconds": 7.2058,
+              "rows": 4000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest"
+            },
+            {
+              "route": "314ah",
+              "table": "ads_trace_cell_coding_314ah_pim",
+              "seconds": 7.9537,
+              "rows": 4001,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest"
+            },
+            {
+              "route": "314ah",
+              "table": "ads_trace_cell_coding_314ah_pim",
+              "seconds": 7.1433,
+              "rows": 4005,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest"
+            },
+            {
+              "route": "314ah",
+              "table": "ads_trace_cell_coding_314ah_pim",
+              "seconds": 7.3567,
+              "rows": 4000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest"
+            },
+            {
+              "route": "314ah",
+              "table": "ads_trace_cell_coding_314ah_pim",
+              "seconds": 5.0754,
+              "rows": 4000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest"
+            },
+            {
+              "route": "314ah",
+              "table": "ads_trace_cell_coding_314ah_pim",
+              "seconds": 5.1493,
+              "rows": 4000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest"
+            },
+            {
+              "route": "314ah",
+              "table": "ads_trace_cell_coding_314ah_pim",
+              "seconds": 1.0001,
+              "rows": 852,
+              "lookup_count": 426,
+              "query_strategy": "batch_latest"
+            }
+          ]
+        },
+        "rules": [
+          "按租户和产品编码关联；目标时间范围内同一产品按工序规则保留一条记录。",
+          "目标宽表按shift_date班次日期筛选，起止日期均包含；最新记录排序与上游追溯时点仍采用字典中经DDL确认的分区时间字段。",
+          "OCV3：按end_time取最新记录。",
+          "切卷：按end_time取最新记录。",
+          "按目标租户和产线确定314Ah或588Ah路线，再按字典关联ADS。取不晚于目标时点的最新追溯批次，保留该批次全部物料行；同一电芯、同一上游码只计一次。",
+          "NG/OK产品数按目标电芯计数；箱线图n为电芯与上游码关联后的有效参数数，一个电芯的多个卷绕码全部绘图，不求平均。同一物料用于多个电芯时按各电芯关联计数，这些样本不是相互独立的观测。",
+          "参数缺失数按已知上游码统计；缺失电芯数为没有任何有效参数的目标电芯，部分缺失电芯另计；追溯缺失时不猜测上游码数量。",
+          "NG为当前缺陷；OK为缺陷字段为空或OK且产品质量为合格的记录；其他缺陷和未知质量排除。",
+          "上游不沿用目标日期、班次或设备限制；在目标记录的分区时间之前，按各工序规则在数据库内选取一条记录。",
+          "缺失值不填零；箱体为25%至75%分位数，须为1.5倍IQR范围内实际值；统计使用全部取回记录。"
+        ],
+        "warnings": []
+      },
+      "upstream_codes_per_target": {
+        "NG": {
+          "2": 135
+        },
+        "OK": {
+          "2": 14288,
+          "3": 1,
+          "4": 1,
+          "5": 1
+        }
+      }
+    },
+    {
+      "route": "588ah",
+      "status": "success",
+      "result": {
+        "status": "success",
+        "ng_type": "NG-E-OCV3009",
+        "ng_name": "容量不及格",
+        "period": {
+          "start_date": "2026-11-15",
+          "end_date": "2026-11-15"
+        },
+        "filters": {
+          "tenant_id": [
+            "11300001"
+          ],
+          "technics_line_name": [
+            "金寨三期588AH"
+          ]
+        },
+        "row_dimensions": {
+          "technics_process_name": "OCV3"
+        },
+        "target": {
+          "id": "C3100.dwd_qual_ocv3_param_pim.volt",
+          "name": "电压",
+          "process_name": "OCV3",
+          "date_filter_field": "shift_date",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "latest"
+          },
+          "groups": {
+            "NG": {
+              "count": 0,
+              "missing_count": 0,
+              "min": null,
+              "q1": null,
+              "median": null,
+              "q3": null,
+              "max": null,
+              "mean": null,
+              "whisker_low": null,
+              "whisker_high": null,
+              "outlier_count": 0,
+              "outliers": []
+            },
+            "OK": {
+              "count": 1126,
+              "missing_count": 0,
+              "min": 3245.338,
+              "q1": 3247.901,
+              "median": 3248.274,
+              "q3": 3248.633,
+              "max": 3250.684,
+              "mean": 3248.268764653641,
+              "whisker_low": 3246.819,
+              "whisker_high": 3249.722,
+              "outlier_count": 75,
+              "outliers": [
+                3245.338,
+                3245.798,
+                3245.808,
+                3245.815,
+                3245.947,
+                3245.964,
+                3245.973,
+                3246.009,
+                3246.042,
+                3246.076,
+                3246.137,
+                3246.194,
+                3246.208,
+                3246.264,
+                3246.292,
+                3246.304,
+                3246.31,
+                3246.372,
+                3246.387,
+                3246.407,
+                3246.436,
+                3246.445,
+                3246.446,
+                3246.465,
+                3246.515,
+                3246.528,
+                3246.546,
+                3246.552,
+                3246.567,
+                3246.627,
+                3246.63,
+                3246.643,
+                3246.652,
+                3246.677,
+                3246.697,
+                3246.7,
+                3246.703,
+                3246.718,
+                3246.755,
+                3246.788,
+                3246.8,
+                3249.735,
+                3249.744,
+                3249.765,
+                3249.768,
+                3249.772,
+                3249.796,
+                3249.826,
+                3249.86,
+                3249.877,
+                3249.877,
+                3249.929,
+                3249.95,
+                3249.953,
+                3249.972,
+                3249.983,
+                3249.985,
+                3250.022,
+                3250.051,
+                3250.059,
+                3250.085,
+                3250.088,
+                3250.173,
+                3250.224,
+                3250.26,
+                3250.3,
+                3250.324,
+                3250.331,
+                3250.341,
+                3250.349,
+                3250.362,
+                3250.378,
+                3250.632,
+                3250.668,
+                3250.684
+              ]
+            }
+          }
+        },
+        "counts": {
+          "NG": 0,
+          "OK": 1126,
+          "excluded": 37
+        },
+        "boxes": [
+          {
+            "field_id": "C1400.dwd_qual_winding_slit_param_pim.12_ac_avg_dist",
+            "name": "1#2#AC均值(外侧负极到正极距离)",
+            "process_name": "切卷",
+            "sample_unit": "cell_material_association",
+            "groups": {
+              "NG": {
+                "count": 0,
+                "missing_count": 0,
+                "min": null,
+                "q1": null,
+                "median": null,
+                "q3": null,
+                "max": null,
+                "mean": null,
+                "whisker_low": null,
+                "whisker_high": null,
+                "outlier_count": 0,
+                "outliers": [],
+                "target_products": 0,
+                "missing_products": 0,
+                "matched_products": 0,
+                "direct_products": 0,
+                "input_code_products": 0,
+                "ads_products": 0,
+                "ambiguous_products": 0,
+                "expected_samples": 0,
+                "valid_products": 0,
+                "complete_products": 0,
+                "partial_products": 0,
+                "trace_missing_products": 0,
+                "multi_code_products": 0
+              },
+              "OK": {
+                "count": 4510,
+                "missing_count": 0,
+                "min": 0.6908,
+                "q1": 1.5023,
+                "median": 1.7688,
+                "q3": 2.064275,
+                "max": 2.8436,
+                "mean": 1.7717360088691796,
+                "whisker_low": 0.6908,
+                "whisker_high": 2.8436,
+                "outlier_count": 0,
+                "outliers": [],
+                "target_products": 1126,
+                "missing_products": 0,
+                "matched_products": 1126,
+                "direct_products": 0,
+                "input_code_products": 0,
+                "ads_products": 1126,
+                "ambiguous_products": 0,
+                "expected_samples": 4510,
+                "valid_products": 1126,
+                "complete_products": 1126,
+                "partial_products": 0,
+                "trace_missing_products": 0,
+                "multi_code_products": 1126
+              }
+            }
+          },
+          {
+            "field_id": "C1400.dwd_qual_winding_slit_param_pim.num34_ac_avg_dist",
+            "name": "3#4#AC均值(内侧负极到正极距离)",
+            "process_name": "切卷",
+            "sample_unit": "cell_material_association",
+            "groups": {
+              "NG": {
+                "count": 0,
+                "missing_count": 0,
+                "min": null,
+                "q1": null,
+                "median": null,
+                "q3": null,
+                "max": null,
+                "mean": null,
+                "whisker_low": null,
+                "whisker_high": null,
+                "outlier_count": 0,
+                "outliers": [],
+                "target_products": 0,
+                "missing_products": 0,
+                "matched_products": 0,
+                "direct_products": 0,
+                "input_code_products": 0,
+                "ads_products": 0,
+                "ambiguous_products": 0,
+                "expected_samples": 0,
+                "valid_products": 0,
+                "complete_products": 0,
+                "partial_products": 0,
+                "trace_missing_products": 0,
+                "multi_code_products": 0
+              },
+              "OK": {
+                "count": 4510,
+                "missing_count": 0,
+                "min": 0.9658,
+                "q1": 1.338825,
+                "median": 1.4484499999999998,
+                "q3": 1.7654,
+                "max": 2.596,
+                "mean": 1.557769955654102,
+                "whisker_low": 0.9658,
+                "whisker_high": 2.4029,
+                "outlier_count": 47,
+                "outliers": [
+                  2.4059,
+                  2.4074,
+                  2.4083,
+                  2.4091,
+                  2.4091,
+                  2.4105,
+                  2.4108,
+                  2.4116,
+                  2.412,
+                  2.414,
+                  2.4154,
+                  2.4211,
+                  2.4218,
+                  2.4254,
+                  2.4255,
+                  2.4307,
+                  2.4347,
+                  2.4358,
+                  2.4362,
+                  2.4379,
+                  2.442,
+                  2.4458,
+                  2.4473,
+                  2.4524,
+                  2.4556,
+                  2.4658,
+                  2.4685,
+                  2.475,
+                  2.4845,
+                  2.485,
+                  2.4921,
+                  2.4996,
+                  2.5003,
+                  2.5136,
+                  2.5181,
+                  2.5376,
+                  2.5424,
+                  2.5438,
+                  2.545,
+                  2.5453,
+                  2.5493,
+                  2.5526,
+                  2.5527,
+                  2.5597,
+                  2.5663,
+                  2.5683,
+                  2.596
+                ],
+                "target_products": 1126,
+                "missing_products": 0,
+                "matched_products": 1126,
+                "direct_products": 0,
+                "input_code_products": 0,
+                "ads_products": 1126,
+                "ambiguous_products": 0,
+                "expected_samples": 4510,
+                "valid_products": 1126,
+                "complete_products": 1126,
+                "partial_products": 0,
+                "trace_missing_products": 0,
+                "multi_code_products": 1126
+              }
+            }
+          }
+        ],
+        "timing": {
+          "total_seconds": 9.4794,
+          "target_query": {
+            "table": "dwd_qual_ocv3_param_pim",
+            "seconds": 1.3822,
+            "rows": 1163,
+            "source_rows": 1163,
+            "product_count": 1163,
+            "duplicate_rows": 0,
+            "invalid_product_rows": 0,
+            "date_filter_field": "shift_date",
+            "sort_time_field": "end_time",
+            "record_selection": {
+              "mode": "latest"
+            }
+          },
+          "feature_wall_seconds": 5.0705,
+          "feature_queries": [
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 5.0283,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 2.8673,
+              "rows": 2000,
+              "eligible_source_rows": 2000,
+              "product_batch_size": 2000,
+              "lookup_count": 2000,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            },
+            {
+              "table": "dwd_qual_winding_slit_param_pim",
+              "process_code": "C1400",
+              "seconds": 1.518,
+              "rows": 510,
+              "eligible_source_rows": 510,
+              "product_batch_size": 510,
+              "lookup_count": 510,
+              "query_strategy": "batch_latest",
+              "sort_time_field": "end_time",
+              "record_selection": {
+                "mode": "latest"
+              }
+            }
+          ],
+          "workers": 8,
+          "trace_wall_seconds": 2.9764,
+          "trace_queries": [
+            {
+              "route": "588ah",
+              "table": "ads_trace_cell_coding_588ah_pim",
+              "seconds": 2.9662,
+              "rows": 4510,
+              "lookup_count": 1126,
+              "query_strategy": "batch_latest"
+            }
+          ]
+        },
+        "rules": [
+          "按租户和产品编码关联；目标时间范围内同一产品按工序规则保留一条记录。",
+          "目标宽表按shift_date班次日期筛选，起止日期均包含；最新记录排序与上游追溯时点仍采用字典中经DDL确认的分区时间字段。",
+          "OCV3：按end_time取最新记录。",
+          "切卷：按end_time取最新记录。",
+          "按目标租户和产线确定314Ah或588Ah路线，再按字典关联ADS。取不晚于目标时点的最新追溯批次，保留该批次全部物料行；同一电芯、同一上游码只计一次。",
+          "NG/OK产品数按目标电芯计数；箱线图n为电芯与上游码关联后的有效参数数，一个电芯的多个卷绕码全部绘图，不求平均。同一物料用于多个电芯时按各电芯关联计数，这些样本不是相互独立的观测。",
+          "参数缺失数按已知上游码统计；缺失电芯数为没有任何有效参数的目标电芯，部分缺失电芯另计；追溯缺失时不猜测上游码数量。",
+          "NG为当前缺陷；OK为缺陷字段为空或OK且产品质量为合格的记录；其他缺陷和未知质量排除。",
+          "上游不沿用目标日期、班次或设备限制；在目标记录的分区时间之前，按各工序规则在数据库内选取一条记录。",
+          "缺失值不填零；箱体为25%至75%分位数，须为1.5倍IQR范围内实际值；统计使用全部取回记录。"
+        ],
+        "warnings": [
+          "当前条件缺少NG或OK样本，请调整范围后对比。"
+        ]
+      },
+      "upstream_codes_per_target": {
+        "NG": {},
+        "OK": {
+          "4": 1123,
+          "6": 3
+        }
+      }
+    }
+  ],
+  "pre_cell_identity_check": {
+    "source_stage": "C1400",
+    "feature_stage": "C1301",
+    "trace_after_target": true,
+    "resolved_material_codes": 1,
+    "queries": [
+      {
+        "route": "314ah",
+        "table": "ads_trace_cell_coding_314ah_pim",
+        "seconds": 0.9767,
+        "rows": 1,
+        "lookup_count": 1,
+        "query_strategy": "batch_latest"
+      }
+    ]
+  }
+}

@@ -1,0 +1,2554 @@
+{
+  "factory_id": "jinzhai-phase-3",
+  "generated_at": "2026-11-16T16:37:04.566443+08:00",
+  "scope": "full_history_all_lines_all_tenants",
+  "tables": [
+    {
+      "table_name": "dwd_qual_ambient_rest1_param_pim",
+      "table_comment": "常温静置1参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_ambient_rest1_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "C2700",
+          "technics_step_names": [
+            "C2700_常温静置1",
+            "C2700_????1",
+            "常温静置1"
+          ],
+          "row_count": 1687199,
+          "name_counts": [
+            {
+              "name": "C2700_常温静置1",
+              "row_count": 143979
+            },
+            {
+              "name": "C2700_????1",
+              "row_count": 236
+            },
+            {
+              "name": "常温静置1",
+              "row_count": 1542984
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1687199,
+      "query_seconds": 1.1266
+    },
+    {
+      "table_name": "dwd_qual_ambient_rest2_param_pim",
+      "table_comment": "常温静置2参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_ambient_rest2_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "C3000",
+          "technics_step_names": [
+            "C3000_常温静置2",
+            "常温静置2"
+          ],
+          "row_count": 1708945,
+          "name_counts": [
+            {
+              "name": "C3000_常温静置2",
+              "row_count": 126966
+            },
+            {
+              "name": "常温静置2",
+              "row_count": 1581979
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1708945,
+      "query_seconds": 1.0062
+    },
+    {
+      "table_name": "dwd_qual_ambient_rest3_param_pim",
+      "table_comment": "常温静置3参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_ambient_rest3_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "C3200",
+          "technics_step_names": [
+            "常温静置3",
+            "C3200_常温静置2",
+            "C3200_常温静置3"
+          ],
+          "row_count": 1675350,
+          "name_counts": [
+            {
+              "name": "常温静置3",
+              "row_count": 1518203
+            },
+            {
+              "name": "C3200_常温静置2",
+              "row_count": 50783
+            },
+            {
+              "name": "C3200_常温静置3",
+              "row_count": 106364
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1675350,
+      "query_seconds": 1.0528
+    },
+    {
+      "table_name": "dwd_qual_bake_param_pim",
+      "table_comment": "烘烤参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_bake_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1742330,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1742330
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "烘烤"
+          ],
+          "row_count": 1,
+          "name_counts": [
+            {
+              "name": "烘烤",
+              "row_count": 1
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1742331,
+      "query_seconds": 0.952
+    },
+    {
+      "table_name": "dwd_qual_connector_laser_weld_param_pim",
+      "table_comment": "连接片激光焊参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_connector_laser_weld_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 393928,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 393928
+            }
+          ]
+        },
+        {
+          "technics_step_code": "盖板连接片激光焊",
+          "technics_step_names": [
+            "盖板连接片激光焊"
+          ],
+          "row_count": 1578352,
+          "name_counts": [
+            {
+              "name": "盖板连接片激光焊",
+              "row_count": 1578352
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1972280,
+      "query_seconds": 1.1525
+    },
+    {
+      "table_name": "dwd_qual_dcr_param_pim",
+      "table_comment": "DCR参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_dcr_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "DCIR",
+            "DCR"
+          ],
+          "row_count": 1542430,
+          "name_counts": [
+            {
+              "name": "DCIR",
+              "row_count": 1542429
+            },
+            {
+              "name": "DCR",
+              "row_count": 1
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1542430,
+      "query_seconds": 1.4498
+    },
+    {
+      "table_name": "dwd_qual_electrolyte_fill1_param_pim",
+      "table_comment": "一次注液参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_electrolyte_fill1_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1868990,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1868990
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "一次注液"
+          ],
+          "row_count": 1,
+          "name_counts": [
+            {
+              "name": "一次注液",
+              "row_count": 1
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1868991,
+      "query_seconds": 1.4431
+    },
+    {
+      "table_name": "dwd_qual_electrolyte_fill2_param_pim",
+      "table_comment": "二次注液参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_electrolyte_fill2_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1852456,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1852456
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "二注"
+          ],
+          "row_count": 1,
+          "name_counts": [
+            {
+              "name": "二注",
+              "row_count": 1
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1852457,
+      "query_seconds": 1.2216
+    },
+    {
+      "table_name": "dwd_qual_electrolyte_fill3_param_pim",
+      "table_comment": "三次注液参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_electrolyte_fill3_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1650858,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1650858
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 0,
+      "total_rows": 1650858,
+      "query_seconds": 1.0202
+    },
+    {
+      "table_name": "dwd_qual_formation_param_pim",
+      "table_comment": "化成参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_formation_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "OCV",
+            "搁置",
+            "复位",
+            "化成"
+          ],
+          "row_count": 1817139,
+          "name_counts": [
+            {
+              "name": "OCV",
+              "row_count": 1791740
+            },
+            {
+              "name": "搁置",
+              "row_count": 19317
+            },
+            {
+              "name": "复位",
+              "row_count": 6081
+            },
+            {
+              "name": "化成",
+              "row_count": 1
+            }
+          ]
+        },
+        {
+          "technics_step_code": "10",
+          "technics_step_names": [
+            "搁置",
+            "恒流充电"
+          ],
+          "row_count": 1797665,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 1771824
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 25841
+            }
+          ]
+        },
+        {
+          "technics_step_code": "11",
+          "technics_step_names": [
+            "OCV",
+            "搁置"
+          ],
+          "row_count": 1797526,
+          "name_counts": [
+            {
+              "name": "OCV",
+              "row_count": 1756685
+            },
+            {
+              "name": "搁置",
+              "row_count": 40841
+            }
+          ]
+        },
+        {
+          "technics_step_code": "12",
+          "technics_step_names": [
+            "搁置",
+            "恒流充电"
+          ],
+          "row_count": 40865,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 40002
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 863
+            }
+          ]
+        },
+        {
+          "technics_step_code": "13",
+          "technics_step_names": [
+            "OCV",
+            "搁置"
+          ],
+          "row_count": 40841,
+          "name_counts": [
+            {
+              "name": "OCV",
+              "row_count": 14976
+            },
+            {
+              "name": "搁置",
+              "row_count": 25865
+            }
+          ]
+        },
+        {
+          "technics_step_code": "14",
+          "technics_step_names": [
+            "搁置",
+            "OCV",
+            "恒流充电"
+          ],
+          "row_count": 25865,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 863
+            },
+            {
+              "name": "OCV",
+              "row_count": 20568
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 4434
+            }
+          ]
+        },
+        {
+          "technics_step_code": "15",
+          "technics_step_names": [
+            "搁置"
+          ],
+          "row_count": 5297,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 5297
+            }
+          ]
+        },
+        {
+          "technics_step_code": "16",
+          "technics_step_names": [
+            "搁置",
+            "OCV",
+            "恒流充电"
+          ],
+          "row_count": 5297,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 4434
+            },
+            {
+              "name": "OCV",
+              "row_count": 839
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 24
+            }
+          ]
+        },
+        {
+          "technics_step_code": "17",
+          "technics_step_names": [
+            "搁置"
+          ],
+          "row_count": 4458,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 4458
+            }
+          ]
+        },
+        {
+          "technics_step_code": "18",
+          "technics_step_names": [
+            "搁置"
+          ],
+          "row_count": 24,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 24
+            }
+          ]
+        },
+        {
+          "technics_step_code": "19",
+          "technics_step_names": [
+            "搁置"
+          ],
+          "row_count": 24,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 24
+            }
+          ]
+        },
+        {
+          "technics_step_code": "2",
+          "technics_step_names": [
+            "搁置"
+          ],
+          "row_count": 1815183,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 1815183
+            }
+          ]
+        },
+        {
+          "technics_step_code": "3",
+          "technics_step_names": [
+            "恒流放电",
+            "恒流充电",
+            "搁置"
+          ],
+          "row_count": 1815332,
+          "name_counts": [
+            {
+              "name": "恒流放电",
+              "row_count": 15839
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 1756703
+            },
+            {
+              "name": "搁置",
+              "row_count": 42790
+            }
+          ]
+        },
+        {
+          "technics_step_code": "4",
+          "technics_step_names": [
+            "搁置",
+            "恒流充电"
+          ],
+          "row_count": 1797476,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 1772474
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 25002
+            }
+          ]
+        },
+        {
+          "technics_step_code": "5",
+          "technics_step_names": [
+            "搁置",
+            "恒流充电"
+          ],
+          "row_count": 1797407,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 25865
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 1771542
+            }
+          ]
+        },
+        {
+          "technics_step_code": "6",
+          "technics_step_names": [
+            "搁置",
+            "恒流充电"
+          ],
+          "row_count": 1797431,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 1776000
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 21431
+            }
+          ]
+        },
+        {
+          "technics_step_code": "7",
+          "technics_step_names": [
+            "恒流充电",
+            "搁置"
+          ],
+          "row_count": 1797576,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 1776145
+            },
+            {
+              "name": "搁置",
+              "row_count": 21431
+            }
+          ]
+        },
+        {
+          "technics_step_code": "8",
+          "technics_step_names": [
+            "搁置",
+            "恒流充电"
+          ],
+          "row_count": 1797636,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 1776229
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 21407
+            }
+          ]
+        },
+        {
+          "technics_step_code": "9",
+          "technics_step_names": [
+            "搁置",
+            "恒流充电"
+          ],
+          "row_count": 1797628,
+          "name_counts": [
+            {
+              "name": "搁置",
+              "row_count": 1782628
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 15000
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 19,
+      "nonempty_distinct_count": 19,
+      "total_rows": 19950670,
+      "query_seconds": 1.0629
+    },
+    {
+      "table_name": "dwd_qual_grading_param_pim",
+      "table_comment": "分容参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_grading_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "恒流恒压充电",
+            "复位",
+            "分容"
+          ],
+          "row_count": 1907346,
+          "name_counts": [
+            {
+              "name": "恒流恒压充电",
+              "row_count": 1877355
+            },
+            {
+              "name": "复位",
+              "row_count": 29990
+            },
+            {
+              "name": "分容",
+              "row_count": 1
+            }
+          ]
+        },
+        {
+          "technics_step_code": "10",
+          "technics_step_names": [
+            "10",
+            "复位",
+            "恒流充电"
+          ],
+          "row_count": 1907466,
+          "name_counts": [
+            {
+              "name": "10",
+              "row_count": 1897789
+            },
+            {
+              "name": "复位",
+              "row_count": 293
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            }
+          ]
+        },
+        {
+          "technics_step_code": "11",
+          "technics_step_names": [
+            "恒流充电",
+            "接触检查",
+            "复位"
+          ],
+          "row_count": 1907464,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 1897716
+            },
+            {
+              "name": "接触检查",
+              "row_count": 9384
+            },
+            {
+              "name": "复位",
+              "row_count": 364
+            }
+          ]
+        },
+        {
+          "technics_step_code": "12",
+          "technics_step_names": [
+            "复位",
+            "结束",
+            "10",
+            "恒流充电"
+          ],
+          "row_count": 1907470,
+          "name_counts": [
+            {
+              "name": "复位",
+              "row_count": 295
+            },
+            {
+              "name": "结束",
+              "row_count": 192
+            },
+            {
+              "name": "10",
+              "row_count": 1897599
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            }
+          ]
+        },
+        {
+          "technics_step_code": "13",
+          "technics_step_names": [
+            "复位",
+            "恒流充电",
+            "10"
+          ],
+          "row_count": 1907295,
+          "name_counts": [
+            {
+              "name": "复位",
+              "row_count": 365
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 1897546
+            },
+            {
+              "name": "10",
+              "row_count": 9384
+            }
+          ]
+        },
+        {
+          "technics_step_code": "14",
+          "technics_step_names": [
+            "复位",
+            "10",
+            "恒流充电"
+          ],
+          "row_count": 1907307,
+          "name_counts": [
+            {
+              "name": "复位",
+              "row_count": 382
+            },
+            {
+              "name": "10",
+              "row_count": 1897541
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            }
+          ]
+        },
+        {
+          "technics_step_code": "15",
+          "technics_step_names": [
+            "10",
+            "复位",
+            "恒流充电"
+          ],
+          "row_count": 1907295,
+          "name_counts": [
+            {
+              "name": "10",
+              "row_count": 9384
+            },
+            {
+              "name": "复位",
+              "row_count": 364
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 1897547
+            }
+          ]
+        },
+        {
+          "technics_step_code": "16",
+          "technics_step_names": [
+            "结束",
+            "复位",
+            "恒流充电"
+          ],
+          "row_count": 1907258,
+          "name_counts": [
+            {
+              "name": "结束",
+              "row_count": 1897557
+            },
+            {
+              "name": "复位",
+              "row_count": 317
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            }
+          ]
+        },
+        {
+          "technics_step_code": "17",
+          "technics_step_names": [
+            "结束",
+            "恒流充电",
+            "复位"
+          ],
+          "row_count": 1907287,
+          "name_counts": [
+            {
+              "name": "结束",
+              "row_count": 9384
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 1897538
+            },
+            {
+              "name": "复位",
+              "row_count": 365
+            }
+          ]
+        },
+        {
+          "technics_step_code": "18",
+          "technics_step_names": [
+            "恒流充电",
+            "复位",
+            "恒流恒压充电"
+          ],
+          "row_count": 1655867,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            },
+            {
+              "name": "复位",
+              "row_count": 216
+            },
+            {
+              "name": "恒流恒压充电",
+              "row_count": 1646267
+            }
+          ]
+        },
+        {
+          "technics_step_code": "2",
+          "technics_step_names": [
+            "10",
+            "恒流充电",
+            "复位",
+            "结束"
+          ],
+          "row_count": 1907501,
+          "name_counts": [
+            {
+              "name": "10",
+              "row_count": 1897779
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            },
+            {
+              "name": "复位",
+              "row_count": 146
+            },
+            {
+              "name": "结束",
+              "row_count": 192
+            }
+          ]
+        },
+        {
+          "technics_step_code": "3",
+          "technics_step_names": [
+            "恒流充电",
+            "10",
+            "复位"
+          ],
+          "row_count": 1907475,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 1897803
+            },
+            {
+              "name": "10",
+              "row_count": 9384
+            },
+            {
+              "name": "复位",
+              "row_count": 288
+            }
+          ]
+        },
+        {
+          "technics_step_code": "4",
+          "technics_step_names": [
+            "复位",
+            "结束",
+            "恒流充电"
+          ],
+          "row_count": 1907468,
+          "name_counts": [
+            {
+              "name": "复位",
+              "row_count": 216
+            },
+            {
+              "name": "结束",
+              "row_count": 1897868
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            }
+          ]
+        },
+        {
+          "technics_step_code": "5",
+          "technics_step_names": [
+            "恒流充电",
+            "结束",
+            "复位"
+          ],
+          "row_count": 1907476,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 1897804
+            },
+            {
+              "name": "结束",
+              "row_count": 9384
+            },
+            {
+              "name": "复位",
+              "row_count": 288
+            }
+          ]
+        },
+        {
+          "technics_step_code": "6",
+          "technics_step_names": [
+            "接触检查",
+            "复位",
+            "恒流充电",
+            "结束"
+          ],
+          "row_count": 1907492,
+          "name_counts": [
+            {
+              "name": "接触检查",
+              "row_count": 192
+            },
+            {
+              "name": "复位",
+              "row_count": 288
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            },
+            {
+              "name": "结束",
+              "row_count": 1897628
+            }
+          ]
+        },
+        {
+          "technics_step_code": "7",
+          "technics_step_names": [
+            "结束",
+            "复位",
+            "恒流充电"
+          ],
+          "row_count": 1907505,
+          "name_counts": [
+            {
+              "name": "结束",
+              "row_count": 9384
+            },
+            {
+              "name": "复位",
+              "row_count": 312
+            },
+            {
+              "name": "恒流充电",
+              "row_count": 1897809
+            }
+          ]
+        },
+        {
+          "technics_step_code": "8",
+          "technics_step_names": [
+            "恒流充电",
+            "10",
+            "接触检查",
+            "复位"
+          ],
+          "row_count": 1907501,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 9384
+            },
+            {
+              "name": "10",
+              "row_count": 192
+            },
+            {
+              "name": "接触检查",
+              "row_count": 1897659
+            },
+            {
+              "name": "复位",
+              "row_count": 266
+            }
+          ]
+        },
+        {
+          "technics_step_code": "9",
+          "technics_step_names": [
+            "恒流充电",
+            "结束",
+            "复位"
+          ],
+          "row_count": 1907487,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 1897671
+            },
+            {
+              "name": "结束",
+              "row_count": 9384
+            },
+            {
+              "name": "复位",
+              "row_count": 432
+            }
+          ]
+        },
+        {
+          "technics_step_code": "999",
+          "technics_step_names": [
+            "999"
+          ],
+          "row_count": 1907497,
+          "name_counts": [
+            {
+              "name": "999",
+              "row_count": 1907497
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 19,
+      "nonempty_distinct_count": 19,
+      "total_rows": 35989457,
+      "query_seconds": 1.4012
+    },
+    {
+      "table_name": "dwd_qual_helium_leak_test1_param_pim",
+      "table_comment": "一次氦检参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_helium_leak_test1_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1474795,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1474795
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "一次氦检"
+          ],
+          "row_count": 1,
+          "name_counts": [
+            {
+              "name": "一次氦检",
+              "row_count": 1
+            }
+          ]
+        },
+        {
+          "technics_step_code": "一次氦检机",
+          "technics_step_names": [
+            "一次氦检机"
+          ],
+          "row_count": 499484,
+          "name_counts": [
+            {
+              "name": "一次氦检机",
+              "row_count": 499484
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 3,
+      "nonempty_distinct_count": 2,
+      "total_rows": 1974280,
+      "query_seconds": 1.3994
+    },
+    {
+      "table_name": "dwd_qual_helium_leak_test2_param_pim",
+      "table_comment": "二次氦检参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_helium_leak_test2_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1392421,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1392421
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "二次氦检"
+          ],
+          "row_count": 1,
+          "name_counts": [
+            {
+              "name": "二次氦检",
+              "row_count": 1
+            }
+          ]
+        },
+        {
+          "technics_step_code": "二次氦检",
+          "technics_step_names": [
+            "二次氦检"
+          ],
+          "row_count": 321764,
+          "name_counts": [
+            {
+              "name": "二次氦检",
+              "row_count": 321764
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 3,
+      "nonempty_distinct_count": 2,
+      "total_rows": 1714186,
+      "query_seconds": 1.4318
+    },
+    {
+      "table_name": "dwd_qual_high_temp_aging_param_pim",
+      "table_comment": "高温老化参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_high_temp_aging_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "C2300",
+          "technics_step_names": [
+            "C2300_高温老化",
+            "C2300_????",
+            "高温老化"
+          ],
+          "row_count": 1712502,
+          "name_counts": [
+            {
+              "name": "C2300_高温老化",
+              "row_count": 155467
+            },
+            {
+              "name": "C2300_????",
+              "row_count": 39
+            },
+            {
+              "name": "高温老化",
+              "row_count": 1556996
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1712502,
+      "query_seconds": 1.7866
+    },
+    {
+      "table_name": "dwd_qual_high_temp_rest1_param_pim",
+      "table_comment": "高温静置1参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_high_temp_rest1_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "C1800",
+          "technics_step_names": [
+            "C1800_高温静置1",
+            "高温静置1"
+          ],
+          "row_count": 230760,
+          "name_counts": [
+            {
+              "name": "C1800_高温静置1",
+              "row_count": 702
+            },
+            {
+              "name": "高温静置1",
+              "row_count": 230058
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 1,
+      "total_rows": 230760,
+      "query_seconds": 1.3579
+    },
+    {
+      "table_name": "dwd_qual_high_temp_rest2_param_pim",
+      "table_comment": "高温静置2参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_high_temp_rest2_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "C2100",
+          "technics_step_names": [
+            "C2100_????2",
+            "高温静置2",
+            "C2100_高温静置2"
+          ],
+          "row_count": 1782207,
+          "name_counts": [
+            {
+              "name": "C2100_????2",
+              "row_count": 238
+            },
+            {
+              "name": "高温静置2",
+              "row_count": 1586400
+            },
+            {
+              "name": "C2100_高温静置2",
+              "row_count": 195569
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1782207,
+      "query_seconds": 1.4628
+    },
+    {
+      "table_name": "dwd_qual_high_temp_rest3_param_pim",
+      "table_comment": "高温静置3参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_high_temp_rest3_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "C2900",
+          "technics_step_names": [
+            "高温静置3",
+            "C2900_????3",
+            "C2900_高温静置3"
+          ],
+          "row_count": 1751334,
+          "name_counts": [
+            {
+              "name": "高温静置3",
+              "row_count": 1594613
+            },
+            {
+              "name": "C2900_????3",
+              "row_count": 435
+            },
+            {
+              "name": "C2900_高温静置3",
+              "row_count": 156286
+            }
+          ]
+        },
+        {
+          "technics_step_code": "二次氦检",
+          "technics_step_names": [
+            "二次氦检"
+          ],
+          "row_count": 110,
+          "name_counts": [
+            {
+              "name": "二次氦检",
+              "row_count": 110
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 2,
+      "total_rows": 1751444,
+      "query_seconds": 1.2299
+    },
+    {
+      "table_name": "dwd_qual_neg_coating_param_pim",
+      "table_comment": "负极涂布参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_neg_coating_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 3939,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 2387
+            },
+            {
+              "name": null,
+              "row_count": 1552
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 0,
+      "total_rows": 3939,
+      "query_seconds": 0.9963
+    },
+    {
+      "table_name": "dwd_qual_neg_mixing_param_pim",
+      "table_comment": "负极合浆参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_neg_mixing_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1614,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1046
+            },
+            {
+              "name": null,
+              "row_count": 568
+            }
+          ]
+        },
+        {
+          "technics_step_code": "C1103",
+          "technics_step_names": [
+            "负极合浆"
+          ],
+          "row_count": 2,
+          "name_counts": [
+            {
+              "name": "负极合浆",
+              "row_count": 2
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1616,
+      "query_seconds": 0.8699
+    },
+    {
+      "table_name": "dwd_qual_neg_roll_slit_param_pim",
+      "table_comment": "负极辊分生产参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_neg_roll_slit_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 3234,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 3234
+            }
+          ]
+        },
+        {
+          "technics_step_code": "C1302",
+          "technics_step_names": [
+            "合浆"
+          ],
+          "row_count": 1,
+          "name_counts": [
+            {
+              "name": "合浆",
+              "row_count": 1
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 3235,
+      "query_seconds": 1.0338
+    },
+    {
+      "table_name": "dwd_qual_ocv3_param_pim",
+      "table_comment": "OCV3参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_ocv3_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "复位",
+            "OCV2",
+            "OCV3",
+            "恒流恒压充电"
+          ],
+          "row_count": 1714766,
+          "name_counts": [
+            {
+              "name": "复位",
+              "row_count": 3
+            },
+            {
+              "name": "OCV2",
+              "row_count": 1
+            },
+            {
+              "name": "OCV3",
+              "row_count": 1714679
+            },
+            {
+              "name": "恒流恒压充电",
+              "row_count": 83
+            }
+          ]
+        },
+        {
+          "technics_step_code": "10",
+          "technics_step_names": [
+            "10"
+          ],
+          "row_count": 92,
+          "name_counts": [
+            {
+              "name": "10",
+              "row_count": 92
+            }
+          ]
+        },
+        {
+          "technics_step_code": "11",
+          "technics_step_names": [
+            "恒流充电"
+          ],
+          "row_count": 91,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 91
+            }
+          ]
+        },
+        {
+          "technics_step_code": "12",
+          "technics_step_names": [
+            "10"
+          ],
+          "row_count": 79,
+          "name_counts": [
+            {
+              "name": "10",
+              "row_count": 79
+            }
+          ]
+        },
+        {
+          "technics_step_code": "13",
+          "technics_step_names": [
+            "恒流充电"
+          ],
+          "row_count": 91,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 91
+            }
+          ]
+        },
+        {
+          "technics_step_code": "14",
+          "technics_step_names": [
+            "10"
+          ],
+          "row_count": 73,
+          "name_counts": [
+            {
+              "name": "10",
+              "row_count": 73
+            }
+          ]
+        },
+        {
+          "technics_step_code": "15",
+          "technics_step_names": [
+            "恒流充电"
+          ],
+          "row_count": 91,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 91
+            }
+          ]
+        },
+        {
+          "technics_step_code": "16",
+          "technics_step_names": [
+            "结束"
+          ],
+          "row_count": 85,
+          "name_counts": [
+            {
+              "name": "结束",
+              "row_count": 85
+            }
+          ]
+        },
+        {
+          "technics_step_code": "17",
+          "technics_step_names": [
+            "恒流充电"
+          ],
+          "row_count": 91,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 91
+            }
+          ]
+        },
+        {
+          "technics_step_code": "18",
+          "technics_step_names": [
+            "恒流恒压充电"
+          ],
+          "row_count": 84,
+          "name_counts": [
+            {
+              "name": "恒流恒压充电",
+              "row_count": 84
+            }
+          ]
+        },
+        {
+          "technics_step_code": "2",
+          "technics_step_names": [
+            "10"
+          ],
+          "row_count": 89,
+          "name_counts": [
+            {
+              "name": "10",
+              "row_count": 89
+            }
+          ]
+        },
+        {
+          "technics_step_code": "3",
+          "technics_step_names": [
+            "恒流充电"
+          ],
+          "row_count": 75,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 75
+            }
+          ]
+        },
+        {
+          "technics_step_code": "4",
+          "technics_step_names": [
+            "结束"
+          ],
+          "row_count": 77,
+          "name_counts": [
+            {
+              "name": "结束",
+              "row_count": 77
+            }
+          ]
+        },
+        {
+          "technics_step_code": "5",
+          "technics_step_names": [
+            "恒流充电"
+          ],
+          "row_count": 68,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 68
+            }
+          ]
+        },
+        {
+          "technics_step_code": "6",
+          "technics_step_names": [
+            "结束"
+          ],
+          "row_count": 80,
+          "name_counts": [
+            {
+              "name": "结束",
+              "row_count": 80
+            }
+          ]
+        },
+        {
+          "technics_step_code": "7",
+          "technics_step_names": [
+            "恒流充电"
+          ],
+          "row_count": 69,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 69
+            }
+          ]
+        },
+        {
+          "technics_step_code": "8",
+          "technics_step_names": [
+            "接触检查"
+          ],
+          "row_count": 86,
+          "name_counts": [
+            {
+              "name": "接触检查",
+              "row_count": 86
+            }
+          ]
+        },
+        {
+          "technics_step_code": "9",
+          "technics_step_names": [
+            "恒流充电"
+          ],
+          "row_count": 84,
+          "name_counts": [
+            {
+              "name": "恒流充电",
+              "row_count": 84
+            }
+          ]
+        },
+        {
+          "technics_step_code": "999",
+          "technics_step_names": [
+            "999"
+          ],
+          "row_count": 89,
+          "name_counts": [
+            {
+              "name": "999",
+              "row_count": 89
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 20,
+      "nonempty_distinct_count": 19,
+      "total_rows": 1716261,
+      "query_seconds": 1.0235
+    },
+    {
+      "table_name": "dwd_qual_ocv4_param_pim",
+      "table_comment": "OCV4参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_ocv4_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 6651,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 6651
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "OCV3",
+            "OCV4",
+            "OCV"
+          ],
+          "row_count": 1632948,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 2
+            },
+            {
+              "name": "OCV3",
+              "row_count": 83
+            },
+            {
+              "name": "OCV4",
+              "row_count": 1632026
+            },
+            {
+              "name": "OCV",
+              "row_count": 837
+            }
+          ]
+        },
+        {
+          "technics_step_code": "999",
+          "technics_step_names": [],
+          "row_count": 642,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 642
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 3,
+      "nonempty_distinct_count": 2,
+      "total_rows": 1640241,
+      "query_seconds": 0.9751
+    },
+    {
+      "table_name": "dwd_qual_pos_ceramic_mixing_param_pim",
+      "table_comment": "正极合陶瓷参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_pos_ceramic_mixing_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 361,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 289
+            },
+            {
+              "name": null,
+              "row_count": 72
+            }
+          ]
+        },
+        {
+          "technics_step_code": "C1102",
+          "technics_step_names": [
+            "正极合陶瓷合浆"
+          ],
+          "row_count": 4,
+          "name_counts": [
+            {
+              "name": "正极合陶瓷合浆",
+              "row_count": 4
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 365,
+      "query_seconds": 0.7687
+    },
+    {
+      "table_name": "dwd_qual_pos_coating_param_pim",
+      "table_comment": "正极涂布参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_pos_coating_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 3206,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1996
+            },
+            {
+              "name": null,
+              "row_count": 1210
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 0,
+      "total_rows": 3206,
+      "query_seconds": 0.7948
+    },
+    {
+      "table_name": "dwd_qual_pos_mixing_param_pim",
+      "table_comment": "正极合浆瓷参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_pos_mixing_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 2161,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1470
+            },
+            {
+              "name": null,
+              "row_count": 691
+            }
+          ]
+        },
+        {
+          "technics_step_code": "C1101",
+          "technics_step_names": [
+            "正极合浆"
+          ],
+          "row_count": 4,
+          "name_counts": [
+            {
+              "name": "正极合浆",
+              "row_count": 4
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 2165,
+      "query_seconds": 0.8711
+    },
+    {
+      "table_name": "dwd_qual_pos_roll_slit_param_pim",
+      "table_comment": "正极辊分生产参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_pos_roll_slit_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 2706,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 2706
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 1,
+      "nonempty_distinct_count": 0,
+      "total_rows": 2706,
+      "query_seconds": 1.0022
+    },
+    {
+      "table_name": "dwd_qual_scrap_inter_resis_comp_param_pim",
+      "table_comment": "AIQG智能排废内阻补偿参数表",
+      "has_technics_step_code": false,
+      "has_technics_step_name": false,
+      "status": "success",
+      "values": []
+    },
+    {
+      "table_name": "dwd_qual_seal_nail_param_pim",
+      "table_comment": "密封钉参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_seal_nail_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1404509,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1404509
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "密封焊"
+          ],
+          "row_count": 1,
+          "name_counts": [
+            {
+              "name": "密封焊",
+              "row_count": 1
+            }
+          ]
+        },
+        {
+          "technics_step_code": "密封钉",
+          "technics_step_names": [
+            "密封钉"
+          ],
+          "row_count": 347519,
+          "name_counts": [
+            {
+              "name": "密封钉",
+              "row_count": 347519
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 3,
+      "nonempty_distinct_count": 2,
+      "total_rows": 1752029,
+      "query_seconds": 1.0896
+    },
+    {
+      "table_name": "dwd_qual_tab_fold_insp_param_pim",
+      "table_comment": "极耳翻折检测参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_tab_fold_insp_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 3312831,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 3312831
+            }
+          ]
+        },
+        {
+          "technics_step_code": "极耳翻折机",
+          "technics_step_names": [
+            "极耳翻折机"
+          ],
+          "row_count": 946656,
+          "name_counts": [
+            {
+              "name": "极耳翻折机",
+              "row_count": 946656
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 4259487,
+      "query_seconds": 1.0024
+    },
+    {
+      "table_name": "dwd_qual_tape_wrap_param_pim",
+      "table_comment": "包胶参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_tape_wrap_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1547585,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1547585
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "OCV4",
+            "包胶"
+          ],
+          "row_count": 1448,
+          "name_counts": [
+            {
+              "name": "OCV4",
+              "row_count": 1447
+            },
+            {
+              "name": "包胶",
+              "row_count": 1
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1549033,
+      "query_seconds": 1.079
+    },
+    {
+      "table_name": "dwd_qual_top_cover_laser_weld_param_pim",
+      "table_comment": "顶盖激光焊参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_top_cover_laser_weld_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1422097,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1422097
+            }
+          ]
+        },
+        {
+          "technics_step_code": "顶盖激光焊",
+          "technics_step_names": [
+            "顶盖激光焊"
+          ],
+          "row_count": 427824,
+          "name_counts": [
+            {
+              "name": "顶盖激光焊",
+              "row_count": 427824
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 1849921,
+      "query_seconds": 1.0672
+    },
+    {
+      "table_name": "dwd_qual_ultrasonic_weld_param_pim",
+      "table_comment": "超声焊接生产参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_ultrasonic_weld_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1379707,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1379707
+            }
+          ]
+        },
+        {
+          "technics_step_code": "超焊",
+          "technics_step_names": [
+            "超焊"
+          ],
+          "row_count": 789833,
+          "name_counts": [
+            {
+              "name": "超焊",
+              "row_count": 789833
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 2169540,
+      "query_seconds": 1.0073
+    },
+    {
+      "table_name": "dwd_qual_winding_slit_param_pim",
+      "table_comment": "切卷参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_winding_slit_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [
+            "切卷"
+          ],
+          "row_count": 4796500,
+          "name_counts": [
+            {
+              "name": "切卷",
+              "row_count": 3
+            },
+            {
+              "name": "",
+              "row_count": 4796497
+            }
+          ]
+        },
+        {
+          "technics_step_code": "1",
+          "technics_step_names": [
+            "#1切卷一体机"
+          ],
+          "row_count": 2,
+          "name_counts": [
+            {
+              "name": "#1切卷一体机",
+              "row_count": 2
+            }
+          ]
+        },
+        {
+          "technics_step_code": "M121011",
+          "technics_step_names": [],
+          "row_count": 47,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 47
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 3,
+      "nonempty_distinct_count": 2,
+      "total_rows": 4796549,
+      "query_seconds": 0.9488
+    },
+    {
+      "table_name": "dwd_qual_wrap_can_insert_param_pim",
+      "table_comment": "包膜入壳参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_wrap_can_insert_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 1507112,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 1507112
+            }
+          ]
+        },
+        {
+          "technics_step_code": "包膜入壳",
+          "technics_step_names": [
+            "包膜入壳"
+          ],
+          "row_count": 562259,
+          "name_counts": [
+            {
+              "name": "包膜入壳",
+              "row_count": 562259
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 2069371,
+      "query_seconds": 1.1347
+    },
+    {
+      "table_name": "dwd_qual_xray_param_pim",
+      "table_comment": "x-ray参数宽表",
+      "has_technics_step_code": true,
+      "has_technics_step_name": true,
+      "status": "success",
+      "column_metadata": {
+        "table_name": "dwd_qual_xray_param_pim",
+        "column_name": "technics_step_code",
+        "data_type": "varchar",
+        "column_comment": "工步编码"
+      },
+      "values": [
+        {
+          "technics_step_code": "",
+          "technics_step_names": [],
+          "row_count": 3186155,
+          "name_counts": [
+            {
+              "name": "",
+              "row_count": 3186155
+            }
+          ]
+        },
+        {
+          "technics_step_code": "Xray配对一体机",
+          "technics_step_names": [
+            "Xray配对一体机"
+          ],
+          "row_count": 1039131,
+          "name_counts": [
+            {
+              "name": "Xray配对一体机",
+              "row_count": 1039131
+            }
+          ]
+        }
+      ],
+      "distinct_count_including_null": 2,
+      "nonempty_distinct_count": 1,
+      "total_rows": 4225286,
+      "query_seconds": 0.8297
+    }
+  ],
+  "global_distinct_nonempty_codes": [
+    "1",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "999",
+    "C1101",
+    "C1102",
+    "C1103",
+    "C1302",
+    "C1800",
+    "C2100",
+    "C2300",
+    "C2700",
+    "C2900",
+    "C3000",
+    "C3200",
+    "M121011",
+    "Xray配对一体机",
+    "一次氦检机",
+    "二次氦检",
+    "包膜入壳",
+    "密封钉",
+    "极耳翻折机",
+    "盖板连接片激光焊",
+    "超焊",
+    "顶盖激光焊"
+  ]
+}

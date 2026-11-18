@@ -1,0 +1,615 @@
+{
+  "generated_at": "2026-11-18T01:00:52.210838+00:00",
+  "context": {
+    "parameters": {
+      "start_date": "2026-11-17",
+      "end_date": "2026-11-17"
+    },
+    "filters": {
+      "device_name": [
+        "#10切卷一体机",
+        "#11切卷一体机"
+      ]
+    },
+    "row": {
+      "ng_type": "NG-E-QJ009",
+      "ng_name": "正极极耳边距不良带极耳",
+      "dimensions": {
+        "technics_process_name": "切卷"
+      }
+    }
+  },
+  "result": {
+    "status": "success",
+    "ng_type": "NG-E-QJ009",
+    "ng_name": "正极极耳边距不良带极耳",
+    "period": {
+      "start_date": "2026-11-17",
+      "end_date": "2026-11-17"
+    },
+    "filters": {
+      "device_name": [
+        "#10切卷一体机",
+        "#11切卷一体机"
+      ]
+    },
+    "row_dimensions": {
+      "technics_process_name": "切卷"
+    },
+    "target": {
+      "id": "C1400.dwd_qual_winding_slit_param_pim.pos_tab_edge_dist",
+      "name": "正极极耳边距",
+      "process_name": "切卷",
+      "date_filter_field": "shift_date",
+      "sort_time_field": "end_time",
+      "record_selection": {
+        "mode": "latest"
+      },
+      "groups": {
+        "NG": {
+          "count": 71,
+          "missing_count": 0,
+          "min": 21.1898,
+          "q1": 26.74,
+          "median": 28.6118,
+          "q3": 30.2711,
+          "max": 31.4254,
+          "mean": 28.086808450704225,
+          "whisker_low": 21.5973,
+          "whisker_high": 31.4254,
+          "outlier_count": 1,
+          "outliers": [
+            21.1898
+          ]
+        },
+        "OK": {
+          "count": 2357,
+          "missing_count": 0,
+          "min": 26.0876,
+          "q1": 30.9046,
+          "median": 31.7033,
+          "q3": 32.3056,
+          "max": 33.6265,
+          "mean": 31.56868235044548,
+          "whisker_low": 28.8072,
+          "whisker_high": 33.6265,
+          "outlier_count": 62,
+          "outliers": [
+            26.0876,
+            26.6836,
+            26.9263,
+            26.9666,
+            27.2644,
+            27.4628,
+            27.5266,
+            27.5427,
+            27.6956,
+            27.7368,
+            27.7545,
+            27.8787,
+            27.8952,
+            27.9376,
+            27.9404,
+            27.9413,
+            27.958,
+            27.972,
+            28.0674,
+            28.0747,
+            28.089,
+            28.0895,
+            28.1067,
+            28.1528,
+            28.1571,
+            28.1633,
+            28.1886,
+            28.1965,
+            28.223,
+            28.2359,
+            28.2509,
+            28.2658,
+            28.2832,
+            28.2892,
+            28.2941,
+            28.336,
+            28.3436,
+            28.375,
+            28.3873,
+            28.4171,
+            28.4218,
+            28.4855,
+            28.4942,
+            28.5018,
+            28.509,
+            28.5223,
+            28.5411,
+            28.5744,
+            28.6053,
+            28.6229,
+            28.6671,
+            28.6678,
+            28.6941,
+            28.7068,
+            28.7186,
+            28.7203,
+            28.7215,
+            28.7467,
+            28.7557,
+            28.7595,
+            28.7668,
+            28.7974
+          ]
+        }
+      }
+    },
+    "counts": {
+      "NG": 71,
+      "OK": 2357,
+      "excluded": 94
+    },
+    "boxes": [
+      {
+        "field_id": "C1201.dwd_qual_pos_coating_param_pim.offset_sym1",
+        "name": "对称错位1",
+        "process_name": "正极涂布",
+        "process_code": "C1201",
+        "analysis_type": "shared_material",
+        "bubble": {
+          "strategy": "equal_width",
+          "max_bins": 10,
+          "denominator": "distinct_target_products_within_interval",
+          "size_metric": "product_count",
+          "range_min": 0.0,
+          "range_max": 0.0,
+          "covered_products": 1966,
+          "bins": [
+            {
+              "index": 0,
+              "lower": 0.0,
+              "upper": 0.0,
+              "upper_inclusive": true,
+              "NG": 0,
+              "OK": 1966,
+              "product_count": 1966,
+              "ng_rate": 0.0,
+              "source_record_count": 4,
+              "upstream_code_count": 4,
+              "association_count": 1966
+            }
+          ]
+        },
+        "sample_unit": "target_material_association",
+        "groups": {
+          "NG": {
+            "count": 0,
+            "missing_count": 0,
+            "min": null,
+            "q1": null,
+            "median": null,
+            "q3": null,
+            "max": null,
+            "mean": null,
+            "whisker_low": null,
+            "whisker_high": null,
+            "outlier_count": 0,
+            "outliers": [],
+            "target_products": 71,
+            "missing_products": 71,
+            "matched_products": 0,
+            "direct_products": 0,
+            "input_code_products": 0,
+            "ads_products": 0,
+            "ambiguous_products": 0,
+            "expected_samples": 0,
+            "valid_products": 0,
+            "complete_products": 0,
+            "partial_products": 0,
+            "trace_missing_products": 71,
+            "multi_code_products": 0,
+            "parameter_record_count": 0,
+            "parameter_record_median": null
+          },
+          "OK": {
+            "count": 1966,
+            "missing_count": 0,
+            "min": 0.0,
+            "q1": 0.0,
+            "median": 0.0,
+            "q3": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "whisker_low": 0.0,
+            "whisker_high": 0.0,
+            "outlier_count": 0,
+            "outliers": [],
+            "target_products": 2357,
+            "missing_products": 391,
+            "matched_products": 1966,
+            "direct_products": 0,
+            "input_code_products": 0,
+            "ads_products": 1966,
+            "ambiguous_products": 0,
+            "expected_samples": 1966,
+            "valid_products": 1966,
+            "complete_products": 1966,
+            "partial_products": 0,
+            "trace_missing_products": 391,
+            "multi_code_products": 0,
+            "parameter_record_count": 4,
+            "parameter_record_median": 0.0
+          }
+        }
+      }
+    ],
+    "timing": {
+      "total_seconds": 24.6947,
+      "target_query": {
+        "table": "dwd_qual_winding_slit_param_pim",
+        "seconds": 14.067,
+        "rows": 2522,
+        "source_rows": 2543,
+        "product_count": 2522,
+        "duplicate_rows": 21,
+        "invalid_product_rows": 0,
+        "date_filter_field": "shift_date",
+        "sort_time_field": "end_time",
+        "record_selection": {
+          "mode": "latest"
+        }
+      },
+      "feature_wall_seconds": 2.0559,
+      "feature_queries": [
+        {
+          "table": "dwd_qual_pos_coating_param_pim",
+          "process_code": "C1201",
+          "seconds": 2.0503,
+          "rows": 4,
+          "eligible_source_rows": 4,
+          "product_batch_size": 4,
+          "lookup_count": 1948,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "latest"
+          }
+        }
+      ],
+      "workers": 8,
+      "trace_wall_seconds": 8.3712,
+      "trace_queries": [
+        {
+          "route": "588ah",
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "seconds": 8.3083,
+          "rows": 1579,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest"
+        },
+        {
+          "route": "588ah",
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "seconds": 4.4584,
+          "rows": 387,
+          "lookup_count": 428,
+          "query_strategy": "batch_latest"
+        }
+      ]
+    },
+    "rules": [
+      "按租户和产品编码关联；目标时间范围内同一产品按工序规则保留一条记录。",
+      "目标宽表按shift_date班次日期筛选，起止日期均包含；最新记录排序与上游追溯时点仍采用字典中经DDL确认的分区时间字段。",
+      "切卷：按end_time取最新记录。",
+      "正极涂布：按end_time取最新记录。",
+      "按目标租户和产线确定314Ah或588Ah路线，再按字典关联ADS，保留所选追溯批次全部物料行；同一目标产品、同一上游码只计一次。",
+      "ADS在一次氦检生成：电芯码目标使用目标时点以内的追溯批次；更早工序的物料码目标使用最新已知编码关系，其上游参数仍严格不晚于目标时点。",
+      "NG/OK产品数按目标产品计数；箱线图n为目标产品与上游码关联后的有效参数数，关联到的多个卷绕码全部绘图，不求平均。同一物料用于多个目标产品时按各目标产品关联计数，这些样本不是相互独立的观测。",
+      "摘要中的参数条数与中位数按当前字段有效的上游实际记录统计：各NG/OK组内按租户、上游码、记录时间和记录标识去重；同一记录可分别属于NG和OK组。覆盖目标产品码仍按具有有效参数的目标产品去重计数。",
+      "参数缺失数按已知上游码统计；缺失电芯数为没有任何有效参数的目标电芯，部分缺失电芯另计；追溯缺失时不猜测上游码数量。",
+      "气泡图按当前特征的有效值划分最多10个等宽区间，左闭右开且最后区间包含右端点；气泡纵轴为区间内去重NG产品数/(NG+OK去重产品数)，面积为区间覆盖产品数。",
+      "同一产品的多个上游码落入同一区间时只计一次；落入不同区间时分别计入，各区间产品数不能直接相加作为总产品数。空区间不绘制气泡，也不视作NG占比为0。",
+      "正负极合浆、涂布、辊压只显示区间气泡图；其他工序可切换气泡图与箱线图。箱线图统计包含全部有效值，隐藏离群散点。",
+      "NG为当前缺陷；OK为缺陷字段为空或OK且产品质量为合格的记录；其他缺陷和未知质量排除。",
+      "上游不沿用目标日期、班次或设备限制；在目标记录的分区时间之前，按各工序规则在数据库内选取一条记录。",
+      "缺失值不填零；箱体为25%至75%分位数，须为1.5倍IQR范围内实际值；统计使用全部取回记录。"
+    ],
+    "warnings": [
+      "部分特征有效数值覆盖率不足50%，请结合每组有效样本数判断，并核对跨工序产品编码是否一致。",
+      "部分电芯在目标时点没有可用的追溯关系或工序映射；已计入缺失电芯数，未知上游码数量未按2个或4个补造。"
+    ]
+  },
+  "ng_ads_all_time_audit": [
+    {
+      "route": "314ah",
+      "source_field": "winding_slit_code",
+      "NG_codes_checked": 71,
+      "NG_codes_found_all_time": 0,
+      "trace_rows": 0,
+      "seconds": 1.4811
+    },
+    {
+      "route": "588ah",
+      "source_field": "winding_slit_code",
+      "NG_codes_checked": 71,
+      "NG_codes_found_all_time": 0,
+      "trace_rows": 0,
+      "seconds": 1.3329
+    }
+  ],
+  "target_line_groups": [
+    {
+      "tenant_id": "11300001",
+      "line": "金寨三期588AH",
+      "group": "OK",
+      "count": 2357
+    },
+    {
+      "tenant_id": "11300001",
+      "line": "金寨三期588AH",
+      "group": "NG",
+      "count": 71
+    },
+    {
+      "tenant_id": "11300001",
+      "line": "金寨三期588AH",
+      "group": "excluded",
+      "count": 94
+    }
+  ],
+  "NG_nonempty_product_in_code": 71,
+  "target_identity_columns": [
+    {
+      "column_name": "tenant_id",
+      "column_comment": "租户ID",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "product_code",
+      "column_comment": "产品编码",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "product_in_code",
+      "column_comment": "输入的产品编码（上一道工序的产出）",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "device_code",
+      "column_comment": "设备编码",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "end_time",
+      "column_comment": "生产结束时间",
+      "data_type": "datetime"
+    },
+    {
+      "column_name": "technics_step_code",
+      "column_comment": "工步编码",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "start_time",
+      "column_comment": "生产开始时间",
+      "data_type": "datetime"
+    },
+    {
+      "column_name": "shift_date",
+      "column_comment": "班次日期",
+      "data_type": "date"
+    },
+    {
+      "column_name": "shift",
+      "column_comment": "班次",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "produce_order_code",
+      "column_comment": "生产工单编码",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "produce_id",
+      "column_comment": "自增ID",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "technics_process_code",
+      "column_comment": "工序编码",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "device_name",
+      "column_comment": "设备名称",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "technics_line_id",
+      "column_comment": "工艺ID",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "technics_line_code",
+      "column_comment": "工艺编码",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "technics_line_name",
+      "column_comment": "工艺名称",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "technics_process_name",
+      "column_comment": "工序名称",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "technics_step_name",
+      "column_comment": "工步名称",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "user_id",
+      "column_comment": "用户ID",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "user_name",
+      "column_comment": "用户名称",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "user_account",
+      "column_comment": "用户账号",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "remarks",
+      "column_comment": "备注",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "ng_type",
+      "column_comment": "NG类型",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "ok_raw_count",
+      "column_comment": "合格数量原始数据",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "ng_raw_count",
+      "column_comment": "不合格数量原始数据",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "cell_upload_status",
+      "column_comment": "电芯上传状态",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "cold_press_station",
+      "column_comment": "冷压工位",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "current_mandrel_no",
+      "column_comment": "当前卷针号",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "dust_collector_status",
+      "column_comment": "吸尘器开启状态",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "production_end_time",
+      "column_comment": "生产结束时间",
+      "data_type": "datetime"
+    },
+    {
+      "column_name": "device_id",
+      "column_comment": "设备ID",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "hipot_voltage_waveform",
+      "column_comment": "Hipot电压波形曲线",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "lower_sep_roll_no",
+      "column_comment": "下隔膜膜卷号",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "ng_reason",
+      "column_comment": "NG原因",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "neg_film_roll_no",
+      "column_comment": "负极膜卷号",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "oc_status",
+      "column_comment": "OC状态(0无测试结果 1不是OC状态 FF开路状态)",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "open_circuit_test_ng",
+      "column_comment": "开路测试NG",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "pos_film_roll_no",
+      "column_comment": "正极膜卷号",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "production_date",
+      "column_comment": "生产日期",
+      "data_type": "datetime"
+    },
+    {
+      "column_name": "sep_static_eliminator_status",
+      "column_comment": "隔膜除静电开关状态",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "short_circuit_defect",
+      "column_comment": "短路不良(0代表OK 1代表NG)",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "short_circuit_test_ng",
+      "column_comment": "短路测试NG",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "side_b_overhang",
+      "column_comment": "B面OVERHAND结果",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "production_start_time",
+      "column_comment": "生产开始时间",
+      "data_type": "datetime"
+    },
+    {
+      "column_name": "test_oc_status",
+      "column_comment": "测试OC状态 0无测试结果 1不是OC状态 FF开路状态",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "total_test_res",
+      "column_comment": "测试总结果",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "tray_barcode",
+      "column_comment": "Tray条码",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "upload_cell_status",
+      "column_comment": "上传本地服务器电芯状态",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "upper_sep_roll_no",
+      "column_comment": "上隔膜膜卷号",
+      "data_type": "varchar"
+    },
+    {
+      "column_name": "insert_time",
+      "column_comment": "入仓时间",
+      "data_type": "datetime"
+    },
+    {
+      "column_name": "virtual_code",
+      "column_comment": "虚拟码",
+      "data_type": "varchar"
+    }
+  ]
+}

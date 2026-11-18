@@ -1,0 +1,1312 @@
+{
+  "factory_id": "jinzhai-phase-3",
+  "period": {
+    "start_date": "2026-11-15",
+    "end_date": "2026-11-15"
+  },
+  "filters": {
+    "tenant_id": [
+      "11300001"
+    ]
+  },
+  "ng_type": "NG-E-YCHJ006",
+  "target": {
+    "id": "C1510.dwd_qual_helium_leak_test1_param_pim.final_inspection_battery_leak_rate_actual_value",
+    "name": "终检-电池漏率值实数值"
+  },
+  "features": [
+    {
+      "id": "C1509.dwd_qual_top_cover_laser_weld_param_pim.long_side_inner_welding_power",
+      "name": "长边内侧焊接功率",
+      "process_name": "顶盖激光焊"
+    },
+    {
+      "id": "C1509.dwd_qual_top_cover_laser_weld_param_pim.short_side_outer_welding_power",
+      "name": "短边外侧焊接功率",
+      "process_name": "顶盖激光焊"
+    },
+    {
+      "id": "C1509.dwd_qual_top_cover_laser_weld_param_pim.long_side_inner_gap_1_data",
+      "name": "长边内侧缝隙1检测数据",
+      "process_name": "顶盖激光焊"
+    },
+    {
+      "id": "C1508.dwd_qual_wrap_can_insert_param_pim.first_insertion_pressure_actual",
+      "name": "第一段入壳压力实际值",
+      "process_name": "包膜入壳"
+    },
+    {
+      "id": "C1508.dwd_qual_wrap_can_insert_param_pim.second_insertion_pressure_actual",
+      "name": "第二段入壳压力实际值",
+      "process_name": "包膜入壳"
+    }
+  ],
+  "batch_size": 2000,
+  "target_query": {
+    "table": "dwd_qual_helium_leak_test1_param_pim",
+    "seconds": 4.8079,
+    "rows": 8267,
+    "product_count": 8264,
+    "duplicate_rows": 3,
+    "invalid_product_rows": 0
+  },
+  "runs": [
+    {
+      "status": "success",
+      "iteration": 1,
+      "workers": 1,
+      "feature_wall_seconds": 31.7671,
+      "client_wall_seconds": 31.7809,
+      "query_count": 18,
+      "rows": 16668,
+      "queries": [
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.0032,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.5018,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.3973,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.2467,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.8564,
+          "rows": 1908,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.0389,
+          "rows": 2018,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.1352,
+          "rows": 2033,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.8369,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.0112,
+          "rows": 463,
+          "product_batch_size": 463
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.0781,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.8959,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.3062,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.1108,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.7459,
+          "rows": 1779,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.1862,
+          "rows": 2001,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.6591,
+          "rows": 2003,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.8406,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 3.105,
+          "rows": 463,
+          "product_batch_size": 463
+        }
+      ]
+    },
+    {
+      "status": "success",
+      "iteration": 1,
+      "workers": 4,
+      "feature_wall_seconds": 11.4364,
+      "client_wall_seconds": 11.503,
+      "query_count": 18,
+      "rows": 16668,
+      "queries": [
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.4797,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.13,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.8393,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.5496,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.7128,
+          "rows": 1908,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 3.2929,
+          "rows": 2018,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.3206,
+          "rows": 2033,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.3584,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.0891,
+          "rows": 463,
+          "product_batch_size": 463
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.4378,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.209,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.3033,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.4247,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.9622,
+          "rows": 1779,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.6172,
+          "rows": 2001,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.5088,
+          "rows": 2003,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 3.045,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.9681,
+          "rows": 463,
+          "product_batch_size": 463
+        }
+      ]
+    },
+    {
+      "status": "success",
+      "iteration": 2,
+      "workers": 4,
+      "feature_wall_seconds": 8.064,
+      "client_wall_seconds": 8.0971,
+      "query_count": 18,
+      "rows": 16668,
+      "queries": [
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.0789,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 0.9514,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 0.8569,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 0.9359,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.8314,
+          "rows": 1908,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.8474,
+          "rows": 2018,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.8053,
+          "rows": 2033,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.3507,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.3619,
+          "rows": 463,
+          "product_batch_size": 463
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 0.8896,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 0.9009,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.185,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.6618,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.0606,
+          "rows": 1779,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.8959,
+          "rows": 2001,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.9213,
+          "rows": 2003,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.861,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.1513,
+          "rows": 463,
+          "product_batch_size": 463
+        }
+      ]
+    },
+    {
+      "status": "success",
+      "iteration": 2,
+      "workers": 1,
+      "feature_wall_seconds": 32.0906,
+      "client_wall_seconds": 32.1387,
+      "query_count": 18,
+      "rows": 16668,
+      "queries": [
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.0963,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.1807,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.2676,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 0.9843,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.5041,
+          "rows": 1908,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.3864,
+          "rows": 2018,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.2485,
+          "rows": 2033,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.405,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.3055,
+          "rows": 463,
+          "product_batch_size": 463
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.2225,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 0.9441,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 0.9923,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.4022,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.0009,
+          "rows": 1779,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.2913,
+          "rows": 2001,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.0335,
+          "rows": 2003,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 3.5564,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 2.1625,
+          "rows": 463,
+          "product_batch_size": 463
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "status": "success",
+    "ng_type": "NG-E-YCHJ006",
+    "ng_name": "氦检NG",
+    "period": {
+      "start_date": "2026-11-15",
+      "end_date": "2026-11-15"
+    },
+    "filters": {
+      "tenant_id": [
+        "11300001"
+      ]
+    },
+    "row_dimensions": {},
+    "target": {
+      "id": "C1510.dwd_qual_helium_leak_test1_param_pim.final_inspection_battery_leak_rate_actual_value",
+      "name": "终检-电池漏率值实数值",
+      "process_name": "一次氦检",
+      "groups": {
+        "NG": {
+          "count": 20,
+          "missing_count": 0,
+          "min": 0.0,
+          "q1": 0.0,
+          "median": 5e-05,
+          "q3": 0.00355,
+          "max": 0.0114,
+          "mean": 0.00294,
+          "whisker_low": 0.0,
+          "whisker_high": 0.001,
+          "outlier_count": 5,
+          "outliers": [
+            0.0112,
+            0.0114,
+            0.0114,
+            0.0114,
+            0.0114
+          ]
+        },
+        "OK": {
+          "count": 8222,
+          "missing_count": 0,
+          "min": 0.0,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "max": 0.0,
+          "mean": 0.0,
+          "whisker_low": 0.0,
+          "whisker_high": 0.0,
+          "outlier_count": 0,
+          "outliers": []
+        }
+      }
+    },
+    "counts": {
+      "NG": 20,
+      "OK": 8222,
+      "excluded": 22
+    },
+    "boxes": [
+      {
+        "field_id": "C1509.dwd_qual_top_cover_laser_weld_param_pim.long_side_inner_welding_power",
+        "name": "长边内侧焊接功率",
+        "process_name": "顶盖激光焊",
+        "groups": {
+          "NG": {
+            "count": 20,
+            "missing_count": 0,
+            "min": 3090.0,
+            "q1": 3110.5,
+            "median": 3117.0,
+            "q3": 3191.5,
+            "max": 3205.0,
+            "mean": 3139.95,
+            "whisker_low": 3090.0,
+            "whisker_high": 3205.0,
+            "outlier_count": 0,
+            "outliers": [],
+            "matched_products": 20,
+            "direct_products": 20,
+            "input_code_products": 0,
+            "ambiguous_products": 0
+          },
+          "OK": {
+            "count": 8222,
+            "missing_count": 0,
+            "min": 3081.0,
+            "q1": 3110.0,
+            "median": 3114.0,
+            "q3": 3116.0,
+            "max": 3207.0,
+            "mean": 3113.112989540258,
+            "whisker_low": 3101.0,
+            "whisker_high": 3120.0,
+            "outlier_count": 820,
+            "outliers": [
+              3081.0,
+              3082.0,
+              3083.0,
+              3084.0,
+              3085.0,
+              3086.0,
+              3087.0,
+              3087.0,
+              3087.0,
+              3088.0,
+              3088.0,
+              3089.0,
+              3089.0,
+              3090.0,
+              3090.0,
+              3090.0,
+              3091.0,
+              3091.0,
+              3091.0,
+              3092.0,
+              3092.0,
+              3092.0,
+              3093.0,
+              3093.0,
+              3093.0,
+              3093.0,
+              3094.0,
+              3094.0,
+              3094.0,
+              3094.0,
+              3094.0,
+              3095.0,
+              3095.0,
+              3095.0,
+              3096.0,
+              3096.0,
+              3096.0,
+              3096.0,
+              3097.0,
+              3097.0,
+              3097.0,
+              3097.0,
+              3097.0,
+              3097.0,
+              3097.0,
+              3097.0,
+              3097.0,
+              3098.0,
+              3098.0,
+              3098.0,
+              3098.0,
+              3098.0,
+              3098.0,
+              3099.0,
+              3099.0,
+              3099.0,
+              3099.0,
+              3099.0,
+              3099.0,
+              3100.0,
+              3100.0,
+              3100.0,
+              3100.0,
+              3100.0,
+              3179.0,
+              3185.0,
+              3189.0,
+              3192.0,
+              3192.0,
+              3193.0,
+              3193.0,
+              3194.0,
+              3195.0,
+              3196.0,
+              3197.0,
+              3197.0,
+              3198.0,
+              3198.0,
+              3200.0,
+              3207.0
+            ],
+            "matched_products": 8222,
+            "direct_products": 0,
+            "input_code_products": 8222,
+            "ambiguous_products": 0
+          }
+        }
+      },
+      {
+        "field_id": "C1509.dwd_qual_top_cover_laser_weld_param_pim.short_side_outer_welding_power",
+        "name": "短边外侧焊接功率",
+        "process_name": "顶盖激光焊",
+        "groups": {
+          "NG": {
+            "count": 20,
+            "missing_count": 0,
+            "min": 3122.0,
+            "q1": 3127.0,
+            "median": 3129.0,
+            "q3": 3222.0,
+            "max": 3225.0,
+            "mean": 3160.65,
+            "whisker_low": 3122.0,
+            "whisker_high": 3225.0,
+            "outlier_count": 0,
+            "outliers": [],
+            "matched_products": 20,
+            "direct_products": 20,
+            "input_code_products": 0,
+            "ambiguous_products": 0
+          },
+          "OK": {
+            "count": 8222,
+            "missing_count": 0,
+            "min": 3119.0,
+            "q1": 3126.0,
+            "median": 3127.0,
+            "q3": 3128.0,
+            "max": 3225.0,
+            "mean": 3128.901483823887,
+            "whisker_low": 3123.0,
+            "whisker_high": 3131.0,
+            "outlier_count": 335,
+            "outliers": [
+              3119.0,
+              3120.0,
+              3120.0,
+              3120.0,
+              3120.0,
+              3120.0,
+              3120.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3121.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3122.0,
+              3218.0,
+              3219.0,
+              3220.0,
+              3220.0,
+              3221.0,
+              3222.0,
+              3222.0,
+              3222.0,
+              3222.0,
+              3222.0,
+              3222.0,
+              3222.0,
+              3222.0,
+              3222.0,
+              3222.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3223.0,
+              3224.0,
+              3224.0,
+              3224.0,
+              3224.0,
+              3224.0,
+              3224.0,
+              3225.0
+            ],
+            "matched_products": 8222,
+            "direct_products": 0,
+            "input_code_products": 8222,
+            "ambiguous_products": 0
+          }
+        }
+      },
+      {
+        "field_id": "C1509.dwd_qual_top_cover_laser_weld_param_pim.long_side_inner_gap_1_data",
+        "name": "长边内侧缝隙1检测数据",
+        "process_name": "顶盖激光焊",
+        "groups": {
+          "NG": {
+            "count": 20,
+            "missing_count": 0,
+            "min": 0.0,
+            "q1": 0.0,
+            "median": 0.0,
+            "q3": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "whisker_low": 0.0,
+            "whisker_high": 0.0,
+            "outlier_count": 0,
+            "outliers": [],
+            "matched_products": 20,
+            "direct_products": 20,
+            "input_code_products": 0,
+            "ambiguous_products": 0
+          },
+          "OK": {
+            "count": 8222,
+            "missing_count": 0,
+            "min": 0.0,
+            "q1": 0.0,
+            "median": 0.0,
+            "q3": 0.0,
+            "max": 0.106,
+            "mean": 0.00017939674045244465,
+            "whisker_low": 0.0,
+            "whisker_high": 0.0,
+            "outlier_count": 20,
+            "outliers": [
+              0.062,
+              0.067,
+              0.068,
+              0.068,
+              0.069,
+              0.069,
+              0.07,
+              0.071,
+              0.071,
+              0.072,
+              0.073,
+              0.073,
+              0.074,
+              0.074,
+              0.074,
+              0.076,
+              0.079,
+              0.079,
+              0.08,
+              0.106
+            ],
+            "matched_products": 8222,
+            "direct_products": 0,
+            "input_code_products": 8222,
+            "ambiguous_products": 0
+          }
+        }
+      },
+      {
+        "field_id": "C1508.dwd_qual_wrap_can_insert_param_pim.first_insertion_pressure_actual",
+        "name": "第一段入壳压力实际值",
+        "process_name": "包膜入壳",
+        "groups": {
+          "NG": {
+            "count": 20,
+            "missing_count": 0,
+            "min": 0.0554,
+            "q1": 0.0554,
+            "median": 0.05845,
+            "q3": 0.0731,
+            "max": 0.0992,
+            "mean": 0.065345,
+            "whisker_low": 0.0554,
+            "whisker_high": 0.0992,
+            "outlier_count": 0,
+            "outliers": [],
+            "matched_products": 20,
+            "direct_products": 20,
+            "input_code_products": 0,
+            "ambiguous_products": 0
+          },
+          "OK": {
+            "count": 8222,
+            "missing_count": 0,
+            "min": 0.0538,
+            "q1": 0.0554,
+            "median": 0.0585,
+            "q3": 0.0731,
+            "max": 0.6631,
+            "mean": 0.06665664072001946,
+            "whisker_low": 0.0538,
+            "whisker_high": 0.0992,
+            "outlier_count": 11,
+            "outliers": [
+              0.1007,
+              0.1007,
+              0.1007,
+              0.1007,
+              0.1007,
+              0.1007,
+              0.1007,
+              0.1007,
+              0.1277,
+              0.2523,
+              0.6631
+            ],
+            "matched_products": 8222,
+            "direct_products": 0,
+            "input_code_products": 8222,
+            "ambiguous_products": 0
+          }
+        }
+      },
+      {
+        "field_id": "C1508.dwd_qual_wrap_can_insert_param_pim.second_insertion_pressure_actual",
+        "name": "第二段入壳压力实际值",
+        "process_name": "包膜入壳",
+        "groups": {
+          "NG": {
+            "count": 20,
+            "missing_count": 0,
+            "min": 0.0638,
+            "q1": 0.08072499999999999,
+            "median": 0.41535,
+            "q3": 1.0707499999999999,
+            "max": 1.908,
+            "mean": 0.578975,
+            "whisker_low": 0.0638,
+            "whisker_high": 1.908,
+            "outlier_count": 0,
+            "outliers": [],
+            "matched_products": 20,
+            "direct_products": 20,
+            "input_code_products": 0,
+            "ambiguous_products": 0
+          },
+          "OK": {
+            "count": 8222,
+            "missing_count": 0,
+            "min": 0.0523,
+            "q1": 0.0761,
+            "median": 0.3662,
+            "q3": 1.1831,
+            "max": 6.9544,
+            "mean": 0.7617385550960837,
+            "whisker_low": 0.0523,
+            "whisker_high": 2.8415,
+            "outlier_count": 310,
+            "outliers": [
+              2.8478,
+              2.8569,
+              2.8801,
+              2.8923,
+              2.9,
+              2.9262,
+              2.9338,
+              2.9492,
+              2.9585,
+              2.9692,
+              2.977,
+              2.9877,
+              2.9969,
+              3.0046,
+              3.0231,
+              3.0323,
+              3.0477,
+              3.0615,
+              3.0723,
+              3.0938,
+              3.1046,
+              3.1046,
+              3.12,
+              3.1308,
+              3.14,
+              3.1477,
+              3.16,
+              3.1785,
+              3.2,
+              3.22,
+              3.2338,
+              3.2523,
+              3.2631,
+              3.28,
+              3.2923,
+              3.3015,
+              3.3046,
+              3.34,
+              3.3508,
+              3.3615,
+              3.3676,
+              3.3815,
+              3.3923,
+              3.4,
+              3.4138,
+              3.4354,
+              3.46,
+              3.4815,
+              3.4938,
+              3.52,
+              3.5262,
+              3.5323,
+              3.5585,
+              3.5937,
+              3.6138,
+              3.6277,
+              3.64,
+              3.6585,
+              3.6754,
+              3.7538,
+              3.7708,
+              3.7938,
+              3.8262,
+              3.8508,
+              3.8754,
+              3.9183,
+              3.9815,
+              3.9998,
+              4.0338,
+              4.0936,
+              4.1738,
+              4.2154,
+              4.2677,
+              4.3058,
+              4.3692,
+              4.5289,
+              4.7108,
+              4.7415,
+              5.1949,
+              6.9544
+            ],
+            "matched_products": 8222,
+            "direct_products": 0,
+            "input_code_products": 8222,
+            "ambiguous_products": 0
+          }
+        }
+      }
+    ],
+    "timing": {
+      "total_seconds": 13.08,
+      "target_query": {
+        "table": "dwd_qual_helium_leak_test1_param_pim",
+        "seconds": 3.2446,
+        "rows": 8267,
+        "product_count": 8264,
+        "duplicate_rows": 3,
+        "invalid_product_rows": 0
+      },
+      "feature_wall_seconds": 9.5654,
+      "feature_queries": [
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.3407,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 3.9038,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.4111,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.5698,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.6278,
+          "rows": 1908,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 3.5105,
+          "rows": 2018,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 2.8466,
+          "rows": 2033,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 3.4767,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_top_cover_laser_weld_param_pim",
+          "process_code": "C1509",
+          "seconds": 1.0333,
+          "rows": 463,
+          "product_batch_size": 463
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 0.8003,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 0.7486,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.037,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 0.6624,
+          "rows": 0,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.9462,
+          "rows": 1779,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.7485,
+          "rows": 2001,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 3.4336,
+          "rows": 2003,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 1.7314,
+          "rows": 2000,
+          "product_batch_size": 2000
+        },
+        {
+          "table": "dwd_qual_wrap_can_insert_param_pim",
+          "process_code": "C1508",
+          "seconds": 0.9578,
+          "rows": 463,
+          "product_batch_size": 463
+        }
+      ],
+      "workers": 4
+    },
+    "rules": [
+      "按租户和产品编码关联；目标时间范围内同一产品保留最新记录。",
+      "优先使用product_code直接关联；换码时仅使用目标记录product_in_code中的显式投入编码，且要求唯一匹配，不猜测或截取编码。",
+      "NG为当前缺陷；OK为缺陷字段为空或OK且产品质量为合格的记录；其他缺陷和未知质量排除。",
+      "上游不沿用目标日期、班次或设备限制；取目标开工前最近一次已完成的同产品工序记录。",
+      "缺失值不填零；箱体为25%至75%分位数，须为1.5倍IQR范围内实际值；统计使用全部取回记录。"
+    ],
+    "warnings": []
+  },
+  "notes": [
+    "只读真实数据库，目标全量取数，无随机抽样；上游按租户和产品编码分批查询，换码使用显式product_in_code唯一追溯。",
+    "串行与并发使用相同产品集合及字段，交替测试顺序；耗时受网络、服务端缓存和负载影响。",
+    "报告不包含产品编码或原始生产明细。"
+  ],
+  "generated_at": "2026-11-16T06:54:34.309314+00:00"
+}

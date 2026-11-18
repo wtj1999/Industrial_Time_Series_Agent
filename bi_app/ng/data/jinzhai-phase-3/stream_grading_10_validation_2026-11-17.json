@@ -1,0 +1,820 @@
+{
+  "generated_at": "2026-11-17T08:22:09.264593+00:00",
+  "context": {
+    "parameters": {
+      "start_date": "2026-11-15",
+      "end_date": "2026-11-15"
+    },
+    "filters": {
+      "tenant_id": [
+        "11300001"
+      ],
+      "technics_line_name": [
+        "金寨三期314Ah"
+      ]
+    },
+    "row": {
+      "ng_type": "NG-E-OCV3009",
+      "ng_name": "容量不及格",
+      "dimensions": {
+        "technics_process_name": "OCV3"
+      }
+    }
+  },
+  "first_event_seconds": 0.0242,
+  "steps_returned": [
+    "10"
+  ],
+  "grading_rows_returned": 14426,
+  "progress_events": [
+    {
+      "type": "progress",
+      "data": {
+        "stage": "preparing",
+        "message": "分析字段已确认，开始读取数据",
+        "sequence": 1,
+        "elapsed_seconds": 0.02
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "target",
+        "message": "正在读取目标工序：OCV3，按shift_date筛选、按end_time选取记录",
+        "sequence": 2,
+        "elapsed_seconds": 0.02
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "target",
+        "message": "目标取数完成 · 14527个产品，耗时3.76秒",
+        "sequence": 3,
+        "elapsed_seconds": 3.91,
+        "rows": 14527
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "trace",
+        "message": "正在按工艺路线追溯上游编码，共0个追溯批次",
+        "sequence": 4,
+        "elapsed_seconds": 4.01,
+        "total": 0
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "正在读取1个上游工序，共8个参数批次，8路并发",
+        "sequence": 5,
+        "elapsed_seconds": 4.03,
+        "total": 8
+      }
+    },
+    {
+      "type": "heartbeat",
+      "elapsed_seconds": 9.04
+    },
+    {
+      "type": "heartbeat",
+      "elapsed_seconds": 14.05
+    },
+    {
+      "type": "heartbeat",
+      "elapsed_seconds": 19.06
+    },
+    {
+      "type": "heartbeat",
+      "elapsed_seconds": 24.07
+    },
+    {
+      "type": "heartbeat",
+      "elapsed_seconds": 29.08
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "分容 · 查询426个请求，返回426条记录，耗时27.57秒",
+        "sequence": 6,
+        "elapsed_seconds": 31.95,
+        "rows": 426,
+        "process_code": "C2800"
+      }
+    },
+    {
+      "type": "heartbeat",
+      "elapsed_seconds": 36.96
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "分容 · 查询2000个请求，返回2000条记录，耗时36.95秒",
+        "sequence": 7,
+        "elapsed_seconds": 41.25,
+        "rows": 2000,
+        "process_code": "C2800"
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "分容 · 查询2000个请求，返回2000条记录，耗时36.97秒",
+        "sequence": 8,
+        "elapsed_seconds": 41.28,
+        "rows": 2000,
+        "process_code": "C2800"
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "分容 · 查询2000个请求，返回2000条记录，耗时37.43秒",
+        "sequence": 9,
+        "elapsed_seconds": 41.64,
+        "rows": 2000,
+        "process_code": "C2800"
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "分容 · 查询2000个请求，返回2000条记录，耗时37.55秒",
+        "sequence": 10,
+        "elapsed_seconds": 41.71,
+        "rows": 2000,
+        "process_code": "C2800"
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "分容 · 查询2000个请求，返回2000条记录，耗时37.71秒",
+        "sequence": 11,
+        "elapsed_seconds": 41.75,
+        "rows": 2000,
+        "process_code": "C2800"
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "分容 · 查询2000个请求，返回2000条记录，耗时38.31秒",
+        "sequence": 12,
+        "elapsed_seconds": 42.34,
+        "rows": 2000,
+        "process_code": "C2800"
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "features",
+        "message": "分容 · 查询2000个请求，返回2000条记录，耗时38.52秒",
+        "sequence": 13,
+        "elapsed_seconds": 42.8,
+        "rows": 2000,
+        "process_code": "C2800"
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "statistics",
+        "message": "正在统计特征 1/1：分容 / 结束容量",
+        "sequence": 14,
+        "elapsed_seconds": 42.93,
+        "current": 1,
+        "total": 1
+      }
+    },
+    {
+      "type": "progress",
+      "data": {
+        "stage": "completed",
+        "message": "取数与分析完成 · NG 135，OK 14291，总耗时43.00秒",
+        "sequence": 15,
+        "elapsed_seconds": 43.03
+      }
+    }
+  ],
+  "result": {
+    "status": "success",
+    "ng_type": "NG-E-OCV3009",
+    "ng_name": "容量不及格",
+    "period": {
+      "start_date": "2026-11-15",
+      "end_date": "2026-11-15"
+    },
+    "filters": {
+      "tenant_id": [
+        "11300001"
+      ],
+      "technics_line_name": [
+        "金寨三期314Ah"
+      ]
+    },
+    "row_dimensions": {
+      "technics_process_name": "OCV3"
+    },
+    "target": {
+      "id": "C3100.dwd_qual_ocv3_param_pim.volt",
+      "name": "电压",
+      "process_name": "OCV3",
+      "date_filter_field": "shift_date",
+      "sort_time_field": "end_time",
+      "record_selection": {
+        "mode": "latest"
+      },
+      "groups": {
+        "NG": {
+          "count": 135,
+          "missing_count": 0,
+          "min": 2735.021,
+          "q1": 3244.5150000000003,
+          "median": 3264.521,
+          "q3": 3333.364,
+          "max": 3434.584,
+          "mean": 3266.9491851851853,
+          "whisker_low": 3128.173,
+          "whisker_high": 3434.584,
+          "outlier_count": 6,
+          "outliers": [
+            2735.021,
+            2747.868,
+            2778.915,
+            2817.721,
+            2882.729,
+            2960.75
+          ]
+        },
+        "OK": {
+          "count": 14291,
+          "missing_count": 0,
+          "min": 3241.051,
+          "q1": 3242.699,
+          "median": 3243.126,
+          "q3": 3243.6825,
+          "max": 3249.818,
+          "mean": 3243.3661530333775,
+          "whisker_low": 3241.275,
+          "whisker_high": 3245.157,
+          "outlier_count": 1142,
+          "outliers": [
+            3241.051,
+            3245.167,
+            3245.189,
+            3245.204,
+            3245.22,
+            3245.234,
+            3245.253,
+            3245.266,
+            3245.278,
+            3245.292,
+            3245.306,
+            3245.317,
+            3245.334,
+            3245.344,
+            3245.365,
+            3245.38,
+            3245.401,
+            3245.419,
+            3245.431,
+            3245.458,
+            3245.482,
+            3245.496,
+            3245.511,
+            3245.528,
+            3245.548,
+            3245.562,
+            3245.584,
+            3245.596,
+            3245.616,
+            3245.636,
+            3245.649,
+            3245.666,
+            3245.69,
+            3245.722,
+            3245.746,
+            3245.765,
+            3245.781,
+            3245.806,
+            3245.827,
+            3245.851,
+            3245.87,
+            3245.896,
+            3245.912,
+            3245.933,
+            3245.956,
+            3245.994,
+            3246.016,
+            3246.056,
+            3246.082,
+            3246.105,
+            3246.127,
+            3246.164,
+            3246.181,
+            3246.2,
+            3246.23,
+            3246.251,
+            3246.279,
+            3246.309,
+            3246.36,
+            3246.394,
+            3246.446,
+            3246.48,
+            3246.539,
+            3246.576,
+            3246.618,
+            3246.656,
+            3246.685,
+            3246.738,
+            3246.82,
+            3246.889,
+            3246.956,
+            3247.04,
+            3247.155,
+            3247.218,
+            3247.414,
+            3247.559,
+            3248.081,
+            3248.489,
+            3249.046,
+            3249.818
+          ]
+        }
+      }
+    },
+    "counts": {
+      "NG": 135,
+      "OK": 14291,
+      "excluded": 101
+    },
+    "boxes": [
+      {
+        "field_id": "C2800.dwd_qual_grading_param_pim.a_cap_end_step",
+        "name": "结束容量",
+        "process_name": "分容",
+        "process_code": "C2800",
+        "analysis_type": "individual",
+        "bubble": {
+          "strategy": "equal_width",
+          "max_bins": 10,
+          "denominator": "distinct_target_products_within_interval",
+          "size_metric": "product_count",
+          "range_min": 0.0,
+          "range_max": 342.3491,
+          "covered_products": 14426,
+          "bins": [
+            {
+              "index": 0,
+              "lower": 0.0,
+              "upper": 34.23491,
+              "upper_inclusive": false,
+              "NG": 65,
+              "OK": 0,
+              "product_count": 65,
+              "ng_rate": 1.0,
+              "source_record_count": 65,
+              "upstream_code_count": 65,
+              "association_count": 65
+            },
+            {
+              "index": 1,
+              "lower": 34.23491,
+              "upper": 68.46982,
+              "upper_inclusive": false,
+              "NG": 8,
+              "OK": 0,
+              "product_count": 8,
+              "ng_rate": 1.0,
+              "source_record_count": 8,
+              "upstream_code_count": 8,
+              "association_count": 8
+            },
+            {
+              "index": 2,
+              "lower": 68.46982,
+              "upper": 102.70473000000001,
+              "upper_inclusive": false,
+              "NG": 2,
+              "OK": 0,
+              "product_count": 2,
+              "ng_rate": 1.0,
+              "source_record_count": 2,
+              "upstream_code_count": 2,
+              "association_count": 2
+            },
+            {
+              "index": 3,
+              "lower": 102.70473000000001,
+              "upper": 136.93964,
+              "upper_inclusive": false,
+              "NG": 5,
+              "OK": 0,
+              "product_count": 5,
+              "ng_rate": 1.0,
+              "source_record_count": 5,
+              "upstream_code_count": 5,
+              "association_count": 5
+            },
+            {
+              "index": 4,
+              "lower": 136.93964,
+              "upper": 171.17455,
+              "upper_inclusive": false,
+              "NG": 3,
+              "OK": 0,
+              "product_count": 3,
+              "ng_rate": 1.0,
+              "source_record_count": 3,
+              "upstream_code_count": 3,
+              "association_count": 3
+            },
+            {
+              "index": 5,
+              "lower": 171.17455,
+              "upper": 205.40946000000002,
+              "upper_inclusive": false,
+              "NG": 5,
+              "OK": 0,
+              "product_count": 5,
+              "ng_rate": 1.0,
+              "source_record_count": 5,
+              "upstream_code_count": 5,
+              "association_count": 5
+            },
+            {
+              "index": 6,
+              "lower": 205.40946000000002,
+              "upper": 239.64437000000004,
+              "upper_inclusive": false,
+              "NG": 7,
+              "OK": 0,
+              "product_count": 7,
+              "ng_rate": 1.0,
+              "source_record_count": 7,
+              "upstream_code_count": 7,
+              "association_count": 7
+            },
+            {
+              "index": 7,
+              "lower": 239.64437000000004,
+              "upper": 273.87928,
+              "upper_inclusive": false,
+              "NG": 1,
+              "OK": 0,
+              "product_count": 1,
+              "ng_rate": 1.0,
+              "source_record_count": 1,
+              "upstream_code_count": 1,
+              "association_count": 1
+            },
+            {
+              "index": 8,
+              "lower": 273.87928,
+              "upper": 308.11419,
+              "upper_inclusive": false,
+              "NG": 6,
+              "OK": 0,
+              "product_count": 6,
+              "ng_rate": 1.0,
+              "source_record_count": 6,
+              "upstream_code_count": 6,
+              "association_count": 6
+            },
+            {
+              "index": 9,
+              "lower": 308.11419,
+              "upper": 342.3491,
+              "upper_inclusive": true,
+              "NG": 33,
+              "OK": 14291,
+              "product_count": 14324,
+              "ng_rate": 0.0023038257469980452,
+              "source_record_count": 14324,
+              "upstream_code_count": 14324,
+              "association_count": 14324
+            }
+          ]
+        },
+        "sample_unit": "target_material_association",
+        "groups": {
+          "NG": {
+            "count": 135,
+            "missing_count": 0,
+            "min": 0.0,
+            "q1": 0.0,
+            "median": 39.8428,
+            "q3": 294.2207,
+            "max": 339.7814,
+            "mean": 126.86126592592592,
+            "whisker_low": 0.0,
+            "whisker_high": 339.7814,
+            "outlier_count": 0,
+            "outliers": [],
+            "target_products": 135,
+            "missing_products": 0,
+            "matched_products": 135,
+            "direct_products": 135,
+            "input_code_products": 0,
+            "ads_products": 0,
+            "ambiguous_products": 0,
+            "expected_samples": 135,
+            "valid_products": 135,
+            "complete_products": 135,
+            "partial_products": 0,
+            "trace_missing_products": 0,
+            "multi_code_products": 0
+          },
+          "OK": {
+            "count": 14291,
+            "missing_count": 0,
+            "min": 328.0589,
+            "q1": 335.9121,
+            "median": 336.983,
+            "q3": 338.009,
+            "max": 342.3491,
+            "mean": 336.8943040095165,
+            "whisker_low": 332.776,
+            "whisker_high": 341.1282,
+            "outlier_count": 310,
+            "outliers": [
+              328.0589,
+              328.5963,
+              329.2937,
+              329.4962,
+              329.5658,
+              329.9567,
+              330.0892,
+              330.187,
+              330.257,
+              330.3408,
+              330.4665,
+              330.5643,
+              330.6194,
+              330.6751,
+              330.7938,
+              330.8425,
+              330.8985,
+              330.9265,
+              330.9407,
+              331.0107,
+              331.0452,
+              331.1147,
+              331.1292,
+              331.2335,
+              331.2475,
+              331.2758,
+              331.2963,
+              331.3245,
+              331.3387,
+              331.3595,
+              331.4501,
+              331.4709,
+              331.5201,
+              331.5546,
+              331.597,
+              331.624,
+              331.638,
+              331.6804,
+              331.7016,
+              331.7502,
+              331.7649,
+              331.8059,
+              331.8269,
+              331.8545,
+              331.8827,
+              331.9106,
+              331.9452,
+              331.9731,
+              332.0223,
+              332.0429,
+              332.0706,
+              332.0966,
+              332.1544,
+              332.2101,
+              332.2526,
+              332.2941,
+              332.315,
+              332.3288,
+              332.3431,
+              332.3643,
+              332.406,
+              332.4402,
+              332.4683,
+              332.5172,
+              332.5381,
+              332.5945,
+              332.6082,
+              332.6429,
+              332.6502,
+              332.657,
+              332.6645,
+              332.6849,
+              332.6924,
+              332.7271,
+              341.1562,
+              341.2538,
+              341.2747,
+              341.4493,
+              341.5052,
+              342.3491
+            ],
+            "target_products": 14291,
+            "missing_products": 0,
+            "matched_products": 14291,
+            "direct_products": 14291,
+            "input_code_products": 0,
+            "ads_products": 0,
+            "ambiguous_products": 0,
+            "expected_samples": 14291,
+            "valid_products": 14291,
+            "complete_products": 14291,
+            "partial_products": 0,
+            "trace_missing_products": 0,
+            "multi_code_products": 0
+          }
+        }
+      }
+    ],
+    "timing": {
+      "total_seconds": 43.0049,
+      "target_query": {
+        "table": "dwd_qual_ocv3_param_pim",
+        "seconds": 3.7632,
+        "rows": 14527,
+        "source_rows": 14527,
+        "product_count": 14527,
+        "duplicate_rows": 0,
+        "invalid_product_rows": 0,
+        "date_filter_field": "shift_date",
+        "sort_time_field": "end_time",
+        "record_selection": {
+          "mode": "latest"
+        }
+      },
+      "feature_wall_seconds": 38.8895,
+      "feature_queries": [
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 38.3057,
+          "rows": 2000,
+          "eligible_source_rows": 5538,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 37.709,
+          "rows": 2000,
+          "eligible_source_rows": 2291,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 37.5469,
+          "rows": 2000,
+          "eligible_source_rows": 2134,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 37.4288,
+          "rows": 2000,
+          "eligible_source_rows": 2035,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 38.5205,
+          "rows": 2000,
+          "eligible_source_rows": 2102,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 36.9545,
+          "rows": 2000,
+          "eligible_source_rows": 2091,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 36.9654,
+          "rows": 2000,
+          "eligible_source_rows": 2077,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 27.5653,
+          "rows": 426,
+          "eligible_source_rows": 435,
+          "product_batch_size": 426,
+          "lookup_count": 426,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        }
+      ],
+      "workers": 8,
+      "trace_wall_seconds": 0.0958,
+      "trace_queries": []
+    },
+    "rules": [
+      "按租户和产品编码关联；目标时间范围内同一产品按工序规则保留一条记录。",
+      "目标宽表按shift_date班次日期筛选，起止日期均包含；最新记录排序与上游追溯时点仍采用字典中经DDL确认的分区时间字段。",
+      "OCV3：按end_time取最新记录。",
+      "分容：按end_time取工步10的最新记录。",
+      "按目标租户和产线确定314Ah或588Ah路线，再按字典关联ADS，保留所选追溯批次全部物料行；同一目标产品、同一上游码只计一次。",
+      "ADS在一次氦检生成：电芯码目标使用目标时点以内的追溯批次；更早工序的物料码目标使用最新已知编码关系，其上游参数仍严格不晚于目标时点。",
+      "NG/OK产品数按目标产品计数；箱线图n为目标产品与上游码关联后的有效参数数，关联到的多个卷绕码全部绘图，不求平均。同一物料用于多个目标产品时按各目标产品关联计数，这些样本不是相互独立的观测。",
+      "参数缺失数按已知上游码统计；缺失电芯数为没有任何有效参数的目标电芯，部分缺失电芯另计；追溯缺失时不猜测上游码数量。",
+      "气泡图按当前特征的有效值划分最多10个等宽区间，左闭右开且最后区间包含右端点；气泡纵轴为区间内去重NG产品数/(NG+OK去重产品数)，面积为区间覆盖产品数。",
+      "同一产品的多个上游码落入同一区间时只计一次；落入不同区间时分别计入，各区间产品数不能直接相加作为总产品数。空区间不绘制气泡，也不视作NG占比为0。",
+      "正负极合浆、涂布、辊压只显示区间气泡图；其他工序可切换气泡图与箱线图。箱线图统计包含全部有效值，隐藏离群散点。",
+      "NG为当前缺陷；OK为缺陷字段为空或OK且产品质量为合格的记录；其他缺陷和未知质量排除。",
+      "上游不沿用目标日期、班次或设备限制；在目标记录的分区时间之前，按各工序规则在数据库内选取一条记录。",
+      "缺失值不填零；箱体为25%至75%分位数，须为1.5倍IQR范围内实际值；统计使用全部取回记录。"
+    ],
+    "warnings": []
+  }
+}

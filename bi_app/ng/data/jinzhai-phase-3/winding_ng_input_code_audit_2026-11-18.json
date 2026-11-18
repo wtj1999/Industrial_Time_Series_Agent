@@ -1,0 +1,211 @@
+{
+  "NG_raw_rows": 71,
+  "NG_codes": 71,
+  "fields": {
+    "product_in_code": {
+      "nonempty_NG_codes": 71,
+      "distinct_values": 25,
+      "formats": {
+        "9": 1,
+        "99999": 1,
+        "9999": 2,
+        "999999999": 1,
+        "AAAAAAAAAAA": 1,
+        "AAAAAAAA": 1,
+        "AAA9AAAA9999999999": 12,
+        "AAAAAAA": 1,
+        "AAAAAAAAA": 1,
+        "aaaaaaaaaaa": 1,
+        "aaaaa": 2,
+        "aaaaaaaaa": 1
+      },
+      "matches": [
+        {
+          "process": "C1301",
+          "table": "dwd_qual_pos_roll_slit_param_pim",
+          "matched_codes": 6,
+          "rows": 6,
+          "seconds": 1.4574
+        },
+        {
+          "process": "C1201",
+          "table": "dwd_qual_pos_coating_param_pim",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 1.9737
+        },
+        {
+          "process": "C1302",
+          "table": "dwd_qual_neg_roll_slit_param_pim",
+          "matched_codes": 6,
+          "rows": 6,
+          "seconds": 0.9782
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "winding_slit_code",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.7934
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "pos_roll_slit_code",
+          "matched_codes": 6,
+          "rows": 2241,
+          "seconds": 1.0137
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "pos_coating_code",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 1.0946
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "neg_roll_slit_code",
+          "matched_codes": 6,
+          "rows": 1786,
+          "seconds": 1.6929
+        }
+      ]
+    },
+    "pos_film_roll_no": {
+      "nonempty_NG_codes": 71,
+      "distinct_values": 6,
+      "formats": {
+        "AAA9AAAA9999999999": 6
+      },
+      "matches": [
+        {
+          "process": "C1301",
+          "table": "dwd_qual_pos_roll_slit_param_pim",
+          "matched_codes": 6,
+          "rows": 6,
+          "seconds": 1.5211
+        },
+        {
+          "process": "C1201",
+          "table": "dwd_qual_pos_coating_param_pim",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.6415
+        },
+        {
+          "process": "C1302",
+          "table": "dwd_qual_neg_roll_slit_param_pim",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.8057
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "winding_slit_code",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.8052
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "pos_roll_slit_code",
+          "matched_codes": 6,
+          "rows": 2241,
+          "seconds": 0.6033
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "pos_coating_code",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.6411
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "neg_roll_slit_code",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 1.1235
+        }
+      ]
+    },
+    "neg_film_roll_no": {
+      "nonempty_NG_codes": 71,
+      "distinct_values": 5,
+      "formats": {
+        "AAA9AAAA9999999999": 5
+      },
+      "matches": [
+        {
+          "process": "C1301",
+          "table": "dwd_qual_pos_roll_slit_param_pim",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.6018
+        },
+        {
+          "process": "C1201",
+          "table": "dwd_qual_pos_coating_param_pim",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.78
+        },
+        {
+          "process": "C1302",
+          "table": "dwd_qual_neg_roll_slit_param_pim",
+          "matched_codes": 5,
+          "rows": 5,
+          "seconds": 1.0697
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "winding_slit_code",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.8324
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "pos_roll_slit_code",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 0.7274
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "pos_coating_code",
+          "matched_codes": 0,
+          "rows": 0,
+          "seconds": 1.3902
+        },
+        {
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "field": "neg_roll_slit_code",
+          "matched_codes": 5,
+          "rows": 1562,
+          "seconds": 0.719
+        }
+      ]
+    }
+  },
+  "related_identity_columns": [
+    {
+      "table_schema": "ads",
+      "table_name": "ads_trace_cell_coding_314ah_pim",
+      "column_name": "winding_slit_code",
+      "column_comment": "切卷产品码"
+    },
+    {
+      "table_schema": "ads",
+      "table_name": "ads_trace_cell_coding_588ah_pim",
+      "column_name": "winding_slit_code",
+      "column_comment": "切卷产品码"
+    },
+    {
+      "table_schema": "dwd",
+      "table_name": "dwd_qual_winding_slit_param_pim",
+      "column_name": "pos_film_roll_no",
+      "column_comment": "正极膜卷号"
+    }
+  ]
+}
