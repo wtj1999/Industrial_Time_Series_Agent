@@ -74,6 +74,7 @@ export interface BiNeedConfirmResponse {
 }
 
 export interface BiSuccessResponse {
+  source_id?: string;
   status: 'success';
   type?: 'success' | string;
   thread_id: string;

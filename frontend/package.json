@@ -11,6 +11,9 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "test:ng-chart": "node scripts/test-ng-chart.mjs",
+    "test:ng-deep": "node scripts/test-ng-deep.mjs",
+    "test:ng-deep-ui": "node scripts/test-ng-deep-browser.mjs",
+    "test:ng-deep-stream": "node scripts/test-ng-deep-stream.mjs",
     "test:bi-analysis": "node scripts/test-bi-analysis.mjs",
     "test:online-metrics": "node scripts/test-online-metrics.mjs",
     "test:vehicle-sales": "node scripts/test-vehicle-sales.mjs"

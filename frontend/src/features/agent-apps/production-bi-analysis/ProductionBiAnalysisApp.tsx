@@ -3,6 +3,11 @@ import { DatabaseZap, Sparkles } from 'lucide-react';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import type { Message } from '@/types';
+import { recommendNgFields, analyzeNgFields } from '../ng-defect-analysis/deepApi';
+import type { DeepPlan, DeepProgress, DeepResult } from '../ng-defect-analysis/deepTypes';
+import { NgDeepFieldCard } from '../ng-defect-analysis/NgDeepFieldCard';
+import { NgDeepResultCard } from '../ng-defect-analysis/NgDeepResultCard';
+import { NgDeepProgressCard } from '../ng-defect-analysis/NgDeepProgressCard';
 import { queryNgOptions, queryProductionBi } from './api';
 import type { ProductionBiAgent } from './config';
 import { BiResultCard } from './BiResultCard';
@@ -18,7 +23,10 @@ import type {
 type BiTurn =
   | { id: string; kind: 'message'; message: Message }
   | { id: string; kind: 'confirm'; confirm: BiConfirmPayload; threadId: string; submitted: boolean; expired?: boolean; analysisQuery: string }
-  | { id: string; kind: 'result'; result: BiSuccessResponse };
+  | { id: string; kind: 'result'; result: BiSuccessResponse }
+  | { id: string; kind: 'deep_confirm'; plan: DeepPlan; submitted: boolean }
+  | { id: string; kind: 'deep_progress'; progress: DeepProgress; history: DeepProgress[] }
+  | { id: string; kind: 'deep_result'; result: DeepResult };
 
 function newId(): string {
   return globalThis.crypto?.randomUUID?.()
@@ -29,6 +37,9 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
   const [threadId, setThreadId] = useState(() => newId());
   const [turns, setTurns] = useState<BiTurn[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deepProgressId, setDeepProgressId] = useState<string | null>(null);
+  const [injectedText, setInjectedText] = useState<string>();
+  const [pendingDeep, setPendingDeep] = useState<{ sourceId: string; rowIndex: number; threadId: string; ngName: string }>();
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -97,6 +108,16 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
   const submitQuery = (query: string) => {
     const trimmed = query.trim();
     if (!trimmed || loading) return;
+    if (pendingDeep) {
+      const context = pendingDeep;
+      setPendingDeep(undefined);
+      setTurns((current) => [...current, { id: newId(), kind: 'message', message: { role: 'user', content: trimmed, timestamp: new Date().toISOString() } }]);
+      void runDeep(async (signal) => {
+        const plan = await recommendNgFields({ source_id: context.sourceId, row_index: context.rowIndex, thread_id: context.threadId, ...(agent.ngFactoryId ? { factory_id: agent.ngFactoryId } : {}) }, signal);
+        if (!signal.aborted) setTurns((current) => [...current, { id: newId(), kind: 'deep_confirm', plan, submitted: false }]);
+      });
+      return;
+    }
     setTurns((current) => [...current.map((turn) => (
       turn.kind === 'confirm' && !turn.submitted ? { ...turn, expired: true } : turn
     )), {
@@ -105,6 +126,46 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
       message: { role: 'user', content: trimmed, timestamp: new Date().toISOString() },
     }]);
     void runRequest({ query: trimmed, thread_id: threadId });
+  };
+
+  const runDeep = async (action: (signal: AbortSignal) => Promise<void>) => {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    setLoading(true);
+    try {
+      await action(controller.signal);
+    } catch (error) {
+      if (!controller.signal.aborted) setTurns((current) => [...current, { id: newId(), kind: 'message', message: { role: 'assistant', content: `深度分析未完成：${error instanceof Error ? error.message : '请重试'}`, timestamp: new Date().toISOString() } }]);
+    } finally {
+      if (abortRef.current === controller) { abortRef.current = null; setLoading(false); setDeepProgressId(null); }
+    }
+  };
+
+  const submitDeepFields = (turnId: string, plan: DeepPlan, targetId: string, featureIds: string[]) => {
+    if (loading) return;
+    const progressId = newId();
+    const initial: DeepProgress = { stage: 'preparing', message: '正在提交已确认字段，准备读取数据', sequence: 0, elapsed_seconds: 0 };
+    setDeepProgressId(progressId);
+    setTurns(current => [...current, { id: progressId, kind: 'deep_progress', progress: initial, history: [initial] }]);
+    const update = (progress: DeepProgress) => setTurns(current => current.map(turn => turn.id === progressId && turn.kind === 'deep_progress'
+      ? { ...turn, progress, history: turn.progress.sequence === progress.sequence ? turn.history : [...turn.history, progress].slice(-160) } : turn));
+    const finish = (stage: 'completed' | 'failed', message: string) => setTurns(current => current.map(turn => {
+      if (turn.id !== progressId || turn.kind !== 'deep_progress' || turn.progress.stage === stage) return turn;
+      const progress: DeepProgress = { ...turn.progress, stage, message, sequence: turn.progress.sequence + 1 };
+      return { ...turn, progress, history: [...turn.history, progress].slice(-160) };
+    }));
+    void runDeep(async (signal) => {
+      try {
+        const result = await analyzeNgFields({ thread_id: plan.thread_id, plan_id: plan.plan_id, target_id: targetId, feature_ids: featureIds, ...(agent.ngFactoryId ? { factory_id: agent.ngFactoryId } : {}) }, signal,
+          progress => { if (!signal.aborted) update(progress); });
+        if (signal.aborted) return;
+        finish('completed', `取数与分析完成 · ${result.timing.total_seconds.toFixed(2)}秒`);
+        setTurns((current) => [...current.map((turn) => turn.id === turnId && turn.kind === 'deep_confirm' ? { ...turn, submitted: true } : turn), { id: newId(), kind: 'deep_result', result }]);
+      } catch (error) {
+        if (!signal.aborted) finish('failed', error instanceof Error ? error.message : '取数与分析失败');
+        throw error;
+      }
+    });
   };
 
   const submitConfirmation = async (
@@ -126,6 +187,12 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
   const stop = () => {
     abortRef.current?.abort();
     abortRef.current = null;
+    setTurns(current => current.map(turn => {
+      if (turn.id !== deepProgressId || turn.kind !== 'deep_progress') return turn;
+      const progress: DeepProgress = { ...turn.progress, stage: 'cancelled', message: '已停止接收取数进度', sequence: turn.progress.sequence + 1 };
+      return { ...turn, progress, history: [...turn.history, progress].slice(-160) };
+    }));
+    setDeepProgressId(null);
     setLoading(false);
   };
 
@@ -155,9 +222,17 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
                   />
                 );
               }
-              return <BiResultCard key={turn.id} result={turn.result} />;
+              if (turn.kind === 'deep_confirm') return <NgDeepFieldCard key={turn.id} plan={turn.plan} submitted={turn.submitted} disabled={loading} onSubmit={(targetId, featureIds) => submitDeepFields(turn.id, turn.plan, targetId, featureIds)} />;
+              if (turn.kind === 'deep_result') return <NgDeepResultCard key={turn.id} result={turn.result} />;
+              if (turn.kind === 'deep_progress') return <NgDeepProgressCard key={turn.id} progress={turn.progress} history={turn.history} />;
+              return <BiResultCard key={turn.id} result={turn.result} deepDisabled={loading} onDeepAnalyze={turn.result.chart?.type === 'ng_bar' && turn.result.source_id ? (rowIndex) => {
+                const row = turn.result.chart!.rows[rowIndex];
+                if (!row) return;
+                setPendingDeep({ sourceId: turn.result.source_id!, rowIndex, threadId: turn.result.thread_id, ngName: row.ng_name });
+                setInjectedText(`针对当前${row.ng_name}进行深度分析`);
+              } : undefined} />;
             })}
-            {loading && (
+            {loading && !deepProgressId && (
               <MessageBubble
                 streaming
                 message={{ role: 'assistant', content: '', timestamp: new Date().toISOString() }}
@@ -166,7 +241,15 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
           </div>
         </div>
       </div>
+      {pendingDeep && <div className="px-4 pb-2 sm:px-6 lg:px-10">
+        <div aria-label="已选深度分析类型" className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+          <span className="min-w-0">已选 {pendingDeep.ngName}，提交后解析目标和上游数值特征。</span>
+          <button type="button" onClick={() => setPendingDeep(undefined)} className="shrink-0 underline">取消深度分析</button>
+        </div>
+      </div>}
       <ChatInput
+        injectedText={injectedText}
+        onConsumeInjected={() => setInjectedText(undefined)}
         streaming={loading}
         allowFileUpload={false}
         placeholder={`输入${agent.category}分析问题，回车发送，Shift+Enter 换行`}

@@ -145,6 +145,8 @@ SQLite checkpoint 默认保存在 `bi_app/.state/ng_checkpoints.sqlite3`，已�
 - 首次请求为 `{ "query": "滁州正极涂布参数", "session_id": "会话标识" }`。
 - 各层（基地 → 工艺路线 → 工序 → 参数）统一使用复选框，确认请求为 `{ "session_id": "会话标识", "confirm": { "option_ids": ["2048949299794657281"] } }`。ID 始终作为字符串，不转数值、不拆分或推断 tenant_id。后端兼容旧浏览器的 option_id，但转成 option_ids 才向远程发送。
 - 未勾选发送 `option_ids: []`，表示当前层全部候选。全选展示项发送实际勾选 ID，不用空数组代替，避免展示上限导致范围扩大。
+- 搜索后的“全选筛选结果”只勾选所有匹配候选（含其他页），再次点击取消仅移除当前匹配项；保留用户此前选择的其他项并显示隐藏选中数。无匹配结果时禁用全选。
+- 前端将相同 ID、名称和来源的完全重复候选合并为一个复选框；同名但不同 ID 保持独立。若同一 ID 对应不同名称或来源，前端返回明确提示，不展示会联动的候选。由于确认协议只接受 option_ids，远程服务必须为不同来源的可独立候选提供唯一 ID；不能仅用本地组合 key 掩盖冲突。
 - 本地会话在后端按已认证用户和 session_id 派生远程会话 ID，避免不同账户复用远程对话；返回给浏览器的 session_id/thread_id 仍是原标识。整个确认链使用同一远程会话。
 - 按 status/content_type 分支，不使用阶段名 type。need_confirm/options 渲染复选框，依次优先使用非空 preselect、options[].selected、reply_with.payload.option_ids 初始化预选；服务端校验 ID 后移除 reply_with，不让它控制请求地址。支持名称/来源搜索、取消勾选、本地每页 10 项分页，翻页保留选择。新问题使旧确认失效，失败可重试。
 - success/table 使用动态 columns 顺序及中文标签展示（含基地、路线、工序来源），null 显示为空。empty=true 时仍展示列头和“暂无数据”，始终展示 message 中的跳过工序及空结果原因；tenant_id=null 原样保留。error/text 是 HTTP 200 业务错误，显示远程 message，不转换成格式错误、不触发 LLM。
@@ -152,6 +154,7 @@ SQLite checkpoint 默认保存在 `bi_app/.state/ng_checkpoints.sqlite3`，已�
 - 分析统计覆盖全部返回记录，关注标准定义、数值上下限倒置、自检标识与检验值个数。最多选取 24 条重点参数作为模型上下文；不把追溯参数缺少数值限值判为不合格，不用工艺标准推断实测超标、Cpk 或良率。返回记录少于服务报告总数时明确分析范围。
 - 模型复用 BI/不良品分析的 `BI_NG_LLM_*` 配置（当前 `DeepSeek-V4.1-Flash`），结构化输出、零自动重试、最长 45 秒。按用户、原始问题、完整结果及模型配置缓存成功分析 24 小时；空结果不调用模型，模型异常仅显示分析不可用提示并保留原始表格。
 - 前端在所有确认请求携带本地字段 `analysis_query`，保留原始问题用于最终分析；该字段不会转发到远程 Control Plan API。
+- 前端选择回归检查：`node frontend/scripts/test-control-plan-selection.mjs`。同步前端时须同时包含 `ControlPlanAnalysisApp.tsx` 和同目录下新增的 `selection.ts`。
 - 网络异常、超时、非法 JSON 和协议不匹配均返回受控错误；浏览器不直接连接内网远程地址，也不按返回的 reply_with 构造任意请求。
 
 部署需同步 `bi_app/control_plan.py`、`bi_app/control_plan_analysis.py`、`bi_app/analysis.py`、`bi_app/api.py` 和前端全部相关文件，重启 `bi-backend` 并加载新的前端。无新增依赖。测试使用模拟远程和模型响应，不代表已对真实基地数据做验收：`python -m pytest bi_app/test_control_plan.py bi_app/test_control_plan_analysis.py bi_app/test_analysis.py bi_app/test_api.py bi_app/test_auth.py -q`。

@@ -27,6 +27,7 @@ NG_FACTORIES: dict[str, NgFactoryConfig] = {
 
 
 class NgSettings(BaseModel):
+    factory_id: str = DEFAULT_NG_FACTORY
     db_host: str = "10.52.94.75"
     db_port: int = Field(default=19030, ge=1, le=65535)
     db_user: str = "gdmo"
@@ -44,6 +45,10 @@ class NgSettings(BaseModel):
     option_page_size: int = Field(default=100, ge=1, le=500)
     match_scan_limit: int = Field(default=5000, ge=100, le=20000)
     match_candidate_limit: int = Field(default=60, ge=10, le=200)
+    catalog_root: Path = BI_ROOT / "ng" / "data"
+    deep_max_rows: int = Field(default=200000, ge=100, le=2000000)
+    deep_query_workers: int = Field(default=8, ge=1, le=8)
+    deep_product_batch_size: int = Field(default=2000, ge=100, le=10000)
 
 
 @lru_cache
@@ -68,6 +73,10 @@ def get_ng_settings() -> NgSettings:
         confirmation_ttl_seconds=int(os.getenv("BI_NG_CONFIRMATION_TTL_SECONDS", "86400")),
         match_scan_limit=int(os.getenv("BI_NG_MATCH_SCAN_LIMIT", "5000")),
         match_candidate_limit=int(os.getenv("BI_NG_MATCH_CANDIDATE_LIMIT", "60")),
+        catalog_root=Path(os.getenv("BI_NG_CATALOG_ROOT", str(BI_ROOT / "ng" / "data"))),
+        deep_max_rows=int(os.getenv("BI_NG_DEEP_MAX_ROWS", "200000")),
+        deep_query_workers=int(os.getenv("BI_NG_DEEP_QUERY_WORKERS", "8")),
+        deep_product_batch_size=int(os.getenv("BI_NG_DEEP_PRODUCT_BATCH_SIZE", "2000")),
     )
 
 
@@ -84,6 +93,7 @@ def get_ng_factory_settings(factory_id: str = DEFAULT_NG_FACTORY) -> NgSettings:
         path = path.with_name(f'{path.stem}.{factory_id}{path.suffix}')
     return NgSettings.model_validate({
         **base.model_dump(),
+        'factory_id': factory_id,
         'db_host': os.getenv(prefix + 'HOST', defaults.db_host),
         'db_port': int(os.getenv(prefix + 'PORT', str(defaults.db_port))),
         'db_user': os.getenv(prefix + 'USER', defaults.db_user),

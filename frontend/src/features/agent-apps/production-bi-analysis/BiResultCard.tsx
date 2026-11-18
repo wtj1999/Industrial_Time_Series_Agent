@@ -7,7 +7,7 @@ import { NgAnalysisCard } from '../ng-defect-analysis/NgAnalysisCard';
 
 const PAGE_SIZE = 20;
 
-export function BiResultCard({ result, columnLabels, pageSize = PAGE_SIZE, message, nullDisplay = '—' }: { result: BiSuccessResponse; columnLabels?: Record<string, string>; pageSize?: number; message?: string; nullDisplay?: string }) {
+export function BiResultCard({ result, columnLabels, pageSize = PAGE_SIZE, message, nullDisplay = '—', onDeepAnalyze, deepDisabled }: { result: BiSuccessResponse; columnLabels?: Record<string, string>; pageSize?: number; message?: string; nullDisplay?: string; onDeepAnalyze?: (rowIndex: number) => void; deepDisabled?: boolean }) {
   const [page, setPage] = useState(0);
   const rows = result.data ?? [];
   const effectivePageSize = Math.max(1, Math.min(100, Math.floor(pageSize) || PAGE_SIZE));
@@ -64,6 +64,7 @@ export function BiResultCard({ result, columnLabels, pageSize = PAGE_SIZE, messa
                         {columnLabels?.[column] ?? column}
                       </th>
                     ))}
+                    {onDeepAnalyze && <th className="whitespace-nowrap border-b border-steel-200 px-3 py-2.5 font-semibold">操作</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -74,6 +75,7 @@ export function BiResultCard({ result, columnLabels, pageSize = PAGE_SIZE, messa
                           {row[column] == null ? nullDisplay : formatCell(row[column])}
                         </td>
                       ))}
+                      {onDeepAnalyze && <td className="whitespace-nowrap border-b border-steel-100 px-3 py-2.5"><Button variant="subtle" size="sm" disabled={deepDisabled} onClick={() => onDeepAnalyze(page * effectivePageSize + rowIndex)}>深度分析</Button></td>}
                     </tr>
                   ))}
                   {rows.length === 0 && <tr><td colSpan={columns.length} className="px-4 py-8 text-center text-xs text-steel-500">暂无数据</td></tr>}

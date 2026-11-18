@@ -14,6 +14,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
 from .config import NgSettings
+from .deep import NgDeepService
 from .analysis import NgResultAnalyzer
 from .errors import NgError
 from .parser import NgIntentParser
@@ -41,6 +42,7 @@ class NgWorkflow:
         self.settings = settings
         self.parser = parser or NgIntentParser(settings)
         self.repository = repository or NgRepository(settings)
+        self.deep = NgDeepService(settings, self.repository, settings.factory_id)
         self.analyzer = analyzer or NgResultAnalyzer(settings)
         self._connection = None
         if checkpointer is None:
@@ -160,6 +162,7 @@ class NgWorkflow:
         description = f"{parameters.start_date} 至 {parameters.end_date}，一次合格口径下按{grouping_text}汇总不良数量"
         return {"result": {
             "status": "success", "type": "success", "thread_id": state["thread_id"],
+            "source_id": state["confirmation_id"],
             "rewritten_query": description + (f"；{selected_text}" if selected_text else "；全部筛选维度"),
             "table": "dwd.dwd_qual_defect_detail_pim",
             "row_count": len(rows),
@@ -217,7 +220,7 @@ class NgWorkflow:
                     if snapshot.next in {("aggregate",), ("analyze",)}:
                         result = self.graph.invoke(None, config)
                     elif not snapshot.next and snapshot.values.get("result"):
-                        return snapshot.values["result"]
+                        result = snapshot.values
                     else:
                         raise NgError("当前查询无法恢复，请重新提问", 409)
                 else:
@@ -225,6 +228,9 @@ class NgWorkflow:
             if result.get("__interrupt__"):
                 return {"status": "need_confirm", "type": "field_confirm",
                         "thread_id": request.thread_id, "confirm": result["__interrupt__"][0].value}
+            # Previously completed checkpoints predate deep-analysis source IDs.
+            result["result"].setdefault("source_id", result["confirmation_id"])
+            self.deep.save_source(result["result"], result["parameters"], result["selected"], user_id)
             return result["result"]
 
     def options(self, request: NgOptionsRequest, user_id: str) -> dict:

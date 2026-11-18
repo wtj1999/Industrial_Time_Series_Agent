@@ -2,10 +2,13 @@ import logging
 import threading
 
 from fastapi import APIRouter, Header, HTTPException
+from fastapi.responses import StreamingResponse
 
 from .config import DEFAULT_NG_FACTORY, NG_FACTORIES, get_ng_factory_settings
 from .errors import NgError
 from .schemas import NgOptionsRequest, NgQueryRequest
+from .deep_schemas import DeepAnalyzeRequest, DeepRecommendRequest
+from .deep_progress import analysis_event_stream
 from .workflow import NgWorkflow
 
 router = APIRouter(prefix="/api/bi/ng", tags=["NG问数"])
@@ -52,3 +55,22 @@ def query_ng(request: NgQueryRequest, x_user_id: str = Header(default="anonymous
 @router.post("/options")
 def ng_options(request: NgOptionsRequest, x_user_id: str = Header(default="anonymous", max_length=200)) -> dict:
     return _invoke(lambda: get_ng_service(request.factory_id).options(request, x_user_id))
+
+
+@router.post("/deep/recommend")
+def recommend_ng_fields(request: DeepRecommendRequest, x_user_id: str = Header(default="anonymous", max_length=200)) -> dict:
+    return _invoke(lambda: get_ng_service(request.factory_id).deep.recommend(request, x_user_id))
+
+
+@router.post("/deep/analyze")
+def analyze_ng_fields(request: DeepAnalyzeRequest, x_user_id: str = Header(default="anonymous", max_length=200)) -> dict:
+    return _invoke(lambda: get_ng_service(request.factory_id).deep.analyze(request, x_user_id))
+
+
+@router.post("/deep/analyze/stream")
+def stream_ng_analysis(request: DeepAnalyzeRequest, x_user_id: str = Header(default="anonymous", max_length=200)):
+    service = get_ng_service(request.factory_id).deep
+    prepared = _invoke(lambda: service.prepare_analysis(request, x_user_id))
+    return StreamingResponse(analysis_event_stream(lambda progress: service.run_prepared(prepared, progress)),
+                             media_type="application/x-ndjson",
+                             headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})

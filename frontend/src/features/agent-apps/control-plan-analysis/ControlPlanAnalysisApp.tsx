@@ -10,11 +10,12 @@ import { getAuthHeaders, handleUnauthorized } from '@/utils/user';
 import type { Message } from '@/types';
 import type { BiSuccessResponse } from '../production-bi-analysis/types';
 import { CONTROL_PLAN_AGENT } from './config';
+import { normalizeControlPlanOptions, toggleMatchingOptions, type ControlPlanOption } from './selection';
 
 type Selection = { option_ids: string[] };
 interface Confirmation {
   selection_mode: 'multiple';
-  options: Array<{ id: string; label: string; detail?: string; selected?: boolean }>;
+  options: ControlPlanOption[];
   preselect?: string[];
   shown_count?: number;
   page_size?: number;
@@ -53,6 +54,7 @@ export function ControlPlanAnalysisApp() {
       if (!response.ok) throw new Error(typeof body?.detail === 'string' ? body.detail : body?.error ?? 'Control Plan 查询失败');
       if (body?.status === 'error' && body.content_type === 'text') throw new Error(body.message || 'Control Plan 查询失败');
       if (!body || !['need_confirm', 'success'].includes(body.status) || body.content_type !== (body.status === 'need_confirm' ? 'options' : 'table') || (body.status === 'need_confirm' && !Array.isArray(body.confirm?.options))) throw new Error('Control Plan 服务响应格式不正确');
+      if (body.status === 'need_confirm') body.confirm.options = normalizeControlPlanOptions(body.confirm.options);
       if (controller.signal.aborted) return false;
       setTurns(current => [...current, body.status === 'need_confirm'
         ? { id: genId(), kind: 'confirm', response: body, submitted: false, expired: false }
@@ -105,14 +107,18 @@ function ConfirmationCard({ response, disabled, submitted, expired, onSubmit }: 
   const options = [
     ...confirm.options.filter(option => defaults.has(option.id)),
     ...confirm.options.filter(option => !defaults.has(option.id)),
-  ].filter(option => `${option.label} ${option.detail ?? ''}`.toLowerCase().includes(search.toLowerCase()));
+  ].filter(option => `${option.label} ${option.detail ?? ''}`.toLowerCase().includes(search.trim().toLowerCase()));
+  const matchingIds = options.map(option => option.id);
+  const allMatchingSelected = matchingIds.length > 0 && matchingIds.every(id => selected.includes(id));
+  const hiddenSelected = selected.filter(id => !matchingIds.includes(id)).length;
   const pageCount = Math.max(1, Math.ceil(options.length / pageSize));
   const visible = options.slice(page * pageSize, (page + 1) * pageSize);
   return <section className="overflow-hidden rounded-2xl border border-brand-200 bg-white shadow-soft">
     <div className="flex items-center gap-3 border-b border-steel-200 bg-gradient-to-r from-brand-50/70 to-transparent px-4 py-3"><span className="rounded-lg bg-brand-600 p-2 text-white"><Filter size={16}/></span><h3 className="text-sm font-semibold text-steel-900">选择查询范围</h3><span className="ml-auto text-[10px] text-steel-500">{expired ? '已失效' : submitted ? '已提交' : '等待你的输入'}</span></div>
     <div className="space-y-4 p-4 sm:p-5"><p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2.5 text-xs leading-5 text-steel-700">{response.message || '可选择多项，不勾选时查询当前层全部候选。'}</p>
       <p className="text-[11px] leading-5 text-steel-500">展示 {confirm.options.length} / {confirm.total_count ?? confirm.options.length} 个候选 · 请确认勾选范围，可自行调整{(confirm.total_count ?? 0) > confirm.options.length ? '；未勾选时包含尚未展示的候选' : ''}</p>
-      <div className="flex items-center gap-3"><input aria-label="搜索路线或参数" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} disabled={disabled} placeholder="搜索名称、基地、路线或工序" className="h-9 min-w-0 flex-1 rounded-lg border border-steel-200 px-3 text-xs"/><button type="button" disabled={disabled} className="shrink-0 text-xs text-brand-700 disabled:opacity-50" onClick={() => setSelected(selected.length === confirm.options.length ? [] : confirm.options.map(option => option.id))}>{selected.length && selected.length === confirm.options.length ? '取消全选' : '全选展示项'}</button></div>
+      <div className="flex items-center gap-3"><input aria-label="搜索路线或参数" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} disabled={disabled} placeholder="搜索名称、基地、路线或工序" className="h-9 min-w-0 flex-1 rounded-lg border border-steel-200 px-3 text-xs"/><button type="button" disabled={disabled || !matchingIds.length} className="shrink-0 text-xs text-brand-700 disabled:opacity-50" onClick={() => setSelected(current => toggleMatchingOptions(current, matchingIds))}>{allMatchingSelected ? '取消全选' : search.trim() ? '全选筛选结果' : '全选展示项'}</button></div>
+      {search.trim() && <p className="text-[11px] leading-5 text-steel-500">匹配 {options.length} 项，全选作用于所有匹配结果（含其他页）。{hiddenSelected > 0 && `已有 ${hiddenSelected} 项选中项不在当前搜索结果中，将保留并一并提交。`}</p>}
       <div className="grid gap-2 sm:grid-cols-2">{visible.map(option => <label key={option.id} className={`flex min-w-0 items-start gap-2 rounded-xl border px-3 py-3 text-xs ${selected.includes(option.id) ? 'border-brand-300 bg-brand-50' : 'border-steel-200 bg-white'} ${disabled ? 'opacity-60' : 'cursor-pointer'}`}>
         <input type="checkbox" name={`selection-${inputName}`} checked={selected.includes(option.id)} disabled={disabled} onChange={() => setSelected(current => current.includes(option.id) ? current.filter(id => id !== option.id) : [...current, option.id])}/>
         <span className="min-w-0 break-words"><span className="block font-medium text-steel-800">{option.label}</span>{option.detail && <span className="mt-1 block text-[11px] text-steel-500">{option.detail}</span>}</span>
