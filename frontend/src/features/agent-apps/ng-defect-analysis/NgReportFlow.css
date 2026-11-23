@@ -1,0 +1,85 @@
+.ng-report-flow {
+  position: relative;
+  isolation: isolate;
+  container-name: ng-report-flow;
+  container-type: inline-size;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e0e8e6;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fbfefd, #f4f8f7 58%, #f7f9fc);
+  box-shadow: inset 0 1px 0 #fff, 0 3px 14px -10px #224c3c24;
+}
+.ng-report-flow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: radial-gradient(#a8bfb5 0.7px, transparent 0.7px);
+  background-size: 16px 16px;
+  opacity: .2;
+  pointer-events: none;
+}
+.ng-report-flow__header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.ng-report-flow__heading { display: inline-flex; align-items: center; gap: 7px; color: #4f635b; font-size: 11px; font-weight: 600; letter-spacing: .03em; }
+.ng-report-flow__heading > svg { color: #5c8d79; }
+.ng-report-flow__position { display: inline-flex; align-items: center; gap: 7px; padding: 3px 9px; border: 1px solid #dbece4; border-radius: 999px; background: #ffffffd9; color: #087454; font-size: 10px; line-height: 20px; }
+.ng-report-flow__status-dot { width: 5px; height: 5px; flex: none; border-radius: 50%; background: #10a576; box-shadow: 0 0 0 3px #10b98113; }
+.ng-report-flow__fraction { margin-left: 2px; padding-left: 8px; border-left: 1px solid #dbece4; color: #7c9389; font-variant-numeric: tabular-nums; }
+.ng-report-flow__diagram { width: 100%; max-width: 760px; margin: 0 auto; }
+.ng-report-flow__steps { --ng-flow-gap: clamp(18px, 4cqw, 36px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ng-flow-gap); min-width: 0; padding: 0; margin: 0; list-style: none; }
+.ng-report-flow__step { position: relative; min-width: 0; }
+.ng-report-flow__card { position: relative; height: 100%; min-height: 100px; overflow: hidden; padding: 12px; border: 1px solid #dce5e1; border-radius: 11px; background: #ffffffed; box-shadow: 0 2px 5px #213f3104; }
+.ng-report-flow__node-header { display: flex; align-items: center; gap: 8px; }
+.ng-report-flow__icon { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex: none; border: 1px solid #d9eee3; border-radius: 9px; background: #eef8f3; color: #378e6c; }
+.ng-report-flow__name { position: relative; z-index: 1; color: #3f534b; font-size: 12px; font-weight: 600; line-height: 19px; white-space: nowrap; }
+.ng-report-flow__number { margin-left: auto; align-self: flex-start; color: #bdcdc5; font-size: 11px; font-weight: 500; line-height: 16px; font-variant-numeric: tabular-nums; }
+.ng-report-flow__result { position: relative; margin: 10px 0 0; color: #62776d; font-size: 11px; line-height: 18px; overflow-wrap: anywhere; }
+.ng-report-flow__completion { position: absolute; right: -5px; bottom: -4px; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: 2px solid #fff; border-radius: 50%; background: #d5f0e1; color: #178a60; font-size: 10px; font-weight: 600; line-height: 12px; }
+.ng-report-flow__step[data-stage-state='current'] .ng-report-flow__card { border-color: #7bd4b0; background: linear-gradient(150deg, #fff 18%, #f0fbf5); box-shadow: 0 0 0 3px #14a8750a, 0 7px 22px -13px #14885a70; }
+.ng-report-flow__step[data-stage-state='current'] .ng-report-flow__icon { border-color: #159e70; background: linear-gradient(145deg, #1ab780, #079367); color: #fff; box-shadow: 0 4px 10px #07936729; }
+.ng-report-flow__step[data-stage-state='current'] .ng-report-flow__icon::before { content: ''; position: absolute; inset: -4px; border: 1px solid #19ae7947; border-radius: 12px; pointer-events: none; }
+.ng-report-flow__step[data-stage-state='current'] .ng-report-flow__name { color: #096449; }
+.ng-report-flow__step[data-stage-state='current'] .ng-report-flow__number { color: #9bcbb6; }
+.ng-report-flow__step[data-stage-state='current'] .ng-report-flow__result { color: #41725d; }
+.ng-report-flow__step[data-stage-insufficient='true'] .ng-report-flow__result { color: #9b712f; }
+.ng-report-flow__step[data-stage-insufficient='true'] .ng-report-flow__completion { background: #fef0d2; color: #ad7a22; }
+.ng-report-flow__step[data-stage-state='pending'] .ng-report-flow__card { border-color: #e0e6e8; background: #f8fafbd4; box-shadow: none; }
+.ng-report-flow__step[data-stage-state='pending'] .ng-report-flow__icon { border-color: #e5eaed; background: #f0f3f5; color: #a9b4be; }
+.ng-report-flow__step[data-stage-state='pending'] .ng-report-flow__name { color: #8d9ba8; }
+.ng-report-flow__step[data-stage-state='pending'] .ng-report-flow__number { color: #d4dde3; }
+.ng-report-flow__connector { position: absolute; left: 100%; top: 50%; display: block; width: var(--ng-flow-gap); height: 20px; transform: translateY(-50%); color: #b9c8cb; }
+.ng-report-flow__connector[data-traversed='true'] { color: #60b995; }
+.ng-report-flow__link { position: absolute; left: 4px; right: 6px; top: 50%; height: 1px; background: linear-gradient(90deg, #ffffff00, currentColor 30%, currentColor); }
+.ng-report-flow__signal { position: absolute; left: 0; top: 50%; width: 3px; height: 3px; border-radius: 50%; background: #07996c; box-shadow: 0 0 4px #07996c66; transform: translate(-50%, -50%); }
+.ng-report-flow__arrowhead { position: absolute; right: 4px; top: 50%; margin-top: -6px; }
+@media (min-width: 640px) {
+  .ng-report-flow { padding: 14px 16px 16px; }
+}
+@container ng-report-flow (max-width: 480px) {
+  .ng-report-flow__card { min-height: 110px; padding: 10px 6px; text-align: center; }
+  .ng-report-flow__node-header { flex-direction: column; gap: 6px; }
+  .ng-report-flow__icon { width: 27px; height: 27px; }
+  .ng-report-flow__name { font-size: 11px; line-height: 17px; }
+  .ng-report-flow__number { display: none; }
+  .ng-report-flow__result { margin-top: 7px; font-size: 10px; line-height: 16px; }
+}
+@container ng-report-flow (max-width: 360px) {
+  .ng-report-flow__fraction { display: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ng-report-flow__card { animation: ng-report-flow-enter 380ms ease-out both; animation-delay: var(--ng-flow-delay, 0ms); }
+  .ng-report-flow__step[data-stage-state='current'] .ng-report-flow__icon::before { animation: ng-report-flow-breathe 3.4s ease-in-out infinite; }
+  .ng-report-flow__status-dot { animation: ng-report-flow-dot 3.4s ease-in-out infinite; }
+  .ng-report-flow__signal { animation: ng-report-flow-travel 3.2s ease-in-out infinite; animation-delay: var(--ng-flow-delay, 0ms); }
+  .ng-report-flow__arrowhead { animation: ng-report-flow-chevron 3.2s ease-in-out infinite; animation-delay: var(--ng-flow-delay, 0ms); }
+}
+@keyframes ng-report-flow-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ng-report-flow-breathe { 0%, 100% { opacity: .35; transform: scale(.98); } 50% { opacity: .8; transform: scale(1.06); } }
+@keyframes ng-report-flow-dot { 0%, 100% { box-shadow: 0 0 0 3px #10b98112; } 50% { box-shadow: 0 0 0 5px #10b98108; } }
+@keyframes ng-report-flow-travel { 0% { opacity: 0; left: 0; } 15% { opacity: .85; } 80% { opacity: .85; } 100% { opacity: 0; left: 100%; } }
+@keyframes ng-report-flow-chevron { 0%, 100% { opacity: .5; transform: translateX(-1px); } 50% { opacity: 1; transform: translateX(1px); } }
+@media (prefers-reduced-motion: reduce) {
+  .ng-report-flow *, .ng-report-flow *::before, .ng-report-flow *::after { animation: none !important; transition: none !important; }
+}
