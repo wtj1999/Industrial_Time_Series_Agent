@@ -1,0 +1,384 @@
+{
+  "generated_at": "2026-11-20T07:26:45.612532+00:00",
+  "table_name": "dwd_qual_hot_press_pim",
+  "code_linkage": {
+    "product_field": "product_code",
+    "comparison": "exact_value_no_substring_or_format_inference",
+    "sample_codes": 200,
+    "unmatched_sample_codes": 116,
+    "cross_route_ambiguous_codes": 0,
+    "sample_formats": {
+      "999999999999A99999": 200
+    },
+    "routes": {
+      "314ah": {
+        "trace_schema": "ads",
+        "trace_table": "ads_trace_cell_coding_314ah_pim",
+        "tenant_field": null,
+        "status": "no_match",
+        "product_code_field": null,
+        "observed_product_code_fields": [],
+        "matched_sample_codes": 0,
+        "ambiguous_field_codes": 0,
+        "field_match_counts": {},
+        "max_cells_per_sample_code": {}
+      },
+      "588ah": {
+        "trace_schema": "ads",
+        "trace_table": "ads_trace_cell_coding_588ah_pim",
+        "tenant_field": null,
+        "status": "ambiguous_fields",
+        "product_code_field": null,
+        "observed_product_code_fields": [
+          "tab_pre_weld_code",
+          "winding_slit_code"
+        ],
+        "matched_sample_codes": 84,
+        "ambiguous_field_codes": 42,
+        "field_match_counts": {
+          "tab_pre_weld_code": 42,
+          "winding_slit_code": 84
+        },
+        "max_cells_per_sample_code": {
+          "tab_pre_weld_code": 1,
+          "winding_slit_code": 1
+        }
+      }
+    },
+    "line_evidence": [
+      {
+        "tenant_id": "11300001",
+        "technics_line_name": "金寨三期314Ah",
+        "sample_codes": 100,
+        "route_match_counts": {
+          "314ah": 0,
+          "588ah": 0
+        },
+        "observed_routes": [],
+        "unmatched_codes": 100
+      },
+      {
+        "tenant_id": "11300001",
+        "technics_line_name": "金寨三期588AH",
+        "sample_codes": 100,
+        "route_match_counts": {
+          "314ah": 0,
+          "588ah": 84
+        },
+        "observed_routes": [
+          "588ah"
+        ],
+        "unmatched_codes": 16
+      }
+    ],
+    "audited_at": "2026-11-20T07:25:46.448124+00:00",
+    "sampling": {
+      "per_tenant_line_limit": 100,
+      "lookback_days_from_table_latest": 7,
+      "time_field": "end_time",
+      "latest_sample_time": "2026-11-20 15:24:52"
+    },
+    "query_seconds": 3.4375,
+    "completed_cell_backcheck": {
+      "product_field": "product_code",
+      "comparison": "exact_value_no_substring_or_format_inference",
+      "sample_codes": 1201,
+      "unmatched_sample_codes": 0,
+      "cross_route_ambiguous_codes": 0,
+      "sample_formats": {
+        "999999999999A99999": 1187,
+        "999999999999A999": 14
+      },
+      "routes": {
+        "314ah": {
+          "trace_schema": "ads",
+          "trace_table": "ads_trace_cell_coding_314ah_pim",
+          "tenant_field": null,
+          "status": "ambiguous_fields",
+          "product_code_field": null,
+          "observed_product_code_fields": [
+            "butterfly_weld_code",
+            "winding_slit_code"
+          ],
+          "matched_sample_codes": 400,
+          "ambiguous_field_codes": 200,
+          "field_match_counts": {
+            "butterfly_weld_code": 200,
+            "winding_slit_code": 400
+          },
+          "max_cells_per_sample_code": {
+            "butterfly_weld_code": 1,
+            "winding_slit_code": 1
+          },
+          "field_requested_codes": {
+            "cell_code": 200,
+            "winding_slit_code": 400,
+            "butterfly_weld_code": 200,
+            "pos_mixing_code": 11,
+            "neg_mixing_code": 11,
+            "pos_coating_code": 17,
+            "neg_coating_code": 28,
+            "pos_roll_slit_code": 44,
+            "neg_roll_slit_code": 49,
+            "wrap_can_insert_code": 200
+          },
+          "field_match_precision": {
+            "cell_code": 0.0,
+            "winding_slit_code": 1.0,
+            "butterfly_weld_code": 1.0,
+            "pos_mixing_code": 0.0,
+            "neg_mixing_code": 0.0,
+            "pos_coating_code": 0.0,
+            "neg_coating_code": 0.0,
+            "pos_roll_slit_code": 0.0,
+            "neg_roll_slit_code": 0.0,
+            "wrap_can_insert_code": 0.0
+          }
+        },
+        "588ah": {
+          "trace_schema": "ads",
+          "trace_table": "ads_trace_cell_coding_588ah_pim",
+          "tenant_field": null,
+          "status": "ambiguous_fields",
+          "product_code_field": null,
+          "observed_product_code_fields": [
+            "butterfly_weld_code",
+            "tab_pre_weld_code",
+            "winding_slit_code"
+          ],
+          "matched_sample_codes": 801,
+          "ambiguous_field_codes": 400,
+          "field_match_counts": {
+            "butterfly_weld_code": 200,
+            "tab_pre_weld_code": 400,
+            "winding_slit_code": 801
+          },
+          "max_cells_per_sample_code": {
+            "butterfly_weld_code": 1,
+            "tab_pre_weld_code": 1,
+            "winding_slit_code": 1
+          },
+          "field_requested_codes": {
+            "cell_code": 200,
+            "winding_slit_code": 801,
+            "tab_pre_weld_code": 400,
+            "pos_mixing_code": 6,
+            "neg_mixing_code": 8,
+            "pos_coating_code": 13,
+            "neg_coating_code": 21,
+            "pos_roll_slit_code": 50,
+            "neg_roll_slit_code": 59,
+            "butterfly_weld_code": 200,
+            "wrap_can_insert_code": 200
+          },
+          "field_match_precision": {
+            "cell_code": 0.0,
+            "winding_slit_code": 1.0,
+            "tab_pre_weld_code": 1.0,
+            "pos_mixing_code": 0.0,
+            "neg_mixing_code": 0.0,
+            "pos_coating_code": 0.0,
+            "neg_coating_code": 0.0,
+            "pos_roll_slit_code": 0.0,
+            "neg_roll_slit_code": 0.0,
+            "butterfly_weld_code": 1.0,
+            "wrap_can_insert_code": 0.0
+          }
+        }
+      },
+      "line_evidence": [
+        {
+          "tenant_id": "11300001",
+          "technics_line_name": "金寨三期314Ah",
+          "sample_codes": 400,
+          "route_match_counts": {
+            "314ah": 400,
+            "588ah": 0
+          },
+          "observed_routes": [
+            "314ah"
+          ],
+          "unmatched_codes": 0
+        },
+        {
+          "tenant_id": "11300001",
+          "technics_line_name": "金寨三期588AH",
+          "sample_codes": 801,
+          "route_match_counts": {
+            "314ah": 0,
+            "588ah": 801
+          },
+          "observed_routes": [
+            "588ah"
+          ],
+          "unmatched_codes": 0
+        }
+      ],
+      "query_seconds": 3.0744
+    },
+    "resolved_mapping": {
+      "314ah": {
+        "trace_schema": "ads",
+        "trace_table": "ads_trace_cell_coding_314ah_pim",
+        "tenant_field": null,
+        "status": "verified_on_sample",
+        "product_code_field": "winding_slit_code",
+        "candidate_fields": [
+          "butterfly_weld_code",
+          "winding_slit_code"
+        ],
+        "selection_basis": "completed_cell_field_coverage_then_precision",
+        "backcheck_field_scores": {
+          "butterfly_weld_code": {
+            "matched_codes": 200,
+            "match_precision": 1.0
+          },
+          "winding_slit_code": {
+            "matched_codes": 400,
+            "match_precision": 1.0
+          }
+        },
+        "recent_matched_codes": 0,
+        "backcheck_matched_codes": 400,
+        "tenant_scope_note": "追溯表无tenant_id；后续宽表读取仍须限制目标租户"
+      },
+      "588ah": {
+        "trace_schema": "ads",
+        "trace_table": "ads_trace_cell_coding_588ah_pim",
+        "tenant_field": null,
+        "status": "verified_on_sample",
+        "product_code_field": "winding_slit_code",
+        "candidate_fields": [
+          "butterfly_weld_code",
+          "tab_pre_weld_code",
+          "winding_slit_code"
+        ],
+        "selection_basis": "completed_cell_field_coverage_then_precision",
+        "backcheck_field_scores": {
+          "butterfly_weld_code": {
+            "matched_codes": 200,
+            "match_precision": 1.0
+          },
+          "tab_pre_weld_code": {
+            "matched_codes": 400,
+            "match_precision": 1.0
+          },
+          "winding_slit_code": {
+            "matched_codes": 801,
+            "match_precision": 1.0
+          }
+        },
+        "recent_matched_codes": 84,
+        "backcheck_matched_codes": 801,
+        "tenant_scope_note": "追溯表无tenant_id；后续宽表读取仍须限制目标租户"
+      }
+    }
+  },
+  "trace_sampling": {
+    "314ah": {
+      "sample_cells_per_day_limit": 50,
+      "lookback_days": 3,
+      "sample_cell_codes": 200,
+      "sample_rows": 400,
+      "query_seconds": 1.5692,
+      "distinct_codes_per_cell": {
+        "cell_code": {
+          "min": 1,
+          "max": 1
+        },
+        "winding_slit_code": {
+          "min": 2,
+          "max": 2
+        },
+        "pos_mixing_code": {
+          "min": 1,
+          "max": 2
+        },
+        "neg_mixing_code": {
+          "min": 1,
+          "max": 2
+        },
+        "pos_coating_code": {
+          "min": 1,
+          "max": 2
+        },
+        "neg_coating_code": {
+          "min": 1,
+          "max": 2
+        },
+        "pos_roll_slit_code": {
+          "min": 2,
+          "max": 2
+        },
+        "neg_roll_slit_code": {
+          "min": 2,
+          "max": 2
+        },
+        "butterfly_weld_code": {
+          "min": 1,
+          "max": 1
+        },
+        "wrap_can_insert_code": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      "latest_trace_time": "2026-11-20 15:25:03"
+    },
+    "588ah": {
+      "sample_cells_per_day_limit": 50,
+      "lookback_days": 3,
+      "sample_cell_codes": 200,
+      "sample_rows": 801,
+      "query_seconds": 1.9233,
+      "distinct_codes_per_cell": {
+        "cell_code": {
+          "min": 1,
+          "max": 1
+        },
+        "winding_slit_code": {
+          "min": 4,
+          "max": 5
+        },
+        "tab_pre_weld_code": {
+          "min": 2,
+          "max": 2
+        },
+        "pos_mixing_code": {
+          "min": 1,
+          "max": 3
+        },
+        "neg_mixing_code": {
+          "min": 1,
+          "max": 4
+        },
+        "pos_coating_code": {
+          "min": 1,
+          "max": 4
+        },
+        "neg_coating_code": {
+          "min": 1,
+          "max": 4
+        },
+        "pos_roll_slit_code": {
+          "min": 2,
+          "max": 4
+        },
+        "neg_roll_slit_code": {
+          "min": 2,
+          "max": 4
+        },
+        "butterfly_weld_code": {
+          "min": 1,
+          "max": 1
+        },
+        "wrap_can_insert_code": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      "latest_trace_time": "2026-11-20 06:40:46"
+    }
+  },
+  "seconds": 11.521
+}

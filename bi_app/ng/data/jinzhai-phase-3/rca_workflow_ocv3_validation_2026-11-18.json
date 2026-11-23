@@ -1,0 +1,2492 @@
+{
+  "generated_at": "2026-11-18T02:23:34.679333+00:00",
+  "context": {
+    "parameters": {
+      "start_date": "2026-11-16",
+      "end_date": "2026-11-16"
+    },
+    "filters": {
+      "tenant_id": [
+        "11300001"
+      ],
+      "technics_line_name": [
+        "金寨三期314Ah"
+      ]
+    },
+    "row": {
+      "ng_type": "NG-E-OCV3009",
+      "ng_name": "容量不及格",
+      "dimensions": {
+        "technics_process_name": "OCV3"
+      }
+    }
+  },
+  "result": {
+    "status": "success",
+    "ng_type": "NG-E-OCV3009",
+    "ng_name": "容量不及格",
+    "period": {
+      "start_date": "2026-11-16",
+      "end_date": "2026-11-16"
+    },
+    "filters": {
+      "tenant_id": [
+        "11300001"
+      ],
+      "technics_line_name": [
+        "金寨三期314Ah"
+      ]
+    },
+    "row_dimensions": {
+      "technics_process_name": "OCV3"
+    },
+    "target": {
+      "id": "C3100.dwd_qual_ocv3_param_pim.volt",
+      "name": "电压",
+      "process_name": "OCV3",
+      "date_filter_field": "shift_date",
+      "sort_time_field": "end_time",
+      "record_selection": {
+        "mode": "latest"
+      },
+      "groups": {
+        "NG": {
+          "count": 89,
+          "missing_count": 0,
+          "min": 2743.723,
+          "q1": 3243.326,
+          "median": 3245.142,
+          "q3": 3296.777,
+          "max": 3433.074,
+          "mean": 3260.51097752809,
+          "whisker_low": 3209.871,
+          "whisker_high": 3373.219,
+          "outlier_count": 16,
+          "outliers": [
+            2743.723,
+            2752.016,
+            2761.961,
+            3052.547,
+            3139.133,
+            3146.507,
+            3386.628,
+            3391.355,
+            3392.247,
+            3393.014,
+            3394.348,
+            3395.739,
+            3408.967,
+            3409.582,
+            3414.68,
+            3433.074
+          ]
+        },
+        "OK": {
+          "count": 13796,
+          "missing_count": 0,
+          "min": 3241.026,
+          "q1": 3242.841,
+          "median": 3243.283,
+          "q3": 3243.762,
+          "max": 3250.994,
+          "mean": 3243.380389895622,
+          "whisker_low": 3241.46,
+          "whisker_high": 3245.143,
+          "outlier_count": 569,
+          "outliers": [
+            3241.026,
+            3241.235,
+            3241.389,
+            3245.152,
+            3245.166,
+            3245.182,
+            3245.191,
+            3245.198,
+            3245.208,
+            3245.226,
+            3245.239,
+            3245.255,
+            3245.266,
+            3245.282,
+            3245.296,
+            3245.313,
+            3245.326,
+            3245.345,
+            3245.359,
+            3245.374,
+            3245.392,
+            3245.409,
+            3245.423,
+            3245.434,
+            3245.442,
+            3245.448,
+            3245.466,
+            3245.473,
+            3245.485,
+            3245.511,
+            3245.532,
+            3245.542,
+            3245.554,
+            3245.564,
+            3245.577,
+            3245.614,
+            3245.627,
+            3245.655,
+            3245.664,
+            3245.676,
+            3245.697,
+            3245.711,
+            3245.728,
+            3245.735,
+            3245.771,
+            3245.789,
+            3245.815,
+            3245.84,
+            3245.868,
+            3245.883,
+            3245.904,
+            3245.94,
+            3245.958,
+            3245.98,
+            3246.006,
+            3246.041,
+            3246.077,
+            3246.108,
+            3246.144,
+            3246.16,
+            3246.203,
+            3246.254,
+            3246.29,
+            3246.332,
+            3246.386,
+            3246.447,
+            3246.494,
+            3246.533,
+            3246.596,
+            3246.658,
+            3246.683,
+            3246.761,
+            3246.832,
+            3246.975,
+            3247.071,
+            3247.171,
+            3247.376,
+            3248.108,
+            3249.835,
+            3250.994
+          ]
+        }
+      }
+    },
+    "counts": {
+      "NG": 89,
+      "OK": 13796,
+      "excluded": 79
+    },
+    "boxes": [
+      {
+        "field_id": "C2800.dwd_qual_grading_param_pim.a_cap_end_step",
+        "name": "结束容量",
+        "process_name": "分容",
+        "process_code": "C2800",
+        "analysis_type": "individual",
+        "bubble": {
+          "strategy": "equal_width",
+          "max_bins": 10,
+          "denominator": "distinct_target_products_within_interval",
+          "size_metric": "product_count",
+          "range_min": 0.0,
+          "range_max": 617.1245,
+          "covered_products": 13885,
+          "bins": [
+            {
+              "index": 0,
+              "lower": 0.0,
+              "upper": 61.712450000000004,
+              "upper_inclusive": false,
+              "NG": 40,
+              "OK": 0,
+              "product_count": 40,
+              "ng_rate": 1.0,
+              "source_record_count": 40,
+              "upstream_code_count": 40,
+              "association_count": 40
+            },
+            {
+              "index": 1,
+              "lower": 61.712450000000004,
+              "upper": 123.42490000000001,
+              "upper_inclusive": false,
+              "NG": 5,
+              "OK": 0,
+              "product_count": 5,
+              "ng_rate": 1.0,
+              "source_record_count": 5,
+              "upstream_code_count": 5,
+              "association_count": 5
+            },
+            {
+              "index": 2,
+              "lower": 123.42490000000001,
+              "upper": 185.13735000000003,
+              "upper_inclusive": false,
+              "NG": 1,
+              "OK": 0,
+              "product_count": 1,
+              "ng_rate": 1.0,
+              "source_record_count": 1,
+              "upstream_code_count": 1,
+              "association_count": 1
+            },
+            {
+              "index": 3,
+              "lower": 185.13735000000003,
+              "upper": 246.84980000000002,
+              "upper_inclusive": false,
+              "NG": 6,
+              "OK": 0,
+              "product_count": 6,
+              "ng_rate": 1.0,
+              "source_record_count": 6,
+              "upstream_code_count": 6,
+              "association_count": 6
+            },
+            {
+              "index": 4,
+              "lower": 246.84980000000002,
+              "upper": 308.56225,
+              "upper_inclusive": false,
+              "NG": 6,
+              "OK": 0,
+              "product_count": 6,
+              "ng_rate": 1.0,
+              "source_record_count": 6,
+              "upstream_code_count": 6,
+              "association_count": 6
+            },
+            {
+              "index": 5,
+              "lower": 308.56225,
+              "upper": 370.27470000000005,
+              "upper_inclusive": false,
+              "NG": 31,
+              "OK": 13783,
+              "product_count": 13814,
+              "ng_rate": 0.0022441001882148545,
+              "source_record_count": 13814,
+              "upstream_code_count": 13814,
+              "association_count": 13814
+            },
+            {
+              "index": 6,
+              "lower": 370.27470000000005,
+              "upper": 431.98715000000004,
+              "upper_inclusive": false,
+              "NG": 0,
+              "OK": 0,
+              "product_count": 0,
+              "ng_rate": null,
+              "source_record_count": 0,
+              "upstream_code_count": 0,
+              "association_count": 0
+            },
+            {
+              "index": 7,
+              "lower": 431.98715000000004,
+              "upper": 493.69960000000003,
+              "upper_inclusive": false,
+              "NG": 0,
+              "OK": 0,
+              "product_count": 0,
+              "ng_rate": null,
+              "source_record_count": 0,
+              "upstream_code_count": 0,
+              "association_count": 0
+            },
+            {
+              "index": 8,
+              "lower": 493.69960000000003,
+              "upper": 555.41205,
+              "upper_inclusive": false,
+              "NG": 0,
+              "OK": 0,
+              "product_count": 0,
+              "ng_rate": null,
+              "source_record_count": 0,
+              "upstream_code_count": 0,
+              "association_count": 0
+            },
+            {
+              "index": 9,
+              "lower": 555.41205,
+              "upper": 617.1245,
+              "upper_inclusive": true,
+              "NG": 0,
+              "OK": 13,
+              "product_count": 13,
+              "ng_rate": 0.0,
+              "source_record_count": 13,
+              "upstream_code_count": 13,
+              "association_count": 13
+            }
+          ]
+        },
+        "sample_unit": "target_material_association",
+        "groups": {
+          "NG": {
+            "count": 89,
+            "missing_count": 0,
+            "min": 0.0,
+            "q1": 0.0,
+            "median": 101.9409,
+            "q3": 334.0315,
+            "max": 338.9513,
+            "mean": 157.11177303370786,
+            "whisker_low": 0.0,
+            "whisker_high": 338.9513,
+            "outlier_count": 0,
+            "outliers": [],
+            "target_products": 89,
+            "missing_products": 0,
+            "matched_products": 89,
+            "direct_products": 89,
+            "input_code_products": 0,
+            "ads_products": 0,
+            "ambiguous_products": 0,
+            "expected_samples": 89,
+            "valid_products": 89,
+            "complete_products": 89,
+            "partial_products": 0,
+            "trace_missing_products": 0,
+            "multi_code_products": 0,
+            "parameter_record_count": 89,
+            "parameter_record_median": 101.9409
+          },
+          "OK": {
+            "count": 13796,
+            "missing_count": 0,
+            "min": 328.1142,
+            "q1": 335.6643,
+            "median": 336.7249,
+            "q3": 337.8413,
+            "max": 617.1245,
+            "mean": 336.966974180922,
+            "whisker_low": 332.3989,
+            "whisker_high": 341.1003,
+            "outlier_count": 189,
+            "outliers": [
+              328.1142,
+              328.4842,
+              328.8123,
+              329.0076,
+              329.0703,
+              329.1611,
+              329.2868,
+              329.3702,
+              329.5726,
+              329.5938,
+              329.754,
+              329.8866,
+              329.9496,
+              330.0122,
+              330.0194,
+              330.1658,
+              330.1798,
+              330.2914,
+              330.417,
+              330.5495,
+              330.6613,
+              330.7169,
+              330.8708,
+              331.0733,
+              331.101,
+              331.1497,
+              331.2334,
+              331.2752,
+              331.2966,
+              331.324,
+              331.359,
+              331.401,
+              331.4567,
+              331.6033,
+              331.6107,
+              331.6241,
+              331.7078,
+              331.7498,
+              331.7706,
+              331.8265,
+              331.8613,
+              331.9172,
+              331.9521,
+              331.9592,
+              332.0567,
+              332.0643,
+              332.0705,
+              332.0987,
+              332.1127,
+              332.1411,
+              332.1475,
+              332.1615,
+              332.1961,
+              332.2033,
+              332.2383,
+              332.2453,
+              332.2522,
+              332.2802,
+              332.294,
+              332.3008,
+              332.3149,
+              332.3572,
+              332.3916,
+              332.3986,
+              341.1069,
+              341.1837,
+              341.1909,
+              341.2047,
+              341.2884,
+              341.4074,
+              341.4844,
+              341.5192,
+              341.5744,
+              341.7072,
+              592.1346,
+              596.3192,
+              608.5594,
+              609.7845,
+              614.8508,
+              617.1245
+            ],
+            "target_products": 13796,
+            "missing_products": 0,
+            "matched_products": 13796,
+            "direct_products": 13796,
+            "input_code_products": 0,
+            "ads_products": 0,
+            "ambiguous_products": 0,
+            "expected_samples": 13796,
+            "valid_products": 13796,
+            "complete_products": 13796,
+            "partial_products": 0,
+            "trace_missing_products": 0,
+            "multi_code_products": 0,
+            "parameter_record_count": 13796,
+            "parameter_record_median": 336.7249
+          }
+        }
+      }
+    ],
+    "target_profile": {
+      "dimensions": {
+        "overall": [
+          {
+            "key": [],
+            "label": "总体",
+            "NG": 89,
+            "OK": 13796,
+            "excluded": 79,
+            "ng_share": 0.006409794742527908,
+            "groups": {
+              "NG": {
+                "count": 89,
+                "missing_count": 0,
+                "min": 2743.723,
+                "q1": 3243.326,
+                "median": 3245.142,
+                "q3": 3296.777,
+                "max": 3433.074,
+                "mean": 3260.51097752809,
+                "whisker_low": 3209.871,
+                "whisker_high": 3373.219,
+                "outlier_count": 16,
+                "outliers": [
+                  2743.723,
+                  2752.016,
+                  2761.961,
+                  3052.547,
+                  3139.133,
+                  3146.507,
+                  3386.628,
+                  3391.355,
+                  3392.247,
+                  3393.014,
+                  3394.348,
+                  3395.739,
+                  3408.967,
+                  3409.582,
+                  3414.68,
+                  3433.074
+                ]
+              },
+              "OK": {
+                "count": 13796,
+                "missing_count": 0,
+                "min": 3241.026,
+                "q1": 3242.841,
+                "median": 3243.283,
+                "q3": 3243.762,
+                "max": 3250.994,
+                "mean": 3243.380389895622,
+                "whisker_low": 3241.46,
+                "whisker_high": 3245.143,
+                "outlier_count": 569,
+                "outliers": [
+                  3241.026,
+                  3241.235,
+                  3241.389,
+                  3245.152,
+                  3245.166,
+                  3245.182,
+                  3245.191,
+                  3245.198,
+                  3245.208,
+                  3245.226,
+                  3245.239,
+                  3245.255,
+                  3245.266,
+                  3245.282,
+                  3245.296,
+                  3245.313,
+                  3245.326,
+                  3245.345,
+                  3245.359,
+                  3245.374,
+                  3245.392,
+                  3245.409,
+                  3245.423,
+                  3245.434,
+                  3245.442,
+                  3245.448,
+                  3245.466,
+                  3245.473,
+                  3245.485,
+                  3245.511,
+                  3245.532,
+                  3245.542,
+                  3245.554,
+                  3245.564,
+                  3245.577,
+                  3245.614,
+                  3245.627,
+                  3245.655,
+                  3245.664,
+                  3245.676,
+                  3245.697,
+                  3245.711,
+                  3245.728,
+                  3245.735,
+                  3245.771,
+                  3245.789,
+                  3245.815,
+                  3245.84,
+                  3245.868,
+                  3245.883,
+                  3245.904,
+                  3245.94,
+                  3245.958,
+                  3245.98,
+                  3246.006,
+                  3246.041,
+                  3246.077,
+                  3246.108,
+                  3246.144,
+                  3246.16,
+                  3246.203,
+                  3246.254,
+                  3246.29,
+                  3246.332,
+                  3246.386,
+                  3246.447,
+                  3246.494,
+                  3246.533,
+                  3246.596,
+                  3246.658,
+                  3246.683,
+                  3246.761,
+                  3246.832,
+                  3246.975,
+                  3247.071,
+                  3247.171,
+                  3247.376,
+                  3248.108,
+                  3249.835,
+                  3250.994
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 2743.723,
+                "upper": 2786.8074375,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2786.8074375,
+                "upper": 2829.891875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2829.891875,
+                "upper": 2872.9763125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2872.9763125,
+                "upper": 2916.06075,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2916.06075,
+                "upper": 2959.1451875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2959.1451875,
+                "upper": 3002.229625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3002.229625,
+                "upper": 3045.3140625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3045.3140625,
+                "upper": 3088.3985000000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3088.3985000000002,
+                "upper": 3131.4829375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3131.4829375,
+                "upper": 3174.567375,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3174.567375,
+                "upper": 3217.6518125000002,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3217.6518125000002,
+                "upper": 3260.73625,
+                "NG": 43,
+                "OK": 13796,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3260.73625,
+                "upper": 3303.8206875,
+                "NG": 16,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3303.8206875,
+                "upper": 3346.905125,
+                "NG": 11,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3346.905125,
+                "upper": 3389.9895625,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3389.9895625,
+                "upper": 3433.074,
+                "NG": 9,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          }
+        ],
+        "device": [
+          {
+            "key": [
+              "11300001",
+              "金寨三期314Ah",
+              "1#OCV3测试设备"
+            ],
+            "label": "1#OCV3测试设备",
+            "NG": 89,
+            "OK": 13783,
+            "excluded": 71,
+            "ng_share": 0.006415801614763552,
+            "groups": {
+              "NG": {
+                "count": 89,
+                "missing_count": 0,
+                "min": 2743.723,
+                "q1": 3243.326,
+                "median": 3245.142,
+                "q3": 3296.777,
+                "max": 3433.074,
+                "mean": 3260.51097752809,
+                "whisker_low": 3209.871,
+                "whisker_high": 3373.219,
+                "outlier_count": 16,
+                "outliers": [
+                  2743.723,
+                  2752.016,
+                  2761.961,
+                  3052.547,
+                  3139.133,
+                  3146.507,
+                  3386.628,
+                  3391.355,
+                  3392.247,
+                  3393.014,
+                  3394.348,
+                  3395.739,
+                  3408.967,
+                  3409.582,
+                  3414.68,
+                  3433.074
+                ]
+              },
+              "OK": {
+                "count": 13783,
+                "missing_count": 0,
+                "min": 3241.026,
+                "q1": 3242.84,
+                "median": 3243.283,
+                "q3": 3243.761,
+                "max": 3249.835,
+                "mean": 3243.3747368497425,
+                "whisker_low": 3241.46,
+                "whisker_high": 3245.139,
+                "outlier_count": 557,
+                "outliers": [
+                  3241.026,
+                  3241.235,
+                  3241.389,
+                  3245.15,
+                  3245.157,
+                  3245.18,
+                  3245.19,
+                  3245.195,
+                  3245.204,
+                  3245.217,
+                  3245.231,
+                  3245.249,
+                  3245.259,
+                  3245.276,
+                  3245.286,
+                  3245.309,
+                  3245.319,
+                  3245.331,
+                  3245.351,
+                  3245.362,
+                  3245.378,
+                  3245.404,
+                  3245.42,
+                  3245.426,
+                  3245.436,
+                  3245.445,
+                  3245.451,
+                  3245.468,
+                  3245.475,
+                  3245.501,
+                  3245.516,
+                  3245.533,
+                  3245.544,
+                  3245.555,
+                  3245.565,
+                  3245.581,
+                  3245.614,
+                  3245.627,
+                  3245.655,
+                  3245.664,
+                  3245.676,
+                  3245.697,
+                  3245.711,
+                  3245.728,
+                  3245.735,
+                  3245.771,
+                  3245.789,
+                  3245.81,
+                  3245.834,
+                  3245.864,
+                  3245.883,
+                  3245.893,
+                  3245.931,
+                  3245.955,
+                  3245.975,
+                  3246.0,
+                  3246.035,
+                  3246.052,
+                  3246.096,
+                  3246.125,
+                  3246.149,
+                  3246.192,
+                  3246.226,
+                  3246.268,
+                  3246.305,
+                  3246.373,
+                  3246.427,
+                  3246.466,
+                  3246.499,
+                  3246.559,
+                  3246.616,
+                  3246.672,
+                  3246.751,
+                  3246.804,
+                  3246.927,
+                  3246.997,
+                  3247.129,
+                  3247.247,
+                  3247.724,
+                  3249.835
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 2743.723,
+                "upper": 2786.8074375,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2786.8074375,
+                "upper": 2829.891875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2829.891875,
+                "upper": 2872.9763125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2872.9763125,
+                "upper": 2916.06075,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2916.06075,
+                "upper": 2959.1451875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2959.1451875,
+                "upper": 3002.229625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3002.229625,
+                "upper": 3045.3140625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3045.3140625,
+                "upper": 3088.3985000000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3088.3985000000002,
+                "upper": 3131.4829375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3131.4829375,
+                "upper": 3174.567375,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3174.567375,
+                "upper": 3217.6518125000002,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3217.6518125000002,
+                "upper": 3260.73625,
+                "NG": 43,
+                "OK": 13783,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3260.73625,
+                "upper": 3303.8206875,
+                "NG": 16,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3303.8206875,
+                "upper": 3346.905125,
+                "NG": 11,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3346.905125,
+                "upper": 3389.9895625,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3389.9895625,
+                "upper": 3433.074,
+                "NG": 9,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "11300001",
+              "金寨三期314Ah",
+              "2#OCV3测试设备"
+            ],
+            "label": "2#OCV3测试设备",
+            "NG": 0,
+            "OK": 13,
+            "excluded": 8,
+            "ng_share": 0.0,
+            "groups": {
+              "NG": {
+                "count": 0,
+                "missing_count": 0,
+                "min": null,
+                "q1": null,
+                "median": null,
+                "q3": null,
+                "max": null,
+                "mean": null,
+                "whisker_low": null,
+                "whisker_high": null,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 13,
+                "missing_count": 0,
+                "min": 3246.536,
+                "q1": 3248.214,
+                "median": 3250.694,
+                "q3": 3250.803,
+                "max": 3250.994,
+                "mean": 3249.373923076923,
+                "whisker_low": 3246.536,
+                "whisker_high": 3250.994,
+                "outlier_count": 0,
+                "outliers": []
+              }
+            },
+            "histogram": [
+              {
+                "lower": 2743.723,
+                "upper": 2786.8074375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2786.8074375,
+                "upper": 2829.891875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2829.891875,
+                "upper": 2872.9763125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2872.9763125,
+                "upper": 2916.06075,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2916.06075,
+                "upper": 2959.1451875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2959.1451875,
+                "upper": 3002.229625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3002.229625,
+                "upper": 3045.3140625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3045.3140625,
+                "upper": 3088.3985000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3088.3985000000002,
+                "upper": 3131.4829375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3131.4829375,
+                "upper": 3174.567375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3174.567375,
+                "upper": 3217.6518125000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3217.6518125000002,
+                "upper": 3260.73625,
+                "NG": 0,
+                "OK": 13,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3260.73625,
+                "upper": 3303.8206875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3303.8206875,
+                "upper": 3346.905125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3346.905125,
+                "upper": 3389.9895625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3389.9895625,
+                "upper": 3433.074,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          }
+        ],
+        "shift": [
+          {
+            "key": [
+              "夜班"
+            ],
+            "label": "夜班",
+            "NG": 14,
+            "OK": 6464,
+            "excluded": 20,
+            "ng_share": 0.00216116085211485,
+            "groups": {
+              "NG": {
+                "count": 14,
+                "missing_count": 0,
+                "min": 3209.871,
+                "q1": 3243.248,
+                "median": 3295.0035,
+                "q3": 3332.8135,
+                "max": 3433.074,
+                "mean": 3292.072642857143,
+                "whisker_low": 3209.871,
+                "whisker_high": 3433.074,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 6464,
+                "missing_count": 0,
+                "min": 3241.026,
+                "q1": 3242.85675,
+                "median": 3243.312,
+                "q3": 3243.773,
+                "max": 3250.994,
+                "mean": 3243.3235649752473,
+                "whisker_low": 3241.497,
+                "whisker_high": 3245.127,
+                "outlier_count": 42,
+                "outliers": [
+                  3241.026,
+                  3241.155,
+                  3241.167,
+                  3241.197,
+                  3241.208,
+                  3241.235,
+                  3241.316,
+                  3241.329,
+                  3241.33,
+                  3241.339,
+                  3241.366,
+                  3241.428,
+                  3241.43,
+                  3241.46,
+                  3241.462,
+                  3245.169,
+                  3245.183,
+                  3245.202,
+                  3245.275,
+                  3245.281,
+                  3245.282,
+                  3245.285,
+                  3245.287,
+                  3245.311,
+                  3245.313,
+                  3245.374,
+                  3245.551,
+                  3246.203,
+                  3246.533,
+                  3246.536,
+                  3246.655,
+                  3247.428,
+                  3248.214,
+                  3248.222,
+                  3249.13,
+                  3250.694,
+                  3250.724,
+                  3250.724,
+                  3250.803,
+                  3250.849,
+                  3250.888,
+                  3250.994
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 2743.723,
+                "upper": 2786.8074375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2786.8074375,
+                "upper": 2829.891875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2829.891875,
+                "upper": 2872.9763125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2872.9763125,
+                "upper": 2916.06075,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2916.06075,
+                "upper": 2959.1451875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2959.1451875,
+                "upper": 3002.229625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3002.229625,
+                "upper": 3045.3140625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3045.3140625,
+                "upper": 3088.3985000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3088.3985000000002,
+                "upper": 3131.4829375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3131.4829375,
+                "upper": 3174.567375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3174.567375,
+                "upper": 3217.6518125000002,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3217.6518125000002,
+                "upper": 3260.73625,
+                "NG": 3,
+                "OK": 6464,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3260.73625,
+                "upper": 3303.8206875,
+                "NG": 4,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3303.8206875,
+                "upper": 3346.905125,
+                "NG": 4,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3346.905125,
+                "upper": 3389.9895625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3389.9895625,
+                "upper": 3433.074,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "白班"
+            ],
+            "label": "白班",
+            "NG": 75,
+            "OK": 7332,
+            "excluded": 59,
+            "ng_share": 0.01012555690562981,
+            "groups": {
+              "NG": {
+                "count": 75,
+                "missing_count": 0,
+                "min": 2743.723,
+                "q1": 3243.7715,
+                "median": 3245.071,
+                "q3": 3295.4975000000004,
+                "max": 3414.68,
+                "mean": 3254.6194666666665,
+                "whisker_low": 3236.34,
+                "whisker_high": 3335.096,
+                "outlier_count": 16,
+                "outliers": [
+                  2743.723,
+                  2752.016,
+                  2761.961,
+                  3052.547,
+                  3139.133,
+                  3146.507,
+                  3373.219,
+                  3386.628,
+                  3391.355,
+                  3392.247,
+                  3393.014,
+                  3394.348,
+                  3395.739,
+                  3408.967,
+                  3409.582,
+                  3414.68
+                ]
+              },
+              "OK": {
+                "count": 7332,
+                "missing_count": 0,
+                "min": 3241.03,
+                "q1": 3242.828,
+                "median": 3243.259,
+                "q3": 3243.7512500000003,
+                "max": 3249.835,
+                "mean": 3243.4304875886523,
+                "whisker_low": 3241.484,
+                "whisker_high": 3245.136,
+                "outlier_count": 532,
+                "outliers": [
+                  3241.03,
+                  3245.139,
+                  3245.153,
+                  3245.173,
+                  3245.19,
+                  3245.194,
+                  3245.2,
+                  3245.215,
+                  3245.23,
+                  3245.239,
+                  3245.255,
+                  3245.271,
+                  3245.286,
+                  3245.309,
+                  3245.324,
+                  3245.34,
+                  3245.357,
+                  3245.365,
+                  3245.387,
+                  3245.406,
+                  3245.42,
+                  3245.427,
+                  3245.436,
+                  3245.445,
+                  3245.451,
+                  3245.468,
+                  3245.475,
+                  3245.494,
+                  3245.511,
+                  3245.532,
+                  3245.542,
+                  3245.554,
+                  3245.564,
+                  3245.577,
+                  3245.607,
+                  3245.621,
+                  3245.645,
+                  3245.663,
+                  3245.674,
+                  3245.681,
+                  3245.703,
+                  3245.716,
+                  3245.732,
+                  3245.762,
+                  3245.777,
+                  3245.789,
+                  3245.815,
+                  3245.84,
+                  3245.868,
+                  3245.883,
+                  3245.893,
+                  3245.931,
+                  3245.955,
+                  3245.973,
+                  3245.999,
+                  3246.031,
+                  3246.045,
+                  3246.079,
+                  3246.118,
+                  3246.146,
+                  3246.17,
+                  3246.217,
+                  3246.257,
+                  3246.29,
+                  3246.332,
+                  3246.386,
+                  3246.447,
+                  3246.475,
+                  3246.512,
+                  3246.596,
+                  3246.662,
+                  3246.683,
+                  3246.761,
+                  3246.831,
+                  3246.94,
+                  3247.042,
+                  3247.134,
+                  3247.268,
+                  3247.724,
+                  3249.835
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 2743.723,
+                "upper": 2786.8074375,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2786.8074375,
+                "upper": 2829.891875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2829.891875,
+                "upper": 2872.9763125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2872.9763125,
+                "upper": 2916.06075,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2916.06075,
+                "upper": 2959.1451875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2959.1451875,
+                "upper": 3002.229625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3002.229625,
+                "upper": 3045.3140625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3045.3140625,
+                "upper": 3088.3985000000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3088.3985000000002,
+                "upper": 3131.4829375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3131.4829375,
+                "upper": 3174.567375,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3174.567375,
+                "upper": 3217.6518125000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3217.6518125000002,
+                "upper": 3260.73625,
+                "NG": 40,
+                "OK": 7332,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3260.73625,
+                "upper": 3303.8206875,
+                "NG": 12,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3303.8206875,
+                "upper": 3346.905125,
+                "NG": 7,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3346.905125,
+                "upper": 3389.9895625,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3389.9895625,
+                "upper": 3433.074,
+                "NG": 8,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          }
+        ],
+        "device_shift": [
+          {
+            "key": [
+              "11300001",
+              "金寨三期314Ah",
+              "1#OCV3测试设备",
+              "夜班"
+            ],
+            "label": "1#OCV3测试设备 · 夜班",
+            "NG": 14,
+            "OK": 6451,
+            "excluded": 12,
+            "ng_share": 0.002165506573859242,
+            "groups": {
+              "NG": {
+                "count": 14,
+                "missing_count": 0,
+                "min": 3209.871,
+                "q1": 3243.248,
+                "median": 3295.0035,
+                "q3": 3332.8135,
+                "max": 3433.074,
+                "mean": 3292.072642857143,
+                "whisker_low": 3209.871,
+                "whisker_high": 3433.074,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 6451,
+                "missing_count": 0,
+                "min": 3241.026,
+                "q1": 3242.856,
+                "median": 3243.311,
+                "q3": 3243.7685,
+                "max": 3246.533,
+                "mean": 3243.311372345373,
+                "whisker_low": 3241.497,
+                "whisker_high": 3245.127,
+                "outlier_count": 29,
+                "outliers": [
+                  3241.026,
+                  3241.155,
+                  3241.167,
+                  3241.197,
+                  3241.208,
+                  3241.235,
+                  3241.316,
+                  3241.329,
+                  3241.33,
+                  3241.339,
+                  3241.366,
+                  3241.428,
+                  3241.43,
+                  3241.46,
+                  3241.462,
+                  3245.169,
+                  3245.183,
+                  3245.202,
+                  3245.275,
+                  3245.281,
+                  3245.282,
+                  3245.285,
+                  3245.287,
+                  3245.311,
+                  3245.313,
+                  3245.374,
+                  3245.551,
+                  3246.203,
+                  3246.533
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 2743.723,
+                "upper": 2786.8074375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2786.8074375,
+                "upper": 2829.891875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2829.891875,
+                "upper": 2872.9763125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2872.9763125,
+                "upper": 2916.06075,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2916.06075,
+                "upper": 2959.1451875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2959.1451875,
+                "upper": 3002.229625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3002.229625,
+                "upper": 3045.3140625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3045.3140625,
+                "upper": 3088.3985000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3088.3985000000002,
+                "upper": 3131.4829375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3131.4829375,
+                "upper": 3174.567375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3174.567375,
+                "upper": 3217.6518125000002,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3217.6518125000002,
+                "upper": 3260.73625,
+                "NG": 3,
+                "OK": 6451,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3260.73625,
+                "upper": 3303.8206875,
+                "NG": 4,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3303.8206875,
+                "upper": 3346.905125,
+                "NG": 4,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3346.905125,
+                "upper": 3389.9895625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3389.9895625,
+                "upper": 3433.074,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "11300001",
+              "金寨三期314Ah",
+              "1#OCV3测试设备",
+              "白班"
+            ],
+            "label": "1#OCV3测试设备 · 白班",
+            "NG": 75,
+            "OK": 7332,
+            "excluded": 59,
+            "ng_share": 0.01012555690562981,
+            "groups": {
+              "NG": {
+                "count": 75,
+                "missing_count": 0,
+                "min": 2743.723,
+                "q1": 3243.7715,
+                "median": 3245.071,
+                "q3": 3295.4975000000004,
+                "max": 3414.68,
+                "mean": 3254.6194666666665,
+                "whisker_low": 3236.34,
+                "whisker_high": 3335.096,
+                "outlier_count": 16,
+                "outliers": [
+                  2743.723,
+                  2752.016,
+                  2761.961,
+                  3052.547,
+                  3139.133,
+                  3146.507,
+                  3373.219,
+                  3386.628,
+                  3391.355,
+                  3392.247,
+                  3393.014,
+                  3394.348,
+                  3395.739,
+                  3408.967,
+                  3409.582,
+                  3414.68
+                ]
+              },
+              "OK": {
+                "count": 7332,
+                "missing_count": 0,
+                "min": 3241.03,
+                "q1": 3242.828,
+                "median": 3243.259,
+                "q3": 3243.7512500000003,
+                "max": 3249.835,
+                "mean": 3243.4304875886523,
+                "whisker_low": 3241.484,
+                "whisker_high": 3245.136,
+                "outlier_count": 532,
+                "outliers": [
+                  3241.03,
+                  3245.139,
+                  3245.153,
+                  3245.173,
+                  3245.19,
+                  3245.194,
+                  3245.2,
+                  3245.215,
+                  3245.23,
+                  3245.239,
+                  3245.255,
+                  3245.271,
+                  3245.286,
+                  3245.309,
+                  3245.324,
+                  3245.34,
+                  3245.357,
+                  3245.365,
+                  3245.387,
+                  3245.406,
+                  3245.42,
+                  3245.427,
+                  3245.436,
+                  3245.445,
+                  3245.451,
+                  3245.468,
+                  3245.475,
+                  3245.494,
+                  3245.511,
+                  3245.532,
+                  3245.542,
+                  3245.554,
+                  3245.564,
+                  3245.577,
+                  3245.607,
+                  3245.621,
+                  3245.645,
+                  3245.663,
+                  3245.674,
+                  3245.681,
+                  3245.703,
+                  3245.716,
+                  3245.732,
+                  3245.762,
+                  3245.777,
+                  3245.789,
+                  3245.815,
+                  3245.84,
+                  3245.868,
+                  3245.883,
+                  3245.893,
+                  3245.931,
+                  3245.955,
+                  3245.973,
+                  3245.999,
+                  3246.031,
+                  3246.045,
+                  3246.079,
+                  3246.118,
+                  3246.146,
+                  3246.17,
+                  3246.217,
+                  3246.257,
+                  3246.29,
+                  3246.332,
+                  3246.386,
+                  3246.447,
+                  3246.475,
+                  3246.512,
+                  3246.596,
+                  3246.662,
+                  3246.683,
+                  3246.761,
+                  3246.831,
+                  3246.94,
+                  3247.042,
+                  3247.134,
+                  3247.268,
+                  3247.724,
+                  3249.835
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 2743.723,
+                "upper": 2786.8074375,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2786.8074375,
+                "upper": 2829.891875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2829.891875,
+                "upper": 2872.9763125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2872.9763125,
+                "upper": 2916.06075,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2916.06075,
+                "upper": 2959.1451875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2959.1451875,
+                "upper": 3002.229625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3002.229625,
+                "upper": 3045.3140625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3045.3140625,
+                "upper": 3088.3985000000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3088.3985000000002,
+                "upper": 3131.4829375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3131.4829375,
+                "upper": 3174.567375,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3174.567375,
+                "upper": 3217.6518125000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3217.6518125000002,
+                "upper": 3260.73625,
+                "NG": 40,
+                "OK": 7332,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3260.73625,
+                "upper": 3303.8206875,
+                "NG": 12,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3303.8206875,
+                "upper": 3346.905125,
+                "NG": 7,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3346.905125,
+                "upper": 3389.9895625,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3389.9895625,
+                "upper": 3433.074,
+                "NG": 8,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "11300001",
+              "金寨三期314Ah",
+              "2#OCV3测试设备",
+              "夜班"
+            ],
+            "label": "2#OCV3测试设备 · 夜班",
+            "NG": 0,
+            "OK": 13,
+            "excluded": 8,
+            "ng_share": 0.0,
+            "groups": {
+              "NG": {
+                "count": 0,
+                "missing_count": 0,
+                "min": null,
+                "q1": null,
+                "median": null,
+                "q3": null,
+                "max": null,
+                "mean": null,
+                "whisker_low": null,
+                "whisker_high": null,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 13,
+                "missing_count": 0,
+                "min": 3246.536,
+                "q1": 3248.214,
+                "median": 3250.694,
+                "q3": 3250.803,
+                "max": 3250.994,
+                "mean": 3249.373923076923,
+                "whisker_low": 3246.536,
+                "whisker_high": 3250.994,
+                "outlier_count": 0,
+                "outliers": []
+              }
+            },
+            "histogram": [
+              {
+                "lower": 2743.723,
+                "upper": 2786.8074375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2786.8074375,
+                "upper": 2829.891875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2829.891875,
+                "upper": 2872.9763125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2872.9763125,
+                "upper": 2916.06075,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2916.06075,
+                "upper": 2959.1451875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 2959.1451875,
+                "upper": 3002.229625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3002.229625,
+                "upper": 3045.3140625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3045.3140625,
+                "upper": 3088.3985000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3088.3985000000002,
+                "upper": 3131.4829375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3131.4829375,
+                "upper": 3174.567375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3174.567375,
+                "upper": 3217.6518125000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3217.6518125000002,
+                "upper": 3260.73625,
+                "NG": 0,
+                "OK": 13,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3260.73625,
+                "upper": 3303.8206875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3303.8206875,
+                "upper": 3346.905125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3346.905125,
+                "upper": 3389.9895625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 3389.9895625,
+                "upper": 3433.074,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          }
+        ]
+      },
+      "findings": [
+        "目标数值NG中位数3245.1、OK中位数3243.3；四分位距分别为53.451、0.921。",
+        "设备维度尚无两个各含20个NG/OK产品的可比组，暂不判断组间差异。",
+        "班次分组中，白班的样本NG占比最高（75/7407，1.01%），与最低组相差0.80个百分点；此为定位线索。",
+        "设备×班次分组中，1#OCV3测试设备 · 白班的样本NG占比最高（75/7407，1.01%），与最低组相差0.80个百分点；此为定位线索。"
+      ],
+      "unit": "distinct_target_product",
+      "rate_denominator": "current_NG_plus_confirmed_OK",
+      "rate_note": "NG占比以本次当前缺陷NG与确认OK为分母，其他缺陷或未知质量不计入，不等同于全产线不良率。",
+      "shift_note": "班次读取目标记录shift，不根据end_time的小时推断；未知班次单列。"
+    },
+    "root_cause": {
+      "version": 1,
+      "label": "current_defect_NG_vs_confirmed_OK",
+      "factors": [
+        {
+          "field_id": "C2800.dwd_qual_grading_param_pim.a_cap_end_step",
+          "name": "结束容量",
+          "process_name": "分容",
+          "status": "candidate",
+          "reason": "存在待验证的分布差异；需结合多因素验证和现场试验。",
+          "score": 0.7415730337078652,
+          "coverage": {
+            "NG": {
+              "valid": 89,
+              "total": 89
+            },
+            "OK": {
+              "valid": 13796,
+              "total": 13796
+            }
+          },
+          "source_codes": 13885,
+          "shared_sources": false,
+          "distinct_values": 5220,
+          "median_NG": 101.9409,
+          "median_OK": 336.7249,
+          "distribution_effect": 0.7415730337078652,
+          "rank_effect": -0.7150020686667036,
+          "p_value": 2.4248137921206803e-31,
+          "q_value": 2.4248137921206803e-31,
+          "adjustment": {
+            "threshold": 336.7179,
+            "raw_risk_difference": -0.007913912125422883,
+            "adjusted_risk_difference": -0.007611849185552119,
+            "matched_products": 13872,
+            "comparable_strata": 12,
+            "controls": [
+              "tenant_id",
+              "technics_line_name",
+              "device_name",
+              "shift",
+              "shift_date",
+              "produce_order_code"
+            ],
+            "method": "overlap_weighted_within_stratum_risk_difference"
+          },
+          "stability": {
+            "status": "insufficient",
+            "periods": [
+              {
+                "date": "2026-11-16",
+                "risk_difference": -0.007913912125422883,
+                "products": 13885
+              }
+            ],
+            "consistent_fraction": null
+          },
+          "worst_interval": {
+            "lower": 0.0,
+            "upper": 61.712450000000004,
+            "ng_share": 1.0,
+            "products": 40,
+            "baseline_share": 0.006409794742527908,
+            "lift": 156.01123595505618
+          },
+          "model_contribution": null,
+          "target_relation": {
+            "products": 13885,
+            "spearman": -0.26698038629064513
+          },
+          "mechanism": "数值关系为观察性证据，需工程师核对工艺机制及替代解释。"
+        }
+      ],
+      "model": {
+        "status": "insufficient",
+        "reason": "时间留出并剔除重复物料后，训练或验证组的NG/OK少于10个，无法独立验证。",
+        "contributions": [],
+        "interactions": [],
+        "train_products": 10398,
+        "test_products": 3487,
+        "purged_products": 0,
+        "baseline": null,
+        "augmented": null,
+        "validation": "later_time_material_disjoint",
+        "cross_date": false,
+        "note": "SHAP解释预测依据，不能解释为因果贡献；验证集不参与筛选、训练或调参。",
+        "complete_products": 13885,
+        "selected_fields": [
+          "C2800.dwd_qual_grading_param_pim.a_cap_end_step"
+        ],
+        "train_counts": {
+          "OK": 10313,
+          "NG": 85
+        },
+        "test_counts": {
+          "OK": 3483,
+          "NG": 4
+        }
+      },
+      "report": {
+        "conclusion": "当前输出为根因候选与验证证据，现场验证完成前不确认根因。",
+        "factors": [
+          {
+            "field_id": "C2800.dwd_qual_grading_param_pim.a_cap_end_step",
+            "name": "结束容量",
+            "process_name": "分容",
+            "status": "待验证候选",
+            "evidence": [
+              "存在待验证的分布差异；需结合多因素验证和现场试验。",
+              "分布区分效应 0.742（0为无差异，1为完全区分）。",
+              "与目标数值的Spearman关联 -0.267，用于描述单调联系，不能单独证明因果。",
+              "可比条件内高于/不高于中位数的NG占比差 -0.76 个百分点，覆盖13872个产品。",
+              "尚无足够跨日期复现证据。",
+              "尚未通过独立样本的多因素模型验证。"
+            ],
+            "hypothesis": "分容的结束容量变化可能与当前NG有关，工艺机制待工程师确认。",
+            "alternatives": "检查设备、时间、配方/工单及共同变化因素；观测差异不能单独证明调参效果。",
+            "action": "在批准的工艺范围内设计对照，明确调整项、保持条件、前后NG/总数，并在独立批次复验。",
+            "causal_status": "unconfirmed"
+          }
+        ]
+      },
+      "methods": [
+        "筛选和模型均以目标产品为单位；多个上游码以中位数与极差构造模型特征，原图仍使用全部关联值。",
+        "分布效应为KS距离；独立编码未复用时另给Mann–Whitney检验及BH校正，共享物料不输出伪独立p值。",
+        "条件内占比差为探索性分层关联，不是因果效应；分层控制租户、产线、设备、班次、日期和工单。",
+        "模型仅使用上游特征及生产上下文，不将目标数值、NG判定或产品条码作为输入；时间留出并剔除物料重叠。",
+        "统计阈值用于证据筛选，不构成因果成立条件；无变化、样本不足或无可比条件时明确保留不足状态。"
+      ]
+    },
+    "timing": {
+      "total_seconds": 52.4493,
+      "target_query": {
+        "table": "dwd_qual_ocv3_param_pim",
+        "seconds": 14.5836,
+        "rows": 13964,
+        "source_rows": 14000,
+        "product_count": 13964,
+        "duplicate_rows": 36,
+        "invalid_product_rows": 0,
+        "date_filter_field": "shift_date",
+        "sort_time_field": "end_time",
+        "record_selection": {
+          "mode": "latest"
+        }
+      },
+      "feature_wall_seconds": 36.1,
+      "feature_queries": [
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 34.3738,
+          "rows": 2000,
+          "eligible_source_rows": 3521,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 35.8811,
+          "rows": 2000,
+          "eligible_source_rows": 2098,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 35.3251,
+          "rows": 2000,
+          "eligible_source_rows": 2201,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 35.6712,
+          "rows": 2000,
+          "eligible_source_rows": 2047,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 34.232,
+          "rows": 2000,
+          "eligible_source_rows": 2042,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 33.8963,
+          "rows": 2000,
+          "eligible_source_rows": 2061,
+          "product_batch_size": 2000,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        },
+        {
+          "table": "dwd_qual_grading_param_pim",
+          "process_code": "C2800",
+          "seconds": 32.6034,
+          "rows": 1885,
+          "eligible_source_rows": 1980,
+          "product_batch_size": 1885,
+          "lookup_count": 1885,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "fixed_step_latest",
+            "step_field": "technics_step_code",
+            "step_value": "10"
+          }
+        }
+      ],
+      "workers": 8,
+      "trace_wall_seconds": 0.0429,
+      "trace_queries": []
+    },
+    "rules": [
+      "按租户和产品编码关联；目标时间范围内同一产品按工序规则保留一条记录。",
+      "目标宽表按shift_date班次日期筛选，起止日期均包含；最新记录排序与上游追溯时点仍采用字典中经DDL确认的分区时间字段。",
+      "OCV3：按end_time取最新记录。",
+      "分容：按end_time取工步10的最新记录。",
+      "按目标租户和产线确定314Ah或588Ah路线，再按字典关联ADS，保留所选追溯批次全部物料行；同一目标产品、同一上游码只计一次。",
+      "ADS在一次氦检生成：电芯码目标使用目标时点以内的追溯批次；更早工序的物料码目标使用最新已知编码关系，其上游参数仍严格不晚于目标时点。",
+      "NG/OK产品数按目标产品计数；箱线图n为目标产品与上游码关联后的有效参数数，关联到的多个卷绕码全部绘图，不求平均。同一物料用于多个目标产品时按各目标产品关联计数，这些样本不是相互独立的观测。",
+      "摘要中的参数条数与中位数按当前字段有效的上游实际记录统计：各NG/OK组内按租户、上游码、记录时间和记录标识去重；同一记录可分别属于NG和OK组。覆盖目标产品码仍按具有有效参数的目标产品去重计数。",
+      "参数缺失数按已知上游码统计；缺失电芯数为没有任何有效参数的目标电芯，部分缺失电芯另计；追溯缺失时不猜测上游码数量。",
+      "气泡图按当前特征的有效值划分最多10个等宽区间，左闭右开且最后区间包含右端点；气泡纵轴为区间内去重NG产品数/(NG+OK去重产品数)，面积为区间覆盖产品数。",
+      "同一产品的多个上游码落入同一区间时只计一次；落入不同区间时分别计入，各区间产品数不能直接相加作为总产品数。空区间不绘制气泡，也不视作NG占比为0。",
+      "正负极合浆、涂布、辊压只显示区间气泡图；其他工序可切换气泡图与箱线图。箱线图统计包含全部有效值，隐藏离群散点。",
+      "NG为当前缺陷；OK为缺陷字段为空或OK且产品质量为合格的记录；其他缺陷和未知质量排除。",
+      "上游不沿用目标日期、班次或设备限制；在目标记录的分区时间之前，按各工序规则在数据库内选取一条记录。",
+      "缺失值不填零；箱体为25%至75%分位数，须为1.5倍IQR范围内实际值；统计使用全部取回记录。"
+    ],
+    "warnings": []
+  }
+}

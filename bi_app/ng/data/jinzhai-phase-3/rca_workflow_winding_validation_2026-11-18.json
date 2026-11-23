@@ -1,0 +1,2217 @@
+{
+  "generated_at": "2026-11-18T02:22:42.187206+00:00",
+  "context": {
+    "parameters": {
+      "start_date": "2026-11-17",
+      "end_date": "2026-11-17"
+    },
+    "filters": {
+      "device_name": [
+        "#10切卷一体机",
+        "#11切卷一体机"
+      ]
+    },
+    "row": {
+      "ng_type": "NG-E-QJ009",
+      "ng_name": "正极极耳边距不良带极耳",
+      "dimensions": {
+        "technics_process_name": "切卷"
+      }
+    }
+  },
+  "result": {
+    "status": "success",
+    "ng_type": "NG-E-QJ009",
+    "ng_name": "正极极耳边距不良带极耳",
+    "period": {
+      "start_date": "2026-11-17",
+      "end_date": "2026-11-17"
+    },
+    "filters": {
+      "device_name": [
+        "#10切卷一体机",
+        "#11切卷一体机"
+      ]
+    },
+    "row_dimensions": {
+      "technics_process_name": "切卷"
+    },
+    "target": {
+      "id": "C1400.dwd_qual_winding_slit_param_pim.pos_tab_edge_dist",
+      "name": "正极极耳边距",
+      "process_name": "切卷",
+      "date_filter_field": "shift_date",
+      "sort_time_field": "end_time",
+      "record_selection": {
+        "mode": "latest"
+      },
+      "groups": {
+        "NG": {
+          "count": 71,
+          "missing_count": 0,
+          "min": 21.1898,
+          "q1": 26.74,
+          "median": 28.6118,
+          "q3": 30.2711,
+          "max": 31.4254,
+          "mean": 28.086808450704225,
+          "whisker_low": 21.5973,
+          "whisker_high": 31.4254,
+          "outlier_count": 1,
+          "outliers": [
+            21.1898
+          ]
+        },
+        "OK": {
+          "count": 2357,
+          "missing_count": 0,
+          "min": 26.0876,
+          "q1": 30.9046,
+          "median": 31.7033,
+          "q3": 32.3056,
+          "max": 33.6265,
+          "mean": 31.56868235044548,
+          "whisker_low": 28.8072,
+          "whisker_high": 33.6265,
+          "outlier_count": 62,
+          "outliers": [
+            26.0876,
+            26.6836,
+            26.9263,
+            26.9666,
+            27.2644,
+            27.4628,
+            27.5266,
+            27.5427,
+            27.6956,
+            27.7368,
+            27.7545,
+            27.8787,
+            27.8952,
+            27.9376,
+            27.9404,
+            27.9413,
+            27.958,
+            27.972,
+            28.0674,
+            28.0747,
+            28.089,
+            28.0895,
+            28.1067,
+            28.1528,
+            28.1571,
+            28.1633,
+            28.1886,
+            28.1965,
+            28.223,
+            28.2359,
+            28.2509,
+            28.2658,
+            28.2832,
+            28.2892,
+            28.2941,
+            28.336,
+            28.3436,
+            28.375,
+            28.3873,
+            28.4171,
+            28.4218,
+            28.4855,
+            28.4942,
+            28.5018,
+            28.509,
+            28.5223,
+            28.5411,
+            28.5744,
+            28.6053,
+            28.6229,
+            28.6671,
+            28.6678,
+            28.6941,
+            28.7068,
+            28.7186,
+            28.7203,
+            28.7215,
+            28.7467,
+            28.7557,
+            28.7595,
+            28.7668,
+            28.7974
+          ]
+        }
+      }
+    },
+    "counts": {
+      "NG": 71,
+      "OK": 2357,
+      "excluded": 94
+    },
+    "boxes": [
+      {
+        "field_id": "C1201.dwd_qual_pos_coating_param_pim.offset_sym1",
+        "name": "对称错位1",
+        "process_name": "正极涂布",
+        "process_code": "C1201",
+        "analysis_type": "shared_material",
+        "bubble": {
+          "strategy": "equal_width",
+          "max_bins": 10,
+          "denominator": "distinct_target_products_within_interval",
+          "size_metric": "product_count",
+          "range_min": 0.0,
+          "range_max": 0.0,
+          "covered_products": 2098,
+          "bins": [
+            {
+              "index": 0,
+              "lower": 0.0,
+              "upper": 0.0,
+              "upper_inclusive": true,
+              "NG": 0,
+              "OK": 2098,
+              "product_count": 2098,
+              "ng_rate": 0.0,
+              "source_record_count": 4,
+              "upstream_code_count": 4,
+              "association_count": 2098
+            }
+          ]
+        },
+        "sample_unit": "target_material_association",
+        "groups": {
+          "NG": {
+            "count": 0,
+            "missing_count": 0,
+            "min": null,
+            "q1": null,
+            "median": null,
+            "q3": null,
+            "max": null,
+            "mean": null,
+            "whisker_low": null,
+            "whisker_high": null,
+            "outlier_count": 0,
+            "outliers": [],
+            "target_products": 71,
+            "missing_products": 71,
+            "matched_products": 0,
+            "direct_products": 0,
+            "input_code_products": 0,
+            "ads_products": 0,
+            "ambiguous_products": 0,
+            "expected_samples": 0,
+            "valid_products": 0,
+            "complete_products": 0,
+            "partial_products": 0,
+            "trace_missing_products": 71,
+            "multi_code_products": 0,
+            "parameter_record_count": 0,
+            "parameter_record_median": null
+          },
+          "OK": {
+            "count": 2098,
+            "missing_count": 0,
+            "min": 0.0,
+            "q1": 0.0,
+            "median": 0.0,
+            "q3": 0.0,
+            "max": 0.0,
+            "mean": 0.0,
+            "whisker_low": 0.0,
+            "whisker_high": 0.0,
+            "outlier_count": 0,
+            "outliers": [],
+            "target_products": 2357,
+            "missing_products": 259,
+            "matched_products": 2098,
+            "direct_products": 0,
+            "input_code_products": 0,
+            "ads_products": 2098,
+            "ambiguous_products": 0,
+            "expected_samples": 2098,
+            "valid_products": 2098,
+            "complete_products": 2098,
+            "partial_products": 0,
+            "trace_missing_products": 259,
+            "multi_code_products": 0,
+            "parameter_record_count": 4,
+            "parameter_record_median": 0.0
+          }
+        }
+      }
+    ],
+    "target_profile": {
+      "dimensions": {
+        "overall": [
+          {
+            "key": [],
+            "label": "总体",
+            "NG": 71,
+            "OK": 2357,
+            "excluded": 94,
+            "ng_share": 0.029242174629324547,
+            "groups": {
+              "NG": {
+                "count": 71,
+                "missing_count": 0,
+                "min": 21.1898,
+                "q1": 26.74,
+                "median": 28.6118,
+                "q3": 30.2711,
+                "max": 31.4254,
+                "mean": 28.086808450704225,
+                "whisker_low": 21.5973,
+                "whisker_high": 31.4254,
+                "outlier_count": 1,
+                "outliers": [
+                  21.1898
+                ]
+              },
+              "OK": {
+                "count": 2357,
+                "missing_count": 0,
+                "min": 26.0876,
+                "q1": 30.9046,
+                "median": 31.7033,
+                "q3": 32.3056,
+                "max": 33.6265,
+                "mean": 31.56868235044548,
+                "whisker_low": 28.8072,
+                "whisker_high": 33.6265,
+                "outlier_count": 62,
+                "outliers": [
+                  26.0876,
+                  26.6836,
+                  26.9263,
+                  26.9666,
+                  27.2644,
+                  27.4628,
+                  27.5266,
+                  27.5427,
+                  27.6956,
+                  27.7368,
+                  27.7545,
+                  27.8787,
+                  27.8952,
+                  27.9376,
+                  27.9404,
+                  27.9413,
+                  27.958,
+                  27.972,
+                  28.0674,
+                  28.0747,
+                  28.089,
+                  28.0895,
+                  28.1067,
+                  28.1528,
+                  28.1571,
+                  28.1633,
+                  28.1886,
+                  28.1965,
+                  28.223,
+                  28.2359,
+                  28.2509,
+                  28.2658,
+                  28.2832,
+                  28.2892,
+                  28.2941,
+                  28.336,
+                  28.3436,
+                  28.375,
+                  28.3873,
+                  28.4171,
+                  28.4218,
+                  28.4855,
+                  28.4942,
+                  28.5018,
+                  28.509,
+                  28.5223,
+                  28.5411,
+                  28.5744,
+                  28.6053,
+                  28.6229,
+                  28.6671,
+                  28.6678,
+                  28.6941,
+                  28.7068,
+                  28.7186,
+                  28.7203,
+                  28.7215,
+                  28.7467,
+                  28.7557,
+                  28.7595,
+                  28.7668,
+                  28.7974
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 4,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 3,
+                "OK": 1,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 5,
+                "OK": 4,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 7,
+                "OK": 21,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 13,
+                "OK": 47,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 6,
+                "OK": 53,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 11,
+                "OK": 212,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 11,
+                "OK": 475,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 1,
+                "OK": 744,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 533,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 267,
+                "upper_inclusive": true
+              }
+            ]
+          }
+        ],
+        "device": [
+          {
+            "key": [
+              "11300001",
+              "金寨三期588AH",
+              "#10切卷一体机"
+            ],
+            "label": "#10切卷一体机",
+            "NG": 69,
+            "OK": 1488,
+            "excluded": 46,
+            "ng_share": 0.04431599229287091,
+            "groups": {
+              "NG": {
+                "count": 69,
+                "missing_count": 0,
+                "min": 21.1898,
+                "q1": 26.7355,
+                "median": 28.5497,
+                "q3": 30.2377,
+                "max": 31.4254,
+                "mean": 28.019710144927537,
+                "whisker_low": 21.5973,
+                "whisker_high": 31.4254,
+                "outlier_count": 1,
+                "outliers": [
+                  21.1898
+                ]
+              },
+              "OK": {
+                "count": 1488,
+                "missing_count": 0,
+                "min": 26.9666,
+                "q1": 30.7443,
+                "median": 31.41005,
+                "q3": 31.869575,
+                "max": 32.7644,
+                "mean": 31.214919556451612,
+                "whisker_low": 29.1061,
+                "whisker_high": 32.7644,
+                "outlier_count": 58,
+                "outliers": [
+                  26.9666,
+                  27.2644,
+                  27.4628,
+                  27.6956,
+                  27.7368,
+                  27.7545,
+                  27.8787,
+                  27.8952,
+                  27.9376,
+                  27.9404,
+                  27.9413,
+                  27.958,
+                  27.972,
+                  28.0747,
+                  28.0895,
+                  28.1528,
+                  28.1571,
+                  28.1633,
+                  28.1886,
+                  28.1965,
+                  28.223,
+                  28.2359,
+                  28.2509,
+                  28.2658,
+                  28.2892,
+                  28.2941,
+                  28.336,
+                  28.3436,
+                  28.3873,
+                  28.4171,
+                  28.4218,
+                  28.4855,
+                  28.5018,
+                  28.509,
+                  28.5223,
+                  28.5411,
+                  28.5744,
+                  28.6053,
+                  28.6671,
+                  28.6678,
+                  28.6941,
+                  28.7068,
+                  28.7186,
+                  28.7203,
+                  28.7467,
+                  28.7595,
+                  28.7668,
+                  28.7974,
+                  28.8072,
+                  28.8525,
+                  28.8548,
+                  28.8701,
+                  28.8979,
+                  28.9014,
+                  28.9165,
+                  28.9428,
+                  28.9933,
+                  29.0222
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 4,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 5,
+                "OK": 2,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 7,
+                "OK": 16,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 13,
+                "OK": 38,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 6,
+                "OK": 27,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 10,
+                "OK": 167,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 10,
+                "OK": 425,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 1,
+                "OK": 605,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 208,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "11300001",
+              "金寨三期588AH",
+              "#11切卷一体机"
+            ],
+            "label": "#11切卷一体机",
+            "NG": 2,
+            "OK": 869,
+            "excluded": 48,
+            "ng_share": 0.002296211251435132,
+            "groups": {
+              "NG": {
+                "count": 2,
+                "missing_count": 0,
+                "min": 29.8138,
+                "q1": 30.10775,
+                "median": 30.401699999999998,
+                "q3": 30.69565,
+                "max": 30.9896,
+                "mean": 30.401699999999998,
+                "whisker_low": 29.8138,
+                "whisker_high": 30.9896,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 869,
+                "missing_count": 0,
+                "min": 26.0876,
+                "q1": 31.7961,
+                "median": 32.5065,
+                "q3": 32.9259,
+                "max": 33.6265,
+                "mean": 32.17443498273878,
+                "whisker_low": 30.1032,
+                "whisker_high": 33.6265,
+                "outlier_count": 59,
+                "outliers": [
+                  26.0876,
+                  26.6836,
+                  26.9263,
+                  27.5266,
+                  27.5427,
+                  28.0674,
+                  28.089,
+                  28.1067,
+                  28.2832,
+                  28.375,
+                  28.4942,
+                  28.6229,
+                  28.7215,
+                  28.7557,
+                  28.873,
+                  28.9496,
+                  28.9607,
+                  28.9638,
+                  29.0526,
+                  29.0554,
+                  29.0751,
+                  29.0759,
+                  29.1021,
+                  29.1169,
+                  29.1883,
+                  29.2079,
+                  29.3122,
+                  29.3177,
+                  29.3505,
+                  29.3665,
+                  29.3783,
+                  29.3867,
+                  29.3915,
+                  29.4042,
+                  29.4155,
+                  29.4516,
+                  29.534,
+                  29.5544,
+                  29.5626,
+                  29.5632,
+                  29.6616,
+                  29.7333,
+                  29.7392,
+                  29.798,
+                  29.8031,
+                  29.8629,
+                  29.8823,
+                  29.9033,
+                  29.9126,
+                  29.9221,
+                  29.9364,
+                  29.9709,
+                  30.0237,
+                  30.0349,
+                  30.0385,
+                  30.0433,
+                  30.0504,
+                  30.0511,
+                  30.0794
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 0,
+                "OK": 1,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 0,
+                "OK": 2,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 0,
+                "OK": 5,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 0,
+                "OK": 9,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 0,
+                "OK": 26,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 1,
+                "OK": 45,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 1,
+                "OK": 50,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 0,
+                "OK": 139,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 325,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 267,
+                "upper_inclusive": true
+              }
+            ]
+          }
+        ],
+        "shift": [
+          {
+            "key": [
+              "夜班"
+            ],
+            "label": "夜班",
+            "NG": 42,
+            "OK": 1398,
+            "excluded": 46,
+            "ng_share": 0.029166666666666667,
+            "groups": {
+              "NG": {
+                "count": 42,
+                "missing_count": 0,
+                "min": 21.1898,
+                "q1": 28.358725,
+                "median": 29.4739,
+                "q3": 30.562525,
+                "max": 31.4254,
+                "mean": 28.86926904761905,
+                "whisker_low": 25.8532,
+                "whisker_high": 31.4254,
+                "outlier_count": 3,
+                "outliers": [
+                  21.1898,
+                  22.3799,
+                  24.5562
+                ]
+              },
+              "OK": {
+                "count": 1398,
+                "missing_count": 0,
+                "min": 26.0876,
+                "q1": 30.937075,
+                "median": 31.700699999999998,
+                "q3": 32.25875,
+                "max": 33.6265,
+                "mean": 31.562530114449213,
+                "whisker_low": 28.9607,
+                "whisker_high": 33.6265,
+                "outlier_count": 41,
+                "outliers": [
+                  26.0876,
+                  26.6836,
+                  26.9263,
+                  26.9666,
+                  27.2644,
+                  27.4628,
+                  27.5266,
+                  27.5427,
+                  27.6956,
+                  27.7368,
+                  27.7545,
+                  27.8952,
+                  27.972,
+                  28.0674,
+                  28.0747,
+                  28.089,
+                  28.0895,
+                  28.1067,
+                  28.1571,
+                  28.223,
+                  28.2359,
+                  28.2658,
+                  28.2832,
+                  28.4218,
+                  28.4942,
+                  28.5223,
+                  28.6229,
+                  28.6678,
+                  28.7186,
+                  28.7215,
+                  28.7467,
+                  28.7557,
+                  28.7595,
+                  28.7668,
+                  28.8072,
+                  28.8525,
+                  28.8548,
+                  28.8701,
+                  28.873,
+                  28.9014,
+                  28.9496
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 3,
+                "OK": 1,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 2,
+                "OK": 4,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 0,
+                "OK": 14,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 9,
+                "OK": 23,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 6,
+                "OK": 42,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 7,
+                "OK": 100,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 10,
+                "OK": 270,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 1,
+                "OK": 498,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 301,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 145,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "白班"
+            ],
+            "label": "白班",
+            "NG": 29,
+            "OK": 959,
+            "excluded": 48,
+            "ng_share": 0.029352226720647773,
+            "groups": {
+              "NG": {
+                "count": 29,
+                "missing_count": 0,
+                "min": 21.5973,
+                "q1": 24.5253,
+                "median": 27.5157,
+                "q3": 28.2712,
+                "max": 30.9896,
+                "mean": 26.953589655172415,
+                "whisker_low": 21.5973,
+                "whisker_high": 30.9896,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 959,
+                "missing_count": 0,
+                "min": 27.8787,
+                "q1": 30.84995,
+                "median": 31.7333,
+                "q3": 32.4173,
+                "max": 33.5157,
+                "mean": 31.57765088633994,
+                "whisker_low": 28.5018,
+                "whisker_high": 33.5157,
+                "outlier_count": 18,
+                "outliers": [
+                  27.8787,
+                  27.9376,
+                  27.9404,
+                  27.9413,
+                  27.958,
+                  28.1528,
+                  28.1633,
+                  28.1886,
+                  28.1965,
+                  28.2509,
+                  28.2892,
+                  28.2941,
+                  28.336,
+                  28.3436,
+                  28.375,
+                  28.3873,
+                  28.4171,
+                  28.4855
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 7,
+                "OK": 7,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 4,
+                "OK": 24,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 0,
+                "OK": 11,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 4,
+                "OK": 112,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 1,
+                "OK": 205,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 0,
+                "OK": 246,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 232,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 122,
+                "upper_inclusive": true
+              }
+            ]
+          }
+        ],
+        "device_shift": [
+          {
+            "key": [
+              "11300001",
+              "金寨三期588AH",
+              "#10切卷一体机",
+              "夜班"
+            ],
+            "label": "#10切卷一体机 · 夜班",
+            "NG": 42,
+            "OK": 875,
+            "excluded": 26,
+            "ng_share": 0.04580152671755725,
+            "groups": {
+              "NG": {
+                "count": 42,
+                "missing_count": 0,
+                "min": 21.1898,
+                "q1": 28.358725,
+                "median": 29.4739,
+                "q3": 30.562525,
+                "max": 31.4254,
+                "mean": 28.86926904761905,
+                "whisker_low": 25.8532,
+                "whisker_high": 31.4254,
+                "outlier_count": 3,
+                "outliers": [
+                  21.1898,
+                  22.3799,
+                  24.5562
+                ]
+              },
+              "OK": {
+                "count": 875,
+                "missing_count": 0,
+                "min": 26.9666,
+                "q1": 30.859499999999997,
+                "median": 31.5156,
+                "q3": 31.87995,
+                "max": 32.6753,
+                "mean": 31.3097736,
+                "whisker_low": 29.4186,
+                "whisker_high": 32.6753,
+                "outlier_count": 34,
+                "outliers": [
+                  26.9666,
+                  27.2644,
+                  27.4628,
+                  27.6956,
+                  27.7368,
+                  27.7545,
+                  27.8952,
+                  27.972,
+                  28.0747,
+                  28.0895,
+                  28.1571,
+                  28.223,
+                  28.2359,
+                  28.2658,
+                  28.4218,
+                  28.5223,
+                  28.6678,
+                  28.7186,
+                  28.7467,
+                  28.7595,
+                  28.7668,
+                  28.8072,
+                  28.8525,
+                  28.8548,
+                  28.8701,
+                  28.9014,
+                  29.0222,
+                  29.1061,
+                  29.1241,
+                  29.1388,
+                  29.2543,
+                  29.2591,
+                  29.2785,
+                  29.324
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 2,
+                "OK": 2,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 0,
+                "OK": 9,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 9,
+                "OK": 15,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 6,
+                "OK": 16,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 7,
+                "OK": 62,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 10,
+                "OK": 238,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 1,
+                "OK": 409,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 124,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "11300001",
+              "金寨三期588AH",
+              "#10切卷一体机",
+              "白班"
+            ],
+            "label": "#10切卷一体机 · 白班",
+            "NG": 27,
+            "OK": 613,
+            "excluded": 20,
+            "ng_share": 0.0421875,
+            "groups": {
+              "NG": {
+                "count": 27,
+                "missing_count": 0,
+                "min": 21.5973,
+                "q1": 24.495800000000003,
+                "median": 27.4887,
+                "q3": 28.16275,
+                "max": 30.3139,
+                "mean": 26.698174074074075,
+                "whisker_low": 21.5973,
+                "whisker_high": 30.3139,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 613,
+                "missing_count": 0,
+                "min": 27.8787,
+                "q1": 30.5619,
+                "median": 31.1935,
+                "q3": 31.8515,
+                "max": 32.7644,
+                "mean": 31.079524306688416,
+                "whisker_low": 28.6671,
+                "whisker_high": 32.7644,
+                "outlier_count": 22,
+                "outliers": [
+                  27.8787,
+                  27.9376,
+                  27.9404,
+                  27.9413,
+                  27.958,
+                  28.1528,
+                  28.1633,
+                  28.1886,
+                  28.1965,
+                  28.2509,
+                  28.2892,
+                  28.2941,
+                  28.336,
+                  28.3436,
+                  28.3873,
+                  28.4171,
+                  28.4855,
+                  28.5018,
+                  28.509,
+                  28.5411,
+                  28.5744,
+                  28.6053
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 1,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 2,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 3,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 7,
+                "OK": 7,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 4,
+                "OK": 23,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 0,
+                "OK": 11,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 3,
+                "OK": 105,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 0,
+                "OK": 187,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 0,
+                "OK": 196,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 84,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "11300001",
+              "金寨三期588AH",
+              "#11切卷一体机",
+              "夜班"
+            ],
+            "label": "#11切卷一体机 · 夜班",
+            "NG": 0,
+            "OK": 523,
+            "excluded": 20,
+            "ng_share": 0.0,
+            "groups": {
+              "NG": {
+                "count": 0,
+                "missing_count": 0,
+                "min": null,
+                "q1": null,
+                "median": null,
+                "q3": null,
+                "max": null,
+                "mean": null,
+                "whisker_low": null,
+                "whisker_high": null,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 523,
+                "missing_count": 0,
+                "min": 26.0876,
+                "q1": 31.525799999999997,
+                "median": 32.3567,
+                "q3": 32.9028,
+                "max": 33.6265,
+                "mean": 31.98540191204589,
+                "whisker_low": 29.534,
+                "whisker_high": 33.6265,
+                "outlier_count": 35,
+                "outliers": [
+                  26.0876,
+                  26.6836,
+                  26.9263,
+                  27.5266,
+                  27.5427,
+                  28.0674,
+                  28.089,
+                  28.1067,
+                  28.2832,
+                  28.4942,
+                  28.6229,
+                  28.7215,
+                  28.7557,
+                  28.873,
+                  28.9496,
+                  28.9607,
+                  28.9638,
+                  29.0526,
+                  29.0554,
+                  29.0751,
+                  29.0759,
+                  29.1021,
+                  29.1169,
+                  29.1883,
+                  29.2079,
+                  29.3122,
+                  29.3177,
+                  29.3505,
+                  29.3665,
+                  29.3783,
+                  29.3867,
+                  29.3915,
+                  29.4042,
+                  29.4155,
+                  29.4516
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 0,
+                "OK": 1,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 0,
+                "OK": 2,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 0,
+                "OK": 5,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 0,
+                "OK": 8,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 0,
+                "OK": 26,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 0,
+                "OK": 38,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 0,
+                "OK": 32,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 0,
+                "OK": 89,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 177,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 145,
+                "upper_inclusive": true
+              }
+            ]
+          },
+          {
+            "key": [
+              "11300001",
+              "金寨三期588AH",
+              "#11切卷一体机",
+              "白班"
+            ],
+            "label": "#11切卷一体机 · 白班",
+            "NG": 2,
+            "OK": 346,
+            "excluded": 28,
+            "ng_share": 0.005747126436781609,
+            "groups": {
+              "NG": {
+                "count": 2,
+                "missing_count": 0,
+                "min": 29.8138,
+                "q1": 30.10775,
+                "median": 30.401699999999998,
+                "q3": 30.69565,
+                "max": 30.9896,
+                "mean": 30.401699999999998,
+                "whisker_low": 29.8138,
+                "whisker_high": 30.9896,
+                "outlier_count": 0,
+                "outliers": []
+              },
+              "OK": {
+                "count": 346,
+                "missing_count": 0,
+                "min": 28.375,
+                "q1": 32.17505,
+                "median": 32.632949999999994,
+                "q3": 32.954625,
+                "max": 33.5157,
+                "mean": 32.46016994219653,
+                "whisker_low": 31.0864,
+                "whisker_high": 33.5157,
+                "outlier_count": 15,
+                "outliers": [
+                  28.375,
+                  30.1932,
+                  30.2451,
+                  30.2555,
+                  30.2653,
+                  30.4438,
+                  30.4949,
+                  30.5048,
+                  30.6485,
+                  30.7469,
+                  30.8022,
+                  30.8573,
+                  30.9049,
+                  30.9189,
+                  30.9733
+                ]
+              }
+            },
+            "histogram": [
+              {
+                "lower": 21.1898,
+                "upper": 21.96709375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 21.96709375,
+                "upper": 22.744387500000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 22.744387500000002,
+                "upper": 23.52168125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 23.52168125,
+                "upper": 24.298975000000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 24.298975000000002,
+                "upper": 25.07626875,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.07626875,
+                "upper": 25.853562500000002,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 25.853562500000002,
+                "upper": 26.63085625,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 26.63085625,
+                "upper": 27.40815,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 27.40815,
+                "upper": 28.18544375,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.18544375,
+                "upper": 28.962737500000003,
+                "NG": 0,
+                "OK": 1,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 28.962737500000003,
+                "upper": 29.74003125,
+                "NG": 0,
+                "OK": 0,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 29.74003125,
+                "upper": 30.517325,
+                "NG": 1,
+                "OK": 7,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 30.517325,
+                "upper": 31.294618749999998,
+                "NG": 1,
+                "OK": 18,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 31.294618749999998,
+                "upper": 32.071912499999996,
+                "NG": 0,
+                "OK": 50,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.071912499999996,
+                "upper": 32.84920625,
+                "NG": 0,
+                "OK": 148,
+                "upper_inclusive": false
+              },
+              {
+                "lower": 32.84920625,
+                "upper": 33.6265,
+                "NG": 0,
+                "OK": 122,
+                "upper_inclusive": true
+              }
+            ]
+          }
+        ]
+      },
+      "findings": [
+        "目标数值NG中位数28.612、OK中位数31.703；四分位距分别为3.5311、1.401。",
+        "设备分组中，#10切卷一体机的样本NG占比最高（69/1557，4.43%），与最低组相差4.20个百分点；此为定位线索。",
+        "班次分组中，白班的样本NG占比最高（29/988，2.94%），与最低组相差0.02个百分点；此为定位线索。",
+        "设备×班次分组中，#10切卷一体机 · 夜班的样本NG占比最高（42/917，4.58%），与最低组相差4.58个百分点；此为定位线索。"
+      ],
+      "unit": "distinct_target_product",
+      "rate_denominator": "current_NG_plus_confirmed_OK",
+      "rate_note": "NG占比以本次当前缺陷NG与确认OK为分母，其他缺陷或未知质量不计入，不等同于全产线不良率。",
+      "shift_note": "班次读取目标记录shift，不根据end_time的小时推断；未知班次单列。"
+    },
+    "root_cause": {
+      "version": 1,
+      "label": "current_defect_NG_vs_confirmed_OK",
+      "factors": [
+        {
+          "field_id": "C1201.dwd_qual_pos_coating_param_pim.offset_sym1",
+          "name": "对称错位1",
+          "process_name": "正极涂布",
+          "status": "insufficient",
+          "reason": "NG或OK有效产品少于5个，暂不排序。",
+          "score": 0.0,
+          "coverage": {
+            "NG": {
+              "valid": 0,
+              "total": 71
+            },
+            "OK": {
+              "valid": 2098,
+              "total": 2357
+            }
+          },
+          "source_codes": 4,
+          "shared_sources": true,
+          "distinct_values": 1,
+          "median_NG": null,
+          "median_OK": 0.0,
+          "distribution_effect": null,
+          "rank_effect": null,
+          "p_value": null,
+          "q_value": null,
+          "adjustment": null,
+          "stability": {
+            "status": "insufficient",
+            "periods": [],
+            "consistent_fraction": null
+          },
+          "worst_interval": null,
+          "model_contribution": null,
+          "target_relation": {
+            "products": 2098,
+            "spearman": null
+          },
+          "mechanism": "数值关系为观察性证据，需工程师核对工艺机制及替代解释。"
+        }
+      ],
+      "model": {
+        "status": "insufficient",
+        "reason": "时间留出并剔除重复物料后，训练或验证组的NG/OK少于10个，无法独立验证。",
+        "contributions": [],
+        "interactions": [],
+        "train_products": 1080,
+        "test_products": 525,
+        "purged_products": 493,
+        "baseline": null,
+        "augmented": null,
+        "validation": "later_time_material_disjoint",
+        "cross_date": false,
+        "note": "SHAP解释预测依据，不能解释为因果贡献；验证集不参与筛选、训练或调参。",
+        "complete_products": 2098,
+        "selected_fields": [
+          "C1201.dwd_qual_pos_coating_param_pim.offset_sym1"
+        ],
+        "train_counts": {
+          "OK": 1080
+        },
+        "test_counts": {
+          "OK": 525
+        }
+      },
+      "report": {
+        "conclusion": "当前输出为根因候选与验证证据，现场验证完成前不确认根因。",
+        "factors": [
+          {
+            "field_id": "C1201.dwd_qual_pos_coating_param_pim.offset_sym1",
+            "name": "对称错位1",
+            "process_name": "正极涂布",
+            "status": "证据不足",
+            "evidence": [
+              "NG或OK有效产品少于5个，暂不排序。",
+              "尚无足够跨日期复现证据。",
+              "尚未通过独立样本的多因素模型验证。"
+            ],
+            "hypothesis": "正极涂布的对称错位1变化可能与当前NG有关，工艺机制待工程师确认。",
+            "alternatives": "检查设备、时间、配方/工单及共同变化因素；观测差异不能单独证明调参效果。",
+            "action": "在批准的工艺范围内设计对照，明确调整项、保持条件、前后NG/总数，并在独立批次复验。",
+            "causal_status": "unconfirmed"
+          }
+        ]
+      },
+      "methods": [
+        "筛选和模型均以目标产品为单位；多个上游码以中位数与极差构造模型特征，原图仍使用全部关联值。",
+        "分布效应为KS距离；独立编码未复用时另给Mann–Whitney检验及BH校正，共享物料不输出伪独立p值。",
+        "条件内占比差为探索性分层关联，不是因果效应；分层控制租户、产线、设备、班次、日期和工单。",
+        "模型仅使用上游特征及生产上下文，不将目标数值、NG判定或产品条码作为输入；时间留出并剔除物料重叠。",
+        "统计阈值用于证据筛选，不构成因果成立条件；无变化、样本不足或无可比条件时明确保留不足状态。"
+      ]
+    },
+    "timing": {
+      "total_seconds": 8.5937,
+      "target_query": {
+        "table": "dwd_qual_winding_slit_param_pim",
+        "seconds": 3.0159,
+        "rows": 2522,
+        "source_rows": 2543,
+        "product_count": 2522,
+        "duplicate_rows": 21,
+        "invalid_product_rows": 0,
+        "date_filter_field": "shift_date",
+        "sort_time_field": "end_time",
+        "record_selection": {
+          "mode": "latest"
+        }
+      },
+      "feature_wall_seconds": 2.1014,
+      "feature_queries": [
+        {
+          "table": "dwd_qual_pos_coating_param_pim",
+          "process_code": "C1201",
+          "seconds": 2.0393,
+          "rows": 4,
+          "eligible_source_rows": 4,
+          "product_batch_size": 4,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "latest"
+          }
+        },
+        {
+          "table": "dwd_qual_pos_coating_param_pim",
+          "process_code": "C1201",
+          "seconds": 2.0997,
+          "rows": 1,
+          "eligible_source_rows": 1,
+          "product_batch_size": 1,
+          "lookup_count": 80,
+          "query_strategy": "batch_latest",
+          "sort_time_field": "end_time",
+          "record_selection": {
+            "mode": "latest"
+          }
+        }
+      ],
+      "workers": 8,
+      "trace_wall_seconds": 2.4511,
+      "trace_queries": [
+        {
+          "route": "588ah",
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "seconds": 2.4216,
+          "rows": 1707,
+          "lookup_count": 2000,
+          "query_strategy": "batch_latest"
+        },
+        {
+          "route": "588ah",
+          "table": "ads_trace_cell_coding_588ah_pim",
+          "seconds": 0.9741,
+          "rows": 391,
+          "lookup_count": 428,
+          "query_strategy": "batch_latest"
+        }
+      ]
+    },
+    "rules": [
+      "按租户和产品编码关联；目标时间范围内同一产品按工序规则保留一条记录。",
+      "目标宽表按shift_date班次日期筛选，起止日期均包含；最新记录排序与上游追溯时点仍采用字典中经DDL确认的分区时间字段。",
+      "切卷：按end_time取最新记录。",
+      "正极涂布：按end_time取最新记录。",
+      "按目标租户和产线确定314Ah或588Ah路线，再按字典关联ADS，保留所选追溯批次全部物料行；同一目标产品、同一上游码只计一次。",
+      "ADS在一次氦检生成：电芯码目标使用目标时点以内的追溯批次；更早工序的物料码目标使用最新已知编码关系，其上游参数仍严格不晚于目标时点。",
+      "NG/OK产品数按目标产品计数；箱线图n为目标产品与上游码关联后的有效参数数，关联到的多个卷绕码全部绘图，不求平均。同一物料用于多个目标产品时按各目标产品关联计数，这些样本不是相互独立的观测。",
+      "摘要中的参数条数与中位数按当前字段有效的上游实际记录统计：各NG/OK组内按租户、上游码、记录时间和记录标识去重；同一记录可分别属于NG和OK组。覆盖目标产品码仍按具有有效参数的目标产品去重计数。",
+      "参数缺失数按已知上游码统计；缺失电芯数为没有任何有效参数的目标电芯，部分缺失电芯另计；追溯缺失时不猜测上游码数量。",
+      "气泡图按当前特征的有效值划分最多10个等宽区间，左闭右开且最后区间包含右端点；气泡纵轴为区间内去重NG产品数/(NG+OK去重产品数)，面积为区间覆盖产品数。",
+      "同一产品的多个上游码落入同一区间时只计一次；落入不同区间时分别计入，各区间产品数不能直接相加作为总产品数。空区间不绘制气泡，也不视作NG占比为0。",
+      "正负极合浆、涂布、辊压只显示区间气泡图；其他工序可切换气泡图与箱线图。箱线图统计包含全部有效值，隐藏离群散点。",
+      "NG为当前缺陷；OK为缺陷字段为空或OK且产品质量为合格的记录；其他缺陷和未知质量排除。",
+      "上游不沿用目标日期、班次或设备限制；在目标记录的分区时间之前，按各工序规则在数据库内选取一条记录。",
+      "缺失值不填零；箱体为25%至75%分位数，须为1.5倍IQR范围内实际值；统计使用全部取回记录。"
+    ],
+    "warnings": [
+      "部分特征有效数值覆盖率不足50%，请结合每组有效样本数判断，并核对跨工序产品编码是否一致。",
+      "部分电芯在目标时点没有可用的追溯关系或工序映射；已计入缺失电芯数，未知上游码数量未按2个或4个补造。"
+    ]
+  }
+}
