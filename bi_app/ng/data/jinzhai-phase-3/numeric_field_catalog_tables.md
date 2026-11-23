@@ -1,6 +1,6 @@
 # 当前NG深度分析工序表清单
 
-直接从当前numeric_field_catalog.json生成。所有表均位于dwd数据库；314Ah、588Ah分别使用对应路线的ADS追溯表。
+直接从当前numeric_field_catalog.json生成。当前共34张工序宽表，所有表均位于dwd数据库；314Ah、588Ah分别使用对应路线的ADS追溯表。
 
 | 工序编码 | 工序 | 表名 | 314Ah关联字段 | 588Ah关联字段 |
 |---|---|---|---|---|
@@ -11,6 +11,7 @@
 | C1301 | 正极辊压 | `dwd_qual_pos_roll_slit_param_pim` | `pos_roll_slit_code` | `pos_roll_slit_code` |
 | C1302 | 负极辊压 | `dwd_qual_neg_roll_slit_param_pim` | `neg_roll_slit_code` | `neg_roll_slit_code` |
 | C1400 | 切卷 | `dwd_qual_winding_slit_param_pim` | `winding_slit_code` | `winding_slit_code` |
+| C1502 | 热压 | `dwd_qual_hot_press_pim` | `winding_slit_code` | `winding_slit_code` |
 | C1503 | 极耳翻折检测 | `dwd_qual_tab_fold_insp_param_pim` | `winding_slit_code` | `winding_slit_code` |
 | C1504 | X-ray | `dwd_qual_xray_param_pim` | `winding_slit_code` | `winding_slit_code` |
 | C1506 | 超声焊 | `dwd_qual_ultrasonic_weld_param_pim` | `butterfly_weld_code` | `butterfly_weld_code` |
@@ -37,3 +38,5 @@
 | C3300 | OCV4 | `dwd_qual_ocv4_param_pim` | `cell_code` | `cell_code` |
 | C3500 | DCR | `dwd_qual_dcr_param_pim` | `cell_code` | `cell_code` |
 | C3600 | 分档包胶 | `dwd_qual_tape_wrap_param_pim` | `cell_code` | `cell_code` |
+
+尚未匹配到可用数值参数宽表的工序：C1501 预热、C1505 极耳预焊、C2000 预充、C3400 OCV5。

@@ -11,6 +11,7 @@ import type { Message } from '@/types';
 import type { BiSuccessResponse } from '../production-bi-analysis/types';
 import { CONTROL_PLAN_AGENT } from './config';
 import { normalizeControlPlanOptions, toggleMatchingOptions, type ControlPlanOption } from './selection';
+import { notifyBiHistory } from '@/services/biSessions';
 
 type Selection = { option_ids: string[] };
 interface Confirmation {
@@ -27,16 +28,17 @@ interface Response {
   message?: string; confirm?: Confirmation; columns?: Record<string, string>; page_size?: number;
   data?: BiSuccessResponse['data']; row_count?: number; analysis?: BiSuccessResponse['analysis'];
 }
-type Turn = { id: string; kind: 'message'; message: Message }
+export type ControlPlanTurn = { id: string; kind: 'message'; message: Message }
   | { id: string; kind: 'confirm'; response: Response; submitted: boolean; expired: boolean }
   | { id: string; kind: 'result'; response: Response };
 
-export function ControlPlanAnalysisApp() {
-  const [sessionId] = useState(() => genId());
-  const [turns, setTurns] = useState<Turn[]>([]);
+export function ControlPlanAnalysisApp({ initialConversation }: { initialConversation?: { thread_id: string; turns: ControlPlanTurn[] } } = {}) {
+  const [sessionId] = useState(() => initialConversation?.thread_id ?? genId());
+  const [turns, setTurns] = useState<ControlPlanTurn[]>(() => initialConversation?.turns ?? []);
   const [loading, setLoading] = useState(false);
   const request = useRef<AbortController | null>(null);
-  const analysisQuery = useRef('');
+  const initialQuestion = initialConversation?.turns.filter((turn): turn is Extract<ControlPlanTurn,{kind:'message'}> => turn.kind === 'message' && turn.message.role === 'user').at(-1)?.message.content ?? '';
+  const analysisQuery = useRef(initialQuestion);
   const scroller = useRef<HTMLDivElement>(null);
   useEffect(() => () => request.current?.abort(), []);
   useEffect(() => { scroller.current?.scrollTo({ top: scroller.current.scrollHeight }); }, [turns, loading]);
@@ -49,6 +51,7 @@ export function ControlPlanAnalysisApp() {
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ session_id: sessionId, analysis_query: analysisQuery.current, ...payload }),
       });
+      notifyBiHistory(response, sessionId);
       handleUnauthorized(response);
       const body = await response.json().catch(() => null);
       if (!response.ok) throw new Error(typeof body?.detail === 'string' ? body.detail : body?.error ?? 'Control Plan 查询失败');

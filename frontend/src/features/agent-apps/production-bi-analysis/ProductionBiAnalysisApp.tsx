@@ -3,7 +3,7 @@ import { DatabaseZap, Sparkles } from 'lucide-react';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { MessageBubble } from '@/components/chat/MessageBubble';
 import type { Message } from '@/types';
-import { recommendNgFields, analyzeNgFields } from '../ng-defect-analysis/deepApi';
+import { recommendNgFields, analyzeNgFields, listNgValidations, recordNgValidation, loadNgQualityAudit } from '../ng-defect-analysis/deepApi';
 import type { DeepPlan, DeepProgress, DeepResult } from '../ng-defect-analysis/deepTypes';
 import { NgDeepFieldCard } from '../ng-defect-analysis/NgDeepFieldCard';
 import { NgDeepResultCard } from '../ng-defect-analysis/NgDeepResultCard';
@@ -20,11 +20,11 @@ import type {
   BiQueryPayload,
 } from './types';
 
-type BiTurn =
+export type BiTurn =
   | { id: string; kind: 'message'; message: Message }
   | { id: string; kind: 'confirm'; confirm: BiConfirmPayload; threadId: string; submitted: boolean; expired?: boolean; analysisQuery: string }
   | { id: string; kind: 'result'; result: BiSuccessResponse }
-  | { id: string; kind: 'deep_confirm'; plan: DeepPlan; submitted: boolean }
+  | { id: string; kind: 'deep_confirm'; plan: DeepPlan; submitted: boolean; expired?: boolean }
   | { id: string; kind: 'deep_progress'; progress: DeepProgress; history: DeepProgress[] }
   | { id: string; kind: 'deep_result'; result: DeepResult };
 
@@ -33,9 +33,9 @@ function newId(): string {
     ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent }) {
-  const [threadId, setThreadId] = useState(() => newId());
-  const [turns, setTurns] = useState<BiTurn[]>([]);
+export function ProductionBiAnalysisApp({ agent, initialConversation }: { agent: ProductionBiAgent; initialConversation?: { thread_id: string; turns: BiTurn[] } }) {
+  const [threadId, setThreadId] = useState(() => initialConversation?.thread_id ?? newId());
+  const [turns, setTurns] = useState<BiTurn[]>(() => initialConversation?.turns ?? []);
   const [loading, setLoading] = useState(false);
   const [deepProgressId, setDeepProgressId] = useState<string | null>(null);
   const [injectedText, setInjectedText] = useState<string>();
@@ -113,7 +113,7 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
       setPendingDeep(undefined);
       setTurns((current) => [...current, { id: newId(), kind: 'message', message: { role: 'user', content: trimmed, timestamp: new Date().toISOString() } }]);
       void runDeep(async (signal) => {
-        const plan = await recommendNgFields({ source_id: context.sourceId, row_index: context.rowIndex, thread_id: context.threadId, ...(agent.ngFactoryId ? { factory_id: agent.ngFactoryId } : {}) }, signal);
+        const plan = await recommendNgFields({ source_id: context.sourceId, row_index: context.rowIndex, thread_id: context.threadId, display_message: trimmed, ...(agent.ngFactoryId ? { factory_id: agent.ngFactoryId } : {}) }, signal);
         if (!signal.aborted) setTurns((current) => [...current, { id: newId(), kind: 'deep_confirm', plan, submitted: false }]);
       });
       return;
@@ -222,8 +222,11 @@ export function ProductionBiAnalysisApp({ agent }: { agent: ProductionBiAgent })
                   />
                 );
               }
-              if (turn.kind === 'deep_confirm') return <NgDeepFieldCard key={turn.id} plan={turn.plan} submitted={turn.submitted} disabled={loading} onSubmit={(targetId, featureIds) => submitDeepFields(turn.id, turn.plan, targetId, featureIds)} />;
-              if (turn.kind === 'deep_result') return <NgDeepResultCard key={turn.id} result={turn.result} />;
+              if (turn.kind === 'deep_confirm') return <NgDeepFieldCard key={turn.id} plan={turn.plan} submitted={turn.submitted} expired={turn.expired} disabled={loading} onSubmit={(targetId, featureIds) => submitDeepFields(turn.id, turn.plan, targetId, featureIds)} />;
+              if (turn.kind === 'deep_result') return <NgDeepResultCard key={turn.id} result={turn.result}
+                onLoadQualityAudit={turn.result.analysis_id ? (fieldId, offset) => loadNgQualityAudit({ factory_id: turn.result.factory_id, thread_id: turn.result.thread_id, analysis_id: turn.result.analysis_id! }, fieldId, offset) : undefined}
+                onLoadValidations={turn.result.analysis_id ? () => listNgValidations({ factory_id: turn.result.factory_id, thread_id: turn.result.thread_id, analysis_id: turn.result.analysis_id! }) : undefined}
+                onSaveValidation={turn.result.analysis_id ? draft => recordNgValidation({ factory_id: turn.result.factory_id, thread_id: turn.result.thread_id, analysis_id: turn.result.analysis_id! }, draft) : undefined} />;
               if (turn.kind === 'deep_progress') return <NgDeepProgressCard key={turn.id} progress={turn.progress} history={turn.history} />;
               return <BiResultCard key={turn.id} result={turn.result} deepDisabled={loading} onDeepAnalyze={turn.result.chart?.type === 'ng_bar' && turn.result.source_id ? (rowIndex) => {
                 const row = turn.result.chart!.rows[rowIndex];

@@ -36,6 +36,17 @@ export function formatMetricPercent(value: number | null | undefined): string {
   return value == null || !Number.isFinite(value) ? '—' : `${Number(value.toFixed(2))}%`;
 }
 
+export function formatMetricSize(bytes: number | null | undefined): string {
+  if (bytes == null || !Number.isFinite(bytes) || bytes < 0) return '—';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  let unit = 0;
+  while (bytes >= 1024 && unit < units.length - 1) {
+    bytes /= 1024;
+    unit += 1;
+  }
+  return `${Number(bytes.toFixed(1))} ${units[unit]}`;
+}
+
 export function formatMetricFreshness(metrics: OnlineTableMetrics, now = Date.now()): string {
   if (!metrics.sample_rows) return '暂无数据';
   if (metrics.freshness_seconds == null) return '无有效时间';

@@ -61,6 +61,8 @@ export interface SessionInfo {
 
 /** One row in the user's session index. */
 export interface SessionSummary {
+  source?: 'agent' | 'bi';
+  app_id?: string; app_name?: string; factory_id?: string | null; factory_name?: string | null; tenant_id?: string | null;
   session_id: string;
   user_id: string;
   /** Short title derived from the first user message. */
@@ -881,6 +883,8 @@ export interface OnlineSource {
 export interface OnlineTable {
   name: string;
   table_name: string;
+  column_count: number;
+  storage_bytes: number | null;
 }
 
 export interface OnlineTableMetrics {
@@ -896,6 +900,8 @@ export interface OnlineTableMetrics {
   latest_insert_time: string | null;
   freshness_seconds: number | null;
   checked_at: string;
+  device_count: number | null;
+  device_time_column: string | null;
 }
 
 export interface DatasetsResponse {

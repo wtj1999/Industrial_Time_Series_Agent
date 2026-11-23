@@ -1,7 +1,7 @@
 {
   "version": 5,
   "factory_id": "jinzhai-phase-3",
-  "generated_at": "2026-11-16T11:34:55.601396+00:00",
+  "generated_at": "2026-11-20T07:24:59.753636+00:00",
   "source": {
     "table_descriptions": "information_schema.tables.TABLE_COMMENT",
     "column_descriptions": "information_schema.columns.COLUMN_COMMENT",
@@ -5853,6 +5853,497 @@
     },
     {
       "table_schema": "dwd",
+      "table_name": "dwd_qual_hot_press_pim",
+      "table_comment": "热压参数宽表",
+      "technics_processes": [
+        {
+          "code": "C1502",
+          "name": "热压",
+          "names": [
+            "热压"
+          ],
+          "order": 1502
+        }
+      ],
+      "partition": {
+        "type": "RANGE",
+        "columns": [
+          "end_time"
+        ],
+        "definition": "PARTITION BY RANGE(`end_time`)"
+      },
+      "sort_time_field": "end_time",
+      "sort_time_source": "SHOW CREATE TABLE / PARTITION BY RANGE",
+      "date_filter_field": "shift_date",
+      "record_selection": {
+        "mode": "latest"
+      },
+      "context_columns": [
+        "tenant_id",
+        "product_code",
+        "product_in_code",
+        "end_time",
+        "technics_step_code",
+        "start_time",
+        "shift_date",
+        "shift",
+        "produce_order_code",
+        "produce_id",
+        "data_source",
+        "technics_process_code",
+        "device_name",
+        "technics_line_name",
+        "technics_process_name",
+        "technics_step_name",
+        "product_count",
+        "ok_count",
+        "ng_count",
+        "product_quality",
+        "ng_type"
+      ],
+      "columns": [
+        {
+          "column_name": "a_discharging_cart_gripper_duration",
+          "column_comment": "A侧出料模组夹爪保持时间",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "a_feeding_cart_gripper_duration",
+          "column_comment": "A侧进料模组夹爪保持时间",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "a_load_gripper_duration",
+          "column_comment": "A侧上料机械手夹爪持续时间",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "actual_pressing_time",
+          "column_comment": "热压时间",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "actual_pressure",
+          "column_comment": "实际压力",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "actual_resistance_value",
+          "column_comment": "实际测试阻值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "b_feeding_cart_gripper_duration",
+          "column_comment": "B侧进料模组夹爪保持时间",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "b_load_gripper_duration",
+          "column_comment": "B侧上料机械手夹爪持续时间",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "lower_plate_1_temperature",
+          "column_comment": "下板1#温度",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "lower_plate_2_temperature",
+          "column_comment": "下板2#温度",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "lower_plate_3_temperature",
+          "column_comment": "下板3#温度",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "pressing_time_setpoint",
+          "column_comment": "热压时间设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "pressure_setpoint",
+          "column_comment": "压力设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "resistance_lower_limit",
+          "column_comment": "电阻下限设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "resistance_test_time_setpoint",
+          "column_comment": "电阻测试时间设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "resistance_upper_limit",
+          "column_comment": "电阻上限设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "temperature_setpoint",
+          "column_comment": "温度设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "test_voltage_setpoint",
+          "column_comment": "测试电压设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "tf_setpoint",
+          "column_comment": "TF设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "th_setpoint",
+          "column_comment": "TH设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "tk_setpoint",
+          "column_comment": "TK设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "tl_setpoint",
+          "column_comment": "TL设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "tp_test_value",
+          "column_comment": "TP测试值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "upper_plate_1_temperature",
+          "column_comment": "上板1#温度",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "upper_plate_2_temperature",
+          "column_comment": "上板2#温度",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "upper_plate_3_temperature",
+          "column_comment": "上板3#温度",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "vd1_setpoint",
+          "column_comment": "VD1设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "vd1_test_value",
+          "column_comment": "VD1测试值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "vd2_setpoint",
+          "column_comment": "VD2设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "vd2_test_value",
+          "column_comment": "VD2测试值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "vd3_set_value",
+          "column_comment": "VD3设定值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "vd3_test_value",
+          "column_comment": "VD3测试值",
+          "data_type": "decimal"
+        },
+        {
+          "column_name": "vp_test_value",
+          "column_comment": "VP测试值",
+          "data_type": "decimal"
+        }
+      ],
+      "code_linkage": {
+        "product_field": "product_code",
+        "comparison": "exact_value_no_substring_or_format_inference",
+        "sample_codes": 200,
+        "unmatched_sample_codes": 116,
+        "cross_route_ambiguous_codes": 0,
+        "sample_formats": {
+          "999999999999A99999": 200
+        },
+        "routes": {
+          "314ah": {
+            "trace_schema": "ads",
+            "trace_table": "ads_trace_cell_coding_314ah_pim",
+            "tenant_field": null,
+            "status": "no_match",
+            "product_code_field": null,
+            "observed_product_code_fields": [],
+            "matched_sample_codes": 0,
+            "ambiguous_field_codes": 0,
+            "field_match_counts": {},
+            "max_cells_per_sample_code": {}
+          },
+          "588ah": {
+            "trace_schema": "ads",
+            "trace_table": "ads_trace_cell_coding_588ah_pim",
+            "tenant_field": null,
+            "status": "ambiguous_fields",
+            "product_code_field": null,
+            "observed_product_code_fields": [
+              "tab_pre_weld_code",
+              "winding_slit_code"
+            ],
+            "matched_sample_codes": 84,
+            "ambiguous_field_codes": 42,
+            "field_match_counts": {
+              "tab_pre_weld_code": 42,
+              "winding_slit_code": 84
+            },
+            "max_cells_per_sample_code": {
+              "tab_pre_weld_code": 1,
+              "winding_slit_code": 1
+            }
+          }
+        },
+        "line_evidence": [
+          {
+            "tenant_id": "11300001",
+            "technics_line_name": "金寨三期314Ah",
+            "sample_codes": 100,
+            "route_match_counts": {
+              "314ah": 0,
+              "588ah": 0
+            },
+            "observed_routes": [],
+            "unmatched_codes": 100
+          },
+          {
+            "tenant_id": "11300001",
+            "technics_line_name": "金寨三期588AH",
+            "sample_codes": 100,
+            "route_match_counts": {
+              "314ah": 0,
+              "588ah": 84
+            },
+            "observed_routes": [
+              "588ah"
+            ],
+            "unmatched_codes": 16
+          }
+        ],
+        "audited_at": "2026-11-20T07:25:46.448124+00:00",
+        "sampling": {
+          "per_tenant_line_limit": 100,
+          "lookback_days_from_table_latest": 7,
+          "time_field": "end_time",
+          "latest_sample_time": "2026-11-20 15:24:52"
+        },
+        "query_seconds": 3.4375,
+        "completed_cell_backcheck": {
+          "product_field": "product_code",
+          "comparison": "exact_value_no_substring_or_format_inference",
+          "sample_codes": 1201,
+          "unmatched_sample_codes": 0,
+          "cross_route_ambiguous_codes": 0,
+          "sample_formats": {
+            "999999999999A99999": 1187,
+            "999999999999A999": 14
+          },
+          "routes": {
+            "314ah": {
+              "trace_schema": "ads",
+              "trace_table": "ads_trace_cell_coding_314ah_pim",
+              "tenant_field": null,
+              "status": "ambiguous_fields",
+              "product_code_field": null,
+              "observed_product_code_fields": [
+                "butterfly_weld_code",
+                "winding_slit_code"
+              ],
+              "matched_sample_codes": 400,
+              "ambiguous_field_codes": 200,
+              "field_match_counts": {
+                "butterfly_weld_code": 200,
+                "winding_slit_code": 400
+              },
+              "max_cells_per_sample_code": {
+                "butterfly_weld_code": 1,
+                "winding_slit_code": 1
+              },
+              "field_requested_codes": {
+                "cell_code": 200,
+                "winding_slit_code": 400,
+                "butterfly_weld_code": 200,
+                "pos_mixing_code": 11,
+                "neg_mixing_code": 11,
+                "pos_coating_code": 17,
+                "neg_coating_code": 28,
+                "pos_roll_slit_code": 44,
+                "neg_roll_slit_code": 49,
+                "wrap_can_insert_code": 200
+              },
+              "field_match_precision": {
+                "cell_code": 0.0,
+                "winding_slit_code": 1.0,
+                "butterfly_weld_code": 1.0,
+                "pos_mixing_code": 0.0,
+                "neg_mixing_code": 0.0,
+                "pos_coating_code": 0.0,
+                "neg_coating_code": 0.0,
+                "pos_roll_slit_code": 0.0,
+                "neg_roll_slit_code": 0.0,
+                "wrap_can_insert_code": 0.0
+              }
+            },
+            "588ah": {
+              "trace_schema": "ads",
+              "trace_table": "ads_trace_cell_coding_588ah_pim",
+              "tenant_field": null,
+              "status": "ambiguous_fields",
+              "product_code_field": null,
+              "observed_product_code_fields": [
+                "butterfly_weld_code",
+                "tab_pre_weld_code",
+                "winding_slit_code"
+              ],
+              "matched_sample_codes": 801,
+              "ambiguous_field_codes": 400,
+              "field_match_counts": {
+                "butterfly_weld_code": 200,
+                "tab_pre_weld_code": 400,
+                "winding_slit_code": 801
+              },
+              "max_cells_per_sample_code": {
+                "butterfly_weld_code": 1,
+                "tab_pre_weld_code": 1,
+                "winding_slit_code": 1
+              },
+              "field_requested_codes": {
+                "cell_code": 200,
+                "winding_slit_code": 801,
+                "tab_pre_weld_code": 400,
+                "pos_mixing_code": 6,
+                "neg_mixing_code": 8,
+                "pos_coating_code": 13,
+                "neg_coating_code": 21,
+                "pos_roll_slit_code": 50,
+                "neg_roll_slit_code": 59,
+                "butterfly_weld_code": 200,
+                "wrap_can_insert_code": 200
+              },
+              "field_match_precision": {
+                "cell_code": 0.0,
+                "winding_slit_code": 1.0,
+                "tab_pre_weld_code": 1.0,
+                "pos_mixing_code": 0.0,
+                "neg_mixing_code": 0.0,
+                "pos_coating_code": 0.0,
+                "neg_coating_code": 0.0,
+                "pos_roll_slit_code": 0.0,
+                "neg_roll_slit_code": 0.0,
+                "butterfly_weld_code": 1.0,
+                "wrap_can_insert_code": 0.0
+              }
+            }
+          },
+          "line_evidence": [
+            {
+              "tenant_id": "11300001",
+              "technics_line_name": "金寨三期314Ah",
+              "sample_codes": 400,
+              "route_match_counts": {
+                "314ah": 400,
+                "588ah": 0
+              },
+              "observed_routes": [
+                "314ah"
+              ],
+              "unmatched_codes": 0
+            },
+            {
+              "tenant_id": "11300001",
+              "technics_line_name": "金寨三期588AH",
+              "sample_codes": 801,
+              "route_match_counts": {
+                "314ah": 0,
+                "588ah": 801
+              },
+              "observed_routes": [
+                "588ah"
+              ],
+              "unmatched_codes": 0
+            }
+          ],
+          "query_seconds": 3.0744
+        },
+        "resolved_mapping": {
+          "314ah": {
+            "trace_schema": "ads",
+            "trace_table": "ads_trace_cell_coding_314ah_pim",
+            "tenant_field": null,
+            "status": "verified_on_sample",
+            "product_code_field": "winding_slit_code",
+            "candidate_fields": [
+              "butterfly_weld_code",
+              "winding_slit_code"
+            ],
+            "selection_basis": "completed_cell_field_coverage_then_precision",
+            "backcheck_field_scores": {
+              "butterfly_weld_code": {
+                "matched_codes": 200,
+                "match_precision": 1.0
+              },
+              "winding_slit_code": {
+                "matched_codes": 400,
+                "match_precision": 1.0
+              }
+            },
+            "recent_matched_codes": 0,
+            "backcheck_matched_codes": 400,
+            "tenant_scope_note": "追溯表无tenant_id；后续宽表读取仍须限制目标租户"
+          },
+          "588ah": {
+            "trace_schema": "ads",
+            "trace_table": "ads_trace_cell_coding_588ah_pim",
+            "tenant_field": null,
+            "status": "verified_on_sample",
+            "product_code_field": "winding_slit_code",
+            "candidate_fields": [
+              "butterfly_weld_code",
+              "tab_pre_weld_code",
+              "winding_slit_code"
+            ],
+            "selection_basis": "completed_cell_field_coverage_then_precision",
+            "backcheck_field_scores": {
+              "butterfly_weld_code": {
+                "matched_codes": 200,
+                "match_precision": 1.0
+              },
+              "tab_pre_weld_code": {
+                "matched_codes": 400,
+                "match_precision": 1.0
+              },
+              "winding_slit_code": {
+                "matched_codes": 801,
+                "match_precision": 1.0
+              }
+            },
+            "recent_matched_codes": 84,
+            "backcheck_matched_codes": 801,
+            "tenant_scope_note": "追溯表无tenant_id；后续宽表读取仍须限制目标租户"
+          }
+        }
+      }
+    },
+    {
+      "table_schema": "dwd",
       "table_name": "dwd_qual_neg_coating_param_pim",
       "table_comment": "负极涂布参数宽表",
       "technics_processes": [
@@ -11444,7 +11935,7 @@
     {
       "table_schema": "dwd",
       "table_name": "dwd_qual_pos_mixing_param_pim",
-      "table_comment": "正极合浆瓷参数宽表",
+      "table_comment": "正极合浆参数宽表",
       "technics_processes": [
         {
           "code": "C1101",
@@ -17090,6 +17581,51 @@
           "column_name": "tab_bend_fold_count",
           "column_comment": "极耳打折翻折个数",
           "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_product_total",
+          "column_comment": "上一个班次生产总数",
+          "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_short_circuit_defect_qty",
+          "column_comment": "上一个班次短路不良个数",
+          "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_tab_misalignment_qty",
+          "column_comment": "上一个班次极耳错位个数",
+          "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_side_gap_defect_qty",
+          "column_comment": "上一个班次侧边距不良个数",
+          "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_ccd_wrap_defect_qty",
+          "column_comment": "上一个班次CCD包覆不良个数",
+          "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_pos_single_roll_qty",
+          "column_comment": "上一个班次正极单卷个数",
+          "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_neg_single_roll_qty",
+          "column_comment": "上一个班次负极单卷个数",
+          "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_double_roll_scrap_qty",
+          "column_comment": "上一个班次双卷报废个数",
+          "data_type": "double"
+        },
+        {
+          "column_name": "last_shift_tab_fold_over_qty",
+          "column_comment": "上一个班次极耳打折翻折个数",
+          "data_type": "double"
         }
       ],
       "code_linkage": {
@@ -18413,13 +18949,6 @@
       "reason": "未找到同时具备追溯、NG字段及DDL数值测量列的参数宽表"
     },
     {
-      "code": "C1502",
-      "names": [
-        "热压"
-      ],
-      "reason": "未找到同时具备追溯、NG字段及DDL数值测量列的参数宽表"
-    },
-    {
       "code": "C1505",
       "names": [
         "极耳预焊"
@@ -18774,7 +19303,14 @@
         "latest_trace_time": "2026-11-17 09:20:55"
       }
     },
-    "report": "product_code_linkage_2026-11-17.json"
+    "report": "product_code_linkage_2026-11-17.json",
+    "supplemental_reports": [
+      {
+        "table_name": "dwd_qual_hot_press_pim",
+        "audited_at": "2026-11-20T07:25:46.448124+00:00",
+        "report": "hot_press_linkage_2026-11-20.json"
+      }
+    ]
   },
-  "revision": "5461301c15788e80e6ac3472e27a195d53bd484b1fcf90f843a8d372fdf26259"
+  "revision": "554f9e34d8f9348509e6ebede0fde642dae2e9064c65a02b840874afa7f98472"
 }

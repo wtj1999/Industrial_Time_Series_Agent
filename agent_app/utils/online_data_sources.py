@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
+import logging
 from math import isfinite
 import re
 from typing import Any
@@ -27,6 +28,7 @@ OPTION_LIMIT = 100
 STRING_TYPES = {'char', 'varchar', 'string', 'text', 'tinytext', 'mediumtext', 'longtext'}
 NUMERIC_TYPES = {'tinyint', 'smallint', 'mediumint', 'int', 'integer', 'bigint', 'largeint', 'float', 'double', 'real', 'decimal', 'numeric'}
 TIME_TYPES = {'date', 'datetime', 'timestamp', 'datetimev2', 'datev2'}
+logger = logging.getLogger(__name__)
 
 
 class InvalidOnlineQuery(ValueError):
@@ -117,25 +119,28 @@ def list_online_tables(source: OnlineSource) -> list[dict[str, Any]]:
     with _connect(source) as connection:
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT table_name, table_comment FROM information_schema.tables "
+                "SELECT table_name, table_comment, data_length FROM information_schema.tables "
                 "WHERE table_schema = %s AND table_type = 'BASE TABLE' ORDER BY table_name",
                 (source.database,),
             )
             tables = cursor.fetchall()
             cursor.execute(
-                "SELECT DISTINCT table_name FROM information_schema.columns "
-                "WHERE table_schema = %s AND column_name = 'insert_time'",
+                "SELECT table_name, COUNT(*) FROM information_schema.columns "
+                "WHERE table_schema = %s GROUP BY table_name "
+                "HAVING MAX(CASE WHEN column_name = 'insert_time' THEN 1 ELSE 0 END) = 1",
                 (source.database,),
             )
-            timestamped_tables = {row[0] for row in cursor.fetchall()}
+            column_counts = dict(cursor.fetchall())
 
     return [
         {
             "name": comment.strip() if comment and comment.strip().upper() != "OLAP" else table_name,
             "table_name": table_name,
+            "column_count": column_counts[table_name],
+            "storage_bytes": int(data_length) if data_length is not None and data_length >= 0 else None,
         }
-        for table_name, comment in tables
-        if table_name in timestamped_tables and not EXCLUDED_TABLE_NAME_RE.search(table_name)
+        for table_name, comment, data_length in tables
+        if table_name in column_counts and not EXCLUDED_TABLE_NAME_RE.search(table_name)
     ]
 
 
@@ -221,8 +226,38 @@ def summarize_online_sample(columns: list[str], rows: list[tuple], *, numeric_co
     }
 
 
+def _daily_device_count(cursor, source: OnlineSource, table_name: str, metadata, today: date) -> tuple[int | None, str | None]:
+    columns = {column['name'].lower(): column for column in metadata}
+    device = columns.get('device_code')
+    if device is None:
+        return None, None
+
+    cursor.execute(
+        'SELECT partition_key FROM information_schema.tables_config '
+        'WHERE table_schema = %s AND table_name = %s',
+        (source.database, table_name),
+    )
+    config = cursor.fetchone()
+    partition_name = (config[0] or '').strip().strip('`').lower() if config else ''
+    partition = columns.get(partition_name)
+    if partition is None or not partition['temporal']:
+        return None, None
+
+    table = f'{_quoted(source.database)}.{_quoted(table_name)}'
+    partition_column = _quoted(partition['name'])
+    device_column = _quoted(device['name'])
+    nonblank = f" AND TRIM({device_column}) <> ''" if device['filterable'] else ''
+    end = today + timedelta(days=1)
+    cursor.execute(
+        f'SELECT /*+ SET_VAR(query_timeout = 5) */ COUNT(DISTINCT {device_column}) FROM {table} '
+        f'WHERE {partition_column} >= %s AND {partition_column} < %s{nonblank}',
+        (today, end),
+    )
+    return int(cursor.fetchone()[0]), partition['name']
+
+
 def online_table_metrics(source: OnlineSource, table_name: str) -> dict[str, Any]:
-    """Only SELECT the latest 100 rows; never count or return the full table."""
+    """Sample data quality and count devices recorded today."""
     with _connect(source) as connection:
         with connection.cursor() as cursor:
             metadata = _metadata(cursor, source, table_name)
@@ -232,8 +267,18 @@ def online_table_metrics(source: OnlineSource, table_name: str) -> dict[str, Any
             )
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
-    return summarize_online_sample(columns, rows,
-                                   numeric_columns=[column['name'] for column in metadata if column['data_type'] in NUMERIC_TYPES])
+            checked_at = datetime.now(FACTORY_TIMEZONE)
+            try:
+                device_count, device_time_column = _daily_device_count(cursor, source, table_name, metadata, checked_at.date())
+            except pymysql.MySQLError as exc:
+                logger.warning('Could not count daily online devices: %s', type(exc).__name__)
+                device_count, device_time_column = None, None
+    metrics = summarize_online_sample(
+        columns, rows,
+        numeric_columns=[column['name'] for column in metadata if column['data_type'] in NUMERIC_TYPES],
+        now=checked_at,
+    )
+    return {**metrics, 'device_count': device_count, 'device_time_column': device_time_column}
 
 
 def online_column_options(source: OnlineSource, table_name: str, column: str,

@@ -1,8 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { BoxStats, DeepFeatureResult, IntervalBubble } from './deepTypes';
 
-export function fmt(value: number | null): string {
-  if (value === null) return '—';
+export const BUBBLE_STYLE = {
+  fill: '#059669', outline: '#047857', opacity: .3, activeOpacity: .75, outlineGap: 3, maxRadius: 28,
+} as const;
+
+export function fmt(value: number | null | undefined): string {
+  if (value == null || !Number.isFinite(value)) return '—';
   if (value !== 0 && (Math.abs(value) < .001 || Math.abs(value) >= 1e7)) return value.toExponential(3);
   return new Intl.NumberFormat('zh-CN', { maximumSignificantDigits: 5 }).format(value);
 }
@@ -12,7 +16,7 @@ export function isSharedMaterial(field: DeepFeatureResult): boolean {
   return field.analysis_type === 'shared_material' || ['C1101', 'C1103', 'C1201', 'C1202', 'C1301', 'C1302'].includes(code ?? '');
 }
 
-function usePlotWidth() {
+export function usePlotWidth() {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(900);
   useEffect(() => {
@@ -39,29 +43,50 @@ const percent = (value: number | null) => value === null ? '无样本' : new Int
   style: 'percent', maximumFractionDigits: 2,
 }).format(value);
 
-export function IntervalBubblePlot({ field }: { field: DeepFeatureResult }) {
+function bubbleLabels(NG: number, OK: number, share: number | null) {
+  return [percent(share), `${NG.toLocaleString('zh-CN')}/${OK.toLocaleString('zh-CN')}`];
+}
+
+export function bubbleLabelWidth(NG: number, OK: number, share: number | null): number {
+  const widths = bubbleLabels(NG, OK, share).map(text => [...text].reduce((sum, char) => sum + (char.charCodeAt(0) > 255 ? 11 : 7), 0));
+  return Math.max(72, ...widths.map(width => width + 16));
+}
+
+export function BubbleLabels({ x, y, radius, NG, OK, share }: { x: number; y: number; radius: number; NG: number; OK: number; share: number | null }) {
+  const [rateLabel, countLabel] = bubbleLabels(NG, OK, share);
+  return <g pointerEvents="none" data-bubble-labels="true">
+    <text x={x} y={y - radius - 10} textAnchor="middle" fontSize={11} fill="#334155">{rateLabel}</text>
+    <text x={x} y={y + radius + 18} textAnchor="middle" fontSize={11} fill="#64748b">{countLabel}</text>
+  </g>;
+}
+
+export function IntervalBubblePlot({ field, target = false }: { field: Pick<DeepFeatureResult, 'name' | 'bubble'>; target?: boolean }) {
   const titleId = useId();
   const { ref, width } = usePlotWidth();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const bubble = field.bubble;
   if (!bubble) return <p className="py-12 text-center text-sm text-steel-500">该历史结果没有区间气泡数据，请重新提交分析。</p>;
-  if (!bubble.bins.length) return <p className="py-12 text-center text-sm text-steel-500">没有有效参数，无法绘制区间气泡图。</p>;
+  if (!bubble.bins.length || target && !bubble.covered_products) return <p className="py-12 text-center text-sm text-steel-500">{target ? '没有有效目标值，无法绘制区间气泡图。' : '没有有效参数，无法绘制区间气泡图。'}</p>;
   const bins = bubble.bins;
   const selected = bins.find(bin => bin.index === selectedIndex) ?? bins.find(bin => bin.product_count > 0) ?? bins[0];
-  const height = 410, left = 68, right = width - 26, top = 48, bottom = 262;
+  const labelWidth = Math.max(...bins.map(bin => bubbleLabelWidth(bin.NG, bin.OK, bin.ng_rate)));
+  const plotWidth = Math.max(width, 94 + bins.length * labelWidth);
+  const height = 452, left = 68, right = plotWidth - 26, top = 56, bottom = 262;
   const step = (right - left) / bins.length;
   const x = (index: number) => left + step * (index + .5);
   const yMax = Math.min(1, Math.max(.01, ...bins.map(bin => bin.ng_rate ?? 0)) * 1.16);
   const y = (value: number) => bottom - (value / yMax) * (bottom - top);
   const maxProducts = Math.max(1, ...bins.map(bin => bin.product_count));
-  const maxRadius = Math.min(28, step * .37);
+  const maxRadius = Math.min(BUBBLE_STYLE.maxRadius, step * .37);
   const radius = (count: number) => Math.sqrt(count / maxProducts) * maxRadius;
   const tickStride = Math.max(1, Math.ceil(bins.length / Math.max(2, Math.floor((right - left) / 115))));
   const ticks = bins.filter((_, index) => index % tickStride === 0 && (index === bins.length - 1 || bins.length - 1 - index >= tickStride));
   if (!ticks.includes(bins[bins.length - 1])) ticks.push(bins[bins.length - 1]);
-  const describe = (bin: IntervalBubble) => `${rangeLabel(bin)}：NG占比 ${percent(bin.ng_rate)}，覆盖产品 ${bin.product_count}，NG ${bin.NG}，OK ${bin.OK}，上游码 ${bin.upstream_code_count}，测量记录 ${bin.source_record_count}`;
+  const describe = (bin: IntervalBubble) => `${rangeLabel(bin)}：NG占比 ${percent(bin.ng_rate)}，覆盖产品 ${bin.product_count}，NG ${bin.NG}，OK ${bin.OK}${target ? '' : `，上游码 ${bin.upstream_code_count}，测量记录 ${bin.source_record_count}`}`;
   return <div ref={ref} className="min-w-0 space-y-3">
-    <svg data-chart="bubble" viewBox={`0 0 ${width} ${height}`} width="100%" height={height} role="img" aria-labelledby={titleId}>
+    <div ref={scrollRef} className="max-w-full overflow-x-auto" role="region" aria-label="区间气泡图，可横向滚动" tabIndex={0}><div style={{ width: plotWidth }}>
+    <svg data-chart={target ? 'target-bubble' : 'bubble'} viewBox={`0 0 ${plotWidth} ${height}`} width="100%" height={height} role="img" aria-labelledby={titleId}>
       <title id={titleId}>{`${field.name}的区间气泡图（NG占比）`}</title>
       <text x={8} y={18} fontSize={12} fill="#64748b">NG占比</text>
       {Array.from({ length: 5 }, (_, index) => {
@@ -69,19 +94,24 @@ export function IntervalBubblePlot({ field }: { field: DeepFeatureResult }) {
         return <g key={index}><line x1={left} x2={right} y1={py} y2={py} stroke="#e2e8f0" /><text x={left - 9} y={py + 4} textAnchor="end" fontSize={12} fill="#64748b">{percent(value)}</text></g>;
       })}
       <line x1={left} x2={left} y1={top} y2={bottom} stroke="#cbd5e1" />
-      {ticks.map(bin => <text key={bin.index} transform={`translate(${Math.max(52, Math.min(width - 52, x(bin.index)))},310) rotate(-35)`} textAnchor="middle" fontSize={11} fill="#64748b">{rangeLabel(bin)}</text>)}
-      <text x={width / 2} y={394} textAnchor="middle" fontSize={12} fill="#64748b">参数值区间</text>
+      {ticks.map(bin => <text key={bin.index} transform={`translate(${Math.max(52, Math.min(plotWidth - 52, x(bin.index)))},352) rotate(-35)`} textAnchor="middle" fontSize={11} fill="#64748b">{rangeLabel(bin)}</text>)}
+      <text x={plotWidth / 2} y={436} textAnchor="middle" fontSize={12} fill="#64748b">{target ? '目标值区间' : '参数值区间'}</text>
       {bins.filter(bin => bin.product_count > 0 && bin.ng_rate !== null).map(bin => <g key={bin.index}>
         <title>{describe(bin)}</title>
         <circle data-bin={bin.index} cx={x(bin.index)} cy={y(bin.ng_rate!)} r={radius(bin.product_count)}
-          fill="#059669" fillOpacity={selected.index === bin.index ? .75 : .3} className="cursor-pointer"
+          fill={BUBBLE_STYLE.fill} fillOpacity={selected.index === bin.index ? BUBBLE_STYLE.activeOpacity : BUBBLE_STYLE.opacity} className="cursor-pointer"
           onClick={() => setSelectedIndex(bin.index)} />
-        {selected.index === bin.index ? <circle cx={x(bin.index)} cy={y(bin.ng_rate!)} r={radius(bin.product_count) + 3} fill="none" stroke="#047857" pointerEvents="none" /> : null}
+        {selected.index === bin.index ? <circle cx={x(bin.index)} cy={y(bin.ng_rate!)} r={radius(bin.product_count) + BUBBLE_STYLE.outlineGap} fill="none" stroke={BUBBLE_STYLE.outline} pointerEvents="none" /> : null}
+        <BubbleLabels x={x(bin.index)} y={y(bin.ng_rate!)} radius={radius(bin.product_count)} NG={bin.NG} OK={bin.OK} share={bin.ng_rate} />
       </g>)}
     </svg>
+    </div></div>
     <div className="flex flex-wrap items-center gap-2 text-xs text-steel-600">
       <label htmlFor={`${titleId}-bin`}>查看区间</label>
-      <select id={`${titleId}-bin`} value={selected.index} onChange={event => setSelectedIndex(Number(event.target.value))}
+      <select id={`${titleId}-bin`} value={selected.index} onChange={event => {
+        const index = Number(event.target.value); setSelectedIndex(index);
+        if (scrollRef.current) scrollRef.current.scrollLeft = x(index) - scrollRef.current.clientWidth / 2;
+      }}
         className="max-w-full rounded-md border border-steel-200 bg-white px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
         {bins.map(bin => <option key={bin.index} value={bin.index}>{rangeLabel(bin)}{bin.product_count ? '' : ' · 无样本'}</option>)}
       </select>

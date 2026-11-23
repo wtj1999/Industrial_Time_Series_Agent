@@ -4,6 +4,7 @@ export interface BiConfirmField {
   cls: string;
   cls_name: string;
   values: string[];
+  default_checked?: string[];
   selected_values?: string[];
   has_more?: boolean;
   next_offset?: number;

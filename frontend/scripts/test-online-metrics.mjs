@@ -4,13 +4,17 @@ import ts from 'typescript';
 
 const source = await readFile(new URL('../src/components/datasets/onlineMetrics.ts', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 } });
-const { createMetricsQueue, formatMetricPercent, formatMetricFreshness, formatMetricTime } = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputText).toString('base64')}`);
+const { createMetricsQueue, formatMetricPercent, formatMetricSize, formatMetricFreshness, formatMetricTime } = await import(`data:text/javascript;base64,${Buffer.from(compiled.outputText).toString('base64')}`);
 
 const now = Date.parse('2026-10-22T12:00:00+08:00');
 const metrics = { sample_rows: 100, checked_at: '2026-10-22T12:00:00+08:00', freshness_seconds: 900 };
 assert.equal(formatMetricPercent(98.555), '98.56%');
 assert.equal(formatMetricPercent(0), '0%');
 assert.equal(formatMetricPercent(null), '—');
+assert.equal(formatMetricSize(0), '0 B');
+assert.equal(formatMetricSize(152709519), '145.6 MB');
+assert.equal(formatMetricSize(3.5 * 1024 ** 3), '3.5 GB');
+assert.equal(formatMetricSize(null), '—');
 assert.equal(formatMetricFreshness(metrics, now), '15分钟前');
 assert.equal(formatMetricFreshness(metrics, now + 3600_000), '1小时前');
 assert.equal(formatMetricFreshness({ ...metrics, sample_rows: 0 }, now), '暂无数据');

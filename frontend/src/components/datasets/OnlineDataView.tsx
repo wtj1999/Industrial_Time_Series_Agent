@@ -120,15 +120,17 @@ export function OnlineTableList({ sourceId }: { sourceId: string }) {
         : tables.length === 0 ? <div className="py-20 text-center text-xs text-steel-500">此数据库暂无表格</div>
         : filteredTables.length === 0 ? <div className="flex flex-col items-center gap-3 py-20 text-center"><Search className="h-7 w-7 text-steel-300" /><p className="text-xs text-steel-500">未找到匹配的数据表，请尝试其他名称。</p><button type="button" onClick={() => setSearch('')} className="rounded-lg border border-steel-200 bg-white px-3 py-1.5 text-xs text-brand-700 hover:bg-brand-50">重置筛选</button></div>
         : <div className="asset-grid">
-            {filteredTables.map((table) => <button key={`${sourceId}:${table.table_name}`} type="button" onClick={() => setSelected(table)} className="production-directory-card asset-record">
+            {filteredTables.map((table) => <button key={`${sourceId}:${table.table_name}`} type="button" onClick={() => setSelected(table)} className="production-directory-card asset-record asset-data-record">
               <AssetArtwork motif="table" />
-              <span className="flex w-full items-start justify-between">
-                <span className="asset-record-icon"><Table2 className="h-5 w-5" /></span>
-                <OnlineTableMetrics sourceId={sourceId} tableName={table.table_name} refreshVersion={metricsVersion} />
+              <span className="flex w-full items-center gap-3">
+                <span className="asset-record-icon"><Table2 className="h-5 w-5" aria-hidden="true" /></span>
+                <span className="min-w-0 flex-1">
+                  <span className="asset-record-title line-clamp-2 !leading-snug" title={table.name}>{table.name}</span>
+                  <code className="mt-0.5 block truncate text-[10px] text-steel-500" title={table.table_name}>{table.table_name}</code>
+                </span>
               </span>
-              <h3 className="asset-record-title mt-3 line-clamp-2" title={table.name}>{table.name}</h3>
-              <code className="mt-1 break-all text-[10px] text-steel-500">{table.table_name}</code>
-              <span className="asset-record-footer">
+              <OnlineTableMetrics sourceId={sourceId} table={table} refreshVersion={metricsVersion} />
+              <span className="asset-record-footer !pt-2.5">
                 <span>预览与筛选生产记录</span>
                 <span className="production-card-arrow"><ArrowRight size={17}/></span>
               </span>

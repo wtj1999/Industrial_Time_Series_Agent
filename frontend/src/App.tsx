@@ -5,6 +5,7 @@ import { ChatRoute } from '@/components/chat/ChatRoute';
 import { MyDataView } from '@/components/views/MyDataView';
 import { MyModelsView } from '@/components/views/MyModelsView';
 import { MyAgentsView } from '@/components/views/MyAgentsView';
+import { BiConversationRoute } from '@/features/agent-apps/production-bi-analysis/BiConversationRoute';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { SessionProvider } from '@/context/SessionContext';
 import { Spinner } from '@/components/ui/Spinner';
@@ -74,6 +75,7 @@ function Root() {
           <Route path="datasets/offline/public" element={<DataRoute kind="offline-public" />} />
           <Route path="models" element={<ModelsRoute />} />
           <Route path="agents" element={<AgentsRoute />} />
+          <Route path="agents/bi/:agentId/:biSessionId?" element={<BiConversationRoute />} />
         </Route>
         <Route path="*" element={<Navigate to="/chat" replace />} />
       </Routes>

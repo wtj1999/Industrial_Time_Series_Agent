@@ -216,7 +216,7 @@ function DatasetCard({ ds, onPreview, isPublic }: { ds: DatasetEntry; onPreview:
     <button
       type="button"
       onClick={onPreview}
-      className="production-directory-card asset-record"
+      className="production-directory-card asset-record asset-data-record"
     >
       <AssetArtwork motif="offline" />
       <div className="flex items-start gap-3">

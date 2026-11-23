@@ -118,7 +118,9 @@ cd frontend
 npm run test:ng-chart
 ```
 
-SQLite checkpoint 默认保存在 `bi_app/.state/ng_checkpoints.sqlite3`，已忽略版本控制。服务重启后，同一用户和线程携带确认ID可继续恢复；前端刷新仍按现有页面行为开启新会话。使用单 worker 运行（同线程请求由进程内锁串行化），多实例部署需换用共享锁和服务端持久化 checkpoint。Docker 的现有 `./bi_app:/app/bi_app` 挂载会保留 checkpoint；修改依赖后需重建 `bi-backend` 镜像。
+BI 对话历史独立保存在 `bi_app/.state/bi_sessions.sqlite3`，不使用 `agent_app` 的会话库或 checkpoint。可通过 `BI_SESSIONS_DB_PATH` 指定独立文件路径；该路径不能放在 `agent_app` 目录内。普通 BI、NG 分析和 Control Plan 的用户消息、确认卡片及勾选结果、查询结果、深度分析和进度均由后端自动保存。左侧历史对话按时间显示，点击后恢复对应智能体和基地，可以继续对话、刷新和删除。列表、详情、删除均验证当前登录账户，旧的未持久化页面内容不会自动补录。新增接口为 `GET /api/bi/sessions`、`GET /api/bi/sessions/{id}`、`DELETE /api/bi/sessions/{id}`；查询响应通过 `X-BI-Session-ID` 返回历史 ID，原有业务响应结构不变。正在运行的任务不会因刷新而重新启动，尚未保存结果时可稍后刷新历史；过期的确认需重新查询。
+
+NG 的 SQLite checkpoint 仍独立保存在 `bi_app/.state/ng_checkpoints.sqlite3`，已忽略版本控制。服务重启后，同一用户和线程携带有效确认ID可继续恢复。使用单 worker 运行（同线程请求由进程内锁串行化），多实例部署需换用共享锁。Docker 的现有 `./bi_app:/app/bi_app` 挂载会同时保留历史和 checkpoint；备份 SQLite 时应使用 SQLite 备份接口，或停服后一并备份 `.state`。修改依赖后需重建 `bi-backend` 镜像。
 
 过期或旧确认卡返回 409/410。重复提交同一筛选返回缓存结果；数据库暂时失败后可用原确认及相同筛选重试，不重复解析。全部数据库操作均为 SELECT，连接和查询分别设置超时。
 

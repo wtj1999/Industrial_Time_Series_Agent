@@ -11,6 +11,7 @@
 .asset-artwork{position:absolute;right:-14px;bottom:16px;width:200px;height:125px;z-index:0;color:var(--catalog-art-line);opacity:.32;pointer-events:none}
 .catalog-tone-dark .asset-artwork{color:var(--catalog-art-highlight);opacity:.45}
 .asset-record{overflow-wrap:anywhere;width:100%;min-height:240px;padding:24px;background:linear-gradient(145deg,#fff,var(--catalog-quiet))}
+.asset-record.asset-data-record{min-height:250px}
 .asset-record>:not(.asset-artwork){position:relative;z-index:1}
 .asset-record .asset-artwork{width:145px;height:90px;right:-18px;bottom:0;opacity:.13}
 .asset-record-title{color:var(--catalog-ink);font-size:14px;line-height:1.6}

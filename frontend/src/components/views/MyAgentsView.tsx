@@ -1,6 +1,8 @@
 import { ControlPlanAnalysisApp } from '@/features/agent-apps/control-plan-analysis/ControlPlanAnalysisApp';
 import { CONTROL_PLAN_AGENT } from '@/features/agent-apps/control-plan-analysis/config';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { biConversationUrl } from '@/services/biSessions';
 import { ArrowLeft, Bot } from 'lucide-react';
 import { useSession } from '@/context/SessionContext';
 import { BatteryInstallationForecastApp } from '@/features/agent-apps/battery-installation-forecast/BatteryInstallationForecastApp';
@@ -40,6 +42,7 @@ import { DOMAIN_META, CATALOG_AGENTS, getDomainGroups, type AgentDomain } from '
 const PRODUCTION_QUERY_AGENTS: readonly ProductionBiAgent[] = [...PRODUCTION_BI_AGENTS, NG_DEFECT_AGENT, CONTROL_PLAN_AGENT];
 
 export function MyAgentsView({ onBack }: { onBack: () => void }) {
+  const navigate = useNavigate();
   const { initNewSession } = useSession();
   const [activeDomain, setActiveDomain] = useState<AgentDomain | null>(null);
   const [activeGroup, setActiveGroup] = useState<ProductionGroupId | null>(null);
@@ -59,6 +62,11 @@ export function MyAgentsView({ onBack }: { onBack: () => void }) {
   };
   const openAgent = (agentId: string) => {
     if (!CATALOG_AGENTS.has(agentId)) return;
+    if (PRODUCTION_QUERY_AGENTS.some(agent => agent.id === agentId)) {
+      navigate(biConversationUrl(agentId, undefined, agentId === NG_DEFECT_AGENT.id ? activeGroup : undefined,
+        PRODUCTION_BI_AGENTS.some(agent => agent.id === agentId) ? groupMeta?.tenantId : undefined));
+      return;
+    }
     if (!PRODUCTION_QUERY_AGENTS.some(agent => agent.id === agentId)) initNewSession();
     setActiveAgent(agentId);
   };

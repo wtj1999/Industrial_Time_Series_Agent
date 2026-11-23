@@ -4,22 +4,23 @@ import { useSession } from '@/context/SessionContext';
 import { IconButton } from '@/components/ui/IconButton';
 import { shortId, stageLabel, taskLabel } from '@/utils/format';
 import { AnnouncementCenter } from '@/components/announcements/AnnouncementCenter';
+import { AccountMenu } from '@/components/auth/AccountMenu';
 import { PlatformBrand } from './PlatformBrand';
 import './Header.css';
 
-export function Header() {
+export function Header({ onOpenProfile }: { onOpenProfile: () => void }) {
   const { pathname } = useLocation();
   const { sessionInfo, sessionId, items, streaming, resetTask, refreshSessionInfo } = useSession();
   const turns = items.filter(item => item.kind === 'message').length;
   const isChat = pathname === '/chat' || pathname.startsWith('/chat/');
 
   if (!isChat) {
-    return <div className="workspace-mobile-brand workspace-mobile-brand-standalone"><div className="workspace-mobile-brand-row"><PlatformBrand /><AnnouncementCenter compact /></div></div>;
+    return <div className="workspace-mobile-brand workspace-mobile-brand-standalone"><MobileBrandRow onOpenProfile={onOpenProfile} /></div>;
   }
 
   return (
     <header className="workspace-header">
-      <div className="workspace-mobile-brand"><PlatformBrand /></div>
+      <div className="workspace-mobile-brand"><MobileBrandRow onOpenProfile={onOpenProfile} /></div>
       <div className="workspace-header-main">
         <div className="workspace-heading">
           <MessageSquare size={15} strokeWidth={1.6} aria-hidden="true" />
@@ -32,7 +33,6 @@ export function Header() {
           </span>
         </div>
         <div className="workspace-actions">
-          <span className="workspace-mobile-announcements"><AnnouncementCenter compact /></span>
           <IconButton title="刷新会话信息" onClick={() => void refreshSessionInfo()} disabled={streaming}>
             <RefreshCw className="h-4 w-4" />
           </IconButton>
@@ -49,6 +49,18 @@ export function Header() {
         <PreparationItem ready={!!sessionInfo?.has_confirmed_spec} complete="规格已确认" pending="等待规格确认" />
       </div>
     </header>
+  );
+}
+
+function MobileBrandRow({ onOpenProfile }: { onOpenProfile: () => void }) {
+  return (
+    <div className="workspace-mobile-brand-row">
+      <PlatformBrand />
+      <div className="workspace-actions">
+        <AnnouncementCenter compact />
+        <AccountMenu compact onOpenProfile={onOpenProfile} />
+      </div>
+    </div>
   );
 }
 

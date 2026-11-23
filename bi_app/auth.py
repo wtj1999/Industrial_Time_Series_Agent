@@ -2,6 +2,7 @@
 import os
 import logging
 import re
+from contextvars import ContextVar
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -10,6 +11,13 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
+_request_account_client: ContextVar[httpx.AsyncClient | None] = ContextVar('bi_account_client', default=None)
+
+
+def new_account_client():
+    # One connection pool per service lifespan. Keep credentials on each request,
+    # never on the shared client, and never cache authentication decisions.
+    return httpx.AsyncClient(timeout=5, trust_env=False)
 
 
 def auth_service_url() -> str:
@@ -41,8 +49,13 @@ async def verify_bi_token(authorization: str) -> dict | None:
     if scheme.lower() != 'bearer' or not token.strip() or len(authorization) > 263:
         return None
     endpoint = auth_me_url()
-    async with httpx.AsyncClient(timeout=5, trust_env=False) as client:
+    client = _request_account_client.get()
+    if client is not None:
         response = await client.get(endpoint, headers={'Authorization': authorization})
+    else:
+        # Standalone diagnostics and apps without the BI service lifespan.
+        async with new_account_client() as client:
+            response = await client.get(endpoint, headers={'Authorization': authorization})
     if response.status_code == 401:
         return None
     response.raise_for_status()
@@ -59,6 +72,8 @@ class BiAuthMiddleware:
     async def __call__(self, scope, receive, send):
         if scope['type'] != 'http' or not scope.get('path', '').startswith('/api/bi/') or scope['method'] == 'OPTIONS':
             return await self.app(scope, receive, send)
+        state = getattr(scope.get('app'), 'state', None)
+        client_context = _request_account_client.set(getattr(state, 'bi_account_client', None))
         try:
             user = await verify_bi_token(Request(scope).headers.get('authorization', ''))
         except (httpx.HTTPError, ValueError) as exc:
@@ -79,6 +94,8 @@ class BiAuthMiddleware:
                 code = 'AUTH_SERVICE_INVALID_RESPONSE'
             response = JSONResponse({'error': message, 'code': code}, status_code=503, headers={'Cache-Control': 'no-store'})
             return await response(scope, receive, send)
+        finally:
+            _request_account_client.reset(client_context)
         if not user:
             response = JSONResponse({'error': '会话已失效，请重新登录'}, status_code=401)
             return await response(scope, receive, send)

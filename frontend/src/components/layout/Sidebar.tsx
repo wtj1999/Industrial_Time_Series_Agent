@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   ArrowRight,
   Bot,
@@ -6,7 +5,6 @@ import {
   Database,
   GitBranch,
   LineChart,
-  LogOut,
   MessageSquare,
   PlusCircle,
   RefreshCw,
@@ -14,17 +12,18 @@ import {
   Sparkles,
   Trash2,
   TrendingUp,
-  User as UserIcon,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSession } from '@/context/SessionContext';
-import { useAuth } from '@/context/AuthContext';
 import { PlatformBrand } from './PlatformBrand';
+import { AccountMenu } from '@/components/auth/AccountMenu';
 import { AssetArtwork } from '@/components/ui/AssetCards';
 import { AnnouncementCenter } from '@/components/announcements/AnnouncementCenter';
 import './Sidebar.css';
 import { cn } from '@/utils/cn';
-import { formatRelative, shortId } from '@/utils/format';
+import { formatRelative } from '@/utils/format';
+import type { SessionSummary } from '@/types';
+import { biConversationUrl } from '@/services/biSessions';
 
 interface ExamplePrompt {
   icon: typeof TrendingUp;
@@ -93,10 +92,12 @@ const NAV_ENTRIES: NavEntry[] = [
 
 export function Sidebar({
   onPickExample,
+  onOpenProfile,
 }: {
   onPickExample: (prompt: string) => void;
+  onOpenProfile: () => void;
 }) {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const {
     streaming,
@@ -105,11 +106,6 @@ export function Sidebar({
     removeSession,
     refreshSessions,
   } = useSession();
-  const { user, logout } = useAuth();
-  const [logoutError, setLogoutError] = useState('');
-  const [loggingOut, setLoggingOut] = useState(false);
-
-
   // Derive which top-level view is active from the URL. Falling back to
   // 'chat' keeps the highlight sensible for any /chat[/:id] path.
   const currentView: AppView = pathname.startsWith('/datasets')
@@ -123,32 +119,24 @@ export function Sidebar({
   // Open a past thread by navigating to /chat/:sessionId — ChatRoute's
   // useEffect picks up the change and calls loadSession. We no longer
   // touch SessionContext directly from the sidebar.
-  const handleOpenSession = (targetId: string) => {
+  const historyPath = (session: SessionSummary) => session.source === 'bi' && session.app_id ? biConversationUrl(session.app_id, session.session_id, session.factory_id, session.tenant_id) : `/chat/${session.session_id}`;
+  const isActive = (session: SessionSummary) => pathname === historyPath(session).split('?')[0];
+  const handleOpenSession = (session: SessionSummary) => {
     if (streaming) return;
-    navigate(`/chat/${targetId}`);
+    navigate(historyPath(session));
   };
 
-  const handleDeleteSession = (e: React.MouseEvent, targetId: string) => {
+  const handleDeleteSession = (e: React.MouseEvent, session: SessionSummary) => {
     // Stop propagation so the row click doesn't also navigate into it.
     e.stopPropagation();
     if (streaming) return;
     // If we're deleting the thread currently open in the URL, navigate to
     // a fresh /chat first so ChatRoute's effect doesn't try to reload a
     // session id the backend just deleted.
-    if (pathname === `/chat/${targetId}`) {
-      navigate('/chat', { replace: true });
+    if (isActive(session)) {
+      navigate(session.source === 'bi' && session.app_id ? biConversationUrl(session.app_id, undefined, session.factory_id, session.tenant_id) : '/chat', { replace: true });
     }
-    void removeSession(targetId);
-  };
-
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    setLogoutError('');
-    try {
-      await logout();
-      navigate('/login', { replace: true });
-    } catch (err) { setLogoutError(err instanceof Error ? err.message : '退出失败，请重试'); }
-    finally { setLoggingOut(false); }
+    void removeSession(session.session_id, session.source);
   };
 
   return (
@@ -156,7 +144,12 @@ export function Sidebar({
       <div className="sidebar-brand"><PlatformBrand /></div>
       <div className="sidebar-top">
         <button type="button" className="sidebar-new-chat" disabled={streaming}
-          onClick={() => navigate('/chat', { replace: true, state: { startNewSession: true } })}>
+          onClick={() => {
+            const currentBi = sessions.find(session => session.source === 'bi' && isActive(session));
+            if (currentBi?.app_id) navigate(biConversationUrl(currentBi.app_id, undefined, currentBi.factory_id, currentBi.tenant_id), { state: { newBiConversation: true } });
+            else if (pathname.startsWith('/agents/bi/')) navigate(pathname.split('/').slice(0,4).join('/') + search, { state: { newBiConversation: true } });
+            else navigate('/chat', { replace: true, state: { startNewSession: true } });
+          }}>
           <PlusCircle size={17} strokeWidth={1.6}/><span>新建对话</span><ArrowRight size={16} strokeWidth={1.5}/>
         </button>
       </div>
@@ -191,15 +184,15 @@ export function Sidebar({
           </div>
           {sessions.length === 0 ? <div className="sidebar-empty">{sessionsLoading ? '加载中…' : '还没有历史对话'}</div>
             : <ul className="sidebar-stack">
-              {sessions.map(s => <li key={s.session_id} className="sidebar-card sidebar-history-card" data-active={pathname === `/chat/${s.session_id}` ? 'true' : undefined}>
-                <button type="button" disabled={streaming} onClick={() => handleOpenSession(s.session_id)}
-                  aria-current={pathname === `/chat/${s.session_id}` ? 'page' : undefined} className="sidebar-history-open">
+              {sessions.map(s => <li key={`${s.source ?? 'agent'}:${s.session_id}`} className="sidebar-card sidebar-history-card" data-active={isActive(s) ? 'true' : undefined}>
+                <button type="button" disabled={streaming} onClick={() => handleOpenSession(s)}
+                  aria-current={isActive(s) ? 'page' : undefined} className="sidebar-history-open">
                   <span className="sidebar-history-icon"><MessageSquare size={15} strokeWidth={1.5}/></span>
                   <span className="sidebar-history-copy"><span className="sidebar-history-title" title={s.title}>{s.title || '新对话'}</span>
-                    <span className="sidebar-hint">{formatRelative(s.updated_at)}{s.message_count > 0 && ` · ${s.message_count} 条`}</span>
+                    <span className="sidebar-hint">{s.source === 'bi' ? `${s.factory_name ?? s.app_name ?? 'BI'} · ` : ''}{formatRelative(s.updated_at)}{s.message_count > 0 && ` · ${s.message_count} 条`}</span>
                   </span>
                 </button>
-                <button type="button" onClick={e => handleDeleteSession(e, s.session_id)} disabled={streaming}
+                <button type="button" onClick={e => handleDeleteSession(e, s)} disabled={streaming}
                   title="删除对话" aria-label={`删除对话：${s.title || '新对话'}`} className="sidebar-icon-button sidebar-delete"><Trash2 size={13} strokeWidth={1.5}/></button>
               </li>)}
             </ul>}
@@ -217,15 +210,7 @@ export function Sidebar({
       </div>
 
       <div className="sidebar-bottom">
-        <div className="sidebar-card sidebar-account">
-          <span className="sidebar-icon"><UserIcon size={17} strokeWidth={1.5}/></span>
-          <div className="sidebar-account-copy"><span title={user?.username}>{user?.username ?? '未登录'}</span>{user && <code title={user.user_id}>{shortId(user.user_id, 12, 8)}</code>}</div>
-          <button type="button" onClick={handleLogout} disabled={!user || loggingOut} title="退出登录" aria-label="退出登录" className="sidebar-icon-button sidebar-logout">
-            <LogOut size={16} strokeWidth={1.5}/>
-          </button>
-        </div>
-        {logoutError && <p role="alert" className="mt-2 text-xs text-rose-600">{logoutError}</p>}
-        <div className="sidebar-status"><span aria-hidden="true"/>LangGraph · FastAPI · Human-in-the-Loop</div>
+        <AccountMenu onOpenProfile={onOpenProfile} />
       </div>
     </aside>
   );

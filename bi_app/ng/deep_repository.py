@@ -15,6 +15,8 @@ from .catalog import identifier
 from .errors import NgError
 from .genealogy import resolve_genealogy, stamp
 from .record_selection import order_sql, rule_description, rule_filter, selection_config
+from .root_cause import target_portrait, collapse_observations, analyze_root_causes
+from .measurement_quality import MeasurementQuality
 from .schemas import FILTER_LABELS, NgFilters, NgParameters
 from .visualization import SHARED_MATERIAL_PROCESSES, interval_bubbles, parameter_record_stats
 
@@ -169,7 +171,8 @@ class NgDeepRepository:
         rule_clauses, rule_values = rule_filter(process)
         clauses.extend(rule_clauses)
         values.extend(rule_values)
-        selected = sorted(required | (columns & {"produce_id", "product_in_code", "technics_step_code", "technics_line_name"}))
+        selected = sorted(required | (columns & {"produce_id", "product_in_code", "technics_step_code", "technics_line_name",
+                                                 "device_name", "shift", "shift_date", "produce_order_code"}) | set(target.get("quality_columns", [])))
         projections = ','.join(identifier(col) for col in selected)
         sql = f"""SELECT {projections}, `_source_row_count` FROM (
     SELECT {projections},
@@ -214,7 +217,7 @@ class NgDeepRepository:
                     by_tenant[row["_key"][0]].update((value, row["_anchor"]) for value in codes)
             process = fields[0]["process"]
             clock, _ = selection_config(process)
-            columns = sorted({"tenant_id", "product_code", clock, *(field["column"] for field in fields)} | (set(process["columns"]) & {"produce_id", "technics_step_code"}))
+            columns = sorted({"tenant_id", "product_code", clock, *(field["column"] for field in fields), *(col for field in fields for col in field.get("quality_columns", []))} | (set(process["columns"]) & {"produce_id", "technics_step_code"}))
             for tenant, lookups in by_tenant.items():
                 lookups = sorted(lookups)
                 for offset in range(0, len(lookups), self.settings.deep_product_batch_size):
@@ -296,15 +299,61 @@ class NgDeepRepository:
 
     def analyze(self, context: dict, target: dict, features: list[dict], *, catalog: dict | None = None, progress=None) -> dict:
         started = time.perf_counter()
+        cleaner = MeasurementQuality.load(self.settings)
+        target = {**target, "quality_columns": sorted(cleaner.columns(target))}
+        features = [{**field, "quality_columns": sorted(cleaner.columns(field))} for field in features]
         if progress:
             progress.emit("target", f"正在读取目标工序：{target['process']['name']}，按shift_date筛选、按end_time选取记录")
         products, target_timing = self.targets(context, target)
+        products = [p for p in products if p['_group'] in {'NG','OK'}]
+        target_timing['analysis_product_count'] = len(products)
         if progress:
             progress.emit("target", f"目标取数完成 · {len(products)}个产品，耗时{target_timing['seconds']:.2f}秒", rows=len(products))
         trace = resolve_genealogy(self, products, target, features, catalog, progress=progress)
         merged, timings, feature_seconds = self.features(products, features, progress=progress)
+        if progress:
+            progress.emit("cleaning", "正在剔除无效测量，按租户、产线及NG/OK分别计算MAD上下限并清洗")
+        target_refs = {p["_key"]: cleaner.apply(target,p,p["_key"],p["_group"])[0] for p in products}
+        events_by_field = {}
+        hard_observations = {}
+        for field in features:
+            table_code = (field["process"]["table"],field["process"]["code"])
+            events_by_field[field["id"]] = {}
+            hard_observations[field["id"]] = []
+            for product in products:
+                if product["_group"] == "excluded":
+                    continue
+                events,strategy = self.trace_events(merged,table_code,product)
+                slots = []
+                for upstream in events:
+                    ref = cleaner.apply(field,upstream,product["_key"],product["_group"])[0] if upstream is not None else None
+                    slots.append((upstream,ref))
+                    if ref is not None and cleaner.value(ref) is not None:
+                        value = cleaner.value(ref)
+                        record = (str(upstream["tenant_id"]),str(upstream["product_code"]),stamp(upstream.get(field["process"]["sort_time_field"])),str(upstream.get("produce_id") or ""),value)
+                        hard_observations[field["id"]].append(((value,product["_key"],product["_group"],record),ref))
+                events_by_field[field["id"]][product["_key"]] = (slots,strategy)
+        cleaner.finalize()
+        snapshot = dict(products=products,target_refs=target_refs,events=events_by_field,hard_observations=hard_observations,
+                        target_timing=target_timing,trace=trace,timings=timings,feature_seconds=feature_seconds)
+        result = self._analyze_snapshot(context,target,features,snapshot,cleaner,True,progress)
+        result["_quality_audit"] = cleaner.audit()
+        result["_quality_rules"] = cleaner.rules.model_dump(mode="json")
+        result["timing"]["total_seconds"] = round(time.perf_counter()-started,4)
+        if progress:
+            progress.emit("completed", f"取数与分析完成 · NG {result['counts']['NG']}，OK {result['counts']['OK']}，总耗时{result['timing']['total_seconds']:.2f}秒")
+        return result
+
+    def _analyze_snapshot(self,context,target,features,snapshot,cleaner,exclude,progress):
+        started = time.perf_counter()
+        products = [{**p,target["column"]:cleaner.value(snapshot["target_refs"][p["_key"]],exclude)} for p in snapshot["products"]]
+        target_timing,trace,timings,feature_seconds = (snapshot[k] for k in ("target_timing","trace","timings","feature_seconds"))
+        if progress:
+            progress.emit("profiling", "正在分析处理后的目标数值分布及设备、白夜班差异")
+        portrait = target_portrait(products,target,box_stats)
         counts = {name: sum(row["_group"] == name for row in products) for name in ("NG", "OK", "excluded")}
         boxes = []
+        evidence_inputs = []
         for field_index, field in enumerate(features, 1):
             if progress:
                 progress.emit("statistics", f"正在统计特征 {field_index}/{len(features)}：{field['process']['name']} / {field['name']}", current=field_index, total=len(features))
@@ -319,7 +368,8 @@ class NgDeepRepository:
                 group = product["_group"]
                 if group == "excluded":
                     continue
-                events, strategy = self.trace_events(merged, table_code, product)
+                slots, strategy = snapshot["events"][field["id"]][product["_key"]]
+                events = [row for row,ref in slots]
                 if strategy:
                     strategies[group][strategy] += 1
                 metrics = strategies[group]
@@ -331,8 +381,8 @@ class NgDeepRepository:
                 if any(row is not None for row in events):
                     matched[group] += 1
                 valid = 0
-                for upstream in events:
-                    value = numeric(upstream.get(field["column"])) if upstream is not None else None
+                for upstream, ref in slots:
+                    value = cleaner.value(ref,exclude) if ref is not None else None
                     if value is not None:
                         grouped[group].append(value)
                         record = (str(upstream["tenant_id"]), str(upstream["product_code"]),
@@ -344,6 +394,7 @@ class NgDeepRepository:
                 metrics["complete_products"] += int(bool(events) and valid == len(events))
                 metrics["partial_products"] += int(0 < valid < len(events))
             record_stats = parameter_record_stats(observations)
+            evidence_inputs.append(collapse_observations(field, observations))
             boxes.append({"field_id": field["id"], "name": field["name"], "process_name": field["process"]["name"],
                           "process_code": field["process"]["code"],
                           "analysis_type": "shared_material" if field["process"]["code"] in SHARED_MATERIAL_PROCESSES else "individual",
@@ -362,13 +413,17 @@ class NgDeepRepository:
             warnings.append(f"{trace['unknown_route_products']}个产品缺少可唯一确定的工艺路线或有效时间，其上游特征未关联，未混用314Ah与588Ah追溯表。")
         if trace["enabled"] and any(box["groups"][group]["trace_missing_products"] for box in boxes for group in ("NG", "OK")):
             warnings.append("部分电芯在目标时点没有可用的追溯关系或工序映射；已计入缺失电芯数，未知上游码数量未按2个或4个补造。")
+        hard_inputs = [collapse_observations(field,[row for row,ref in snapshot["hard_observations"][field["id"]]]) for field in features]
+        root_cause = analyze_root_causes(products, evidence_inputs, boxes, progress, target_column=target["column"],
+                                        model_inputs=hard_inputs if exclude else None,
+                                        model_preprocessor=cleaner.model_preprocessor(snapshot["hard_observations"]) if exclude else None)
         result = {"status": "success", "ng_type": context["row"]["ng_type"], "ng_name": context["row"]["ng_name"],
                 "period": {key: context["parameters"][key] for key in ("start_date", "end_date")},
                 "filters": context["filters"], "row_dimensions": context["row"].get("dimensions", {}),
                 "target": {"id": target["id"], "name": target["name"], "process_name": target["process"]["name"],
                            "date_filter_field": target["process"]["date_filter_field"], "sort_time_field": target["process"]["sort_time_field"], "record_selection": target["process"]["record_selection"],
                            "groups": {group: box_stats([value for row in products if row["_group"] == group and (value := numeric(row.get(target["column"]))) is not None], counts[group]) for group in ("NG", "OK")}},
-                "counts": counts, "boxes": boxes,
+                "counts": counts, "boxes": boxes, "target_profile": portrait, "root_cause": root_cause, "measurement_quality": cleaner.ledger(exclude),
                 "timing": {"total_seconds": round(time.perf_counter() - started, 4), "target_query": target_timing,
                            "feature_wall_seconds": feature_seconds, "feature_queries": timings, "workers": self.settings.deep_query_workers,
                            "trace_wall_seconds": trace["seconds"], "trace_queries": trace["queries"]},
@@ -388,8 +443,6 @@ class NgDeepRepository:
                           "上游不沿用目标日期、班次或设备限制；在目标记录的分区时间之前，按各工序规则在数据库内选取一条记录。",
                           "缺失值不填零；箱体为25%至75%分位数，须为1.5倍IQR范围内实际值；统计使用全部取回记录。"],
                 "warnings": warnings}
-        if progress:
-            progress.emit("completed", f"取数与分析完成 · NG {counts['NG']}，OK {counts['OK']}，总耗时{result['timing']['total_seconds']:.2f}秒")
         return result
 
     @staticmethod

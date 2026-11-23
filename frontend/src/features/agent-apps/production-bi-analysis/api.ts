@@ -1,5 +1,6 @@
 import { API_BASE } from '@/services/api';
 import { getAuthHeaders, handleUnauthorized } from '@/utils/user';
+import { notifyBiHistory } from '@/services/biSessions';
 import type { BiOptionsPage, BiQueryPayload, BiResponse } from './types';
 
 export async function queryProductionBi(
@@ -19,10 +20,12 @@ export async function queryProductionBi(
       body: JSON.stringify(payload),
     });
   } catch (error) {
+    notifyBiHistory(undefined, payload.thread_id);
     if (error instanceof Error && error.name === 'AbortError') throw error;
     throw new Error('网络错误，请确认生产 BI 服务已启动');
   }
 
+  notifyBiHistory(response, payload.thread_id);
   handleUnauthorized(response);
   const body = await response.json().catch(() => null) as
     | (BiResponse & { detail?: string; error?: string })

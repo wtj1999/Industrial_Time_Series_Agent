@@ -15,6 +15,7 @@
     "test:ng-deep-ui": "node scripts/test-ng-deep-browser.mjs",
     "test:ng-deep-stream": "node scripts/test-ng-deep-stream.mjs",
     "test:bi-analysis": "node scripts/test-bi-analysis.mjs",
+    "test:bi-history": "node scripts/test-bi-history-browser.mjs",
     "test:online-metrics": "node scripts/test-online-metrics.mjs",
     "test:vehicle-sales": "node scripts/test-vehicle-sales.mjs"
   },

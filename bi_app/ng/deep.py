@@ -17,6 +17,7 @@ from .deep_repository import NgDeepRepository
 from .deep_schemas import DeepAnalyzeRequest, DeepFieldRecommendation, DeepRecommendRequest
 from .errors import NgError
 from .record_selection import rule_description
+from .rca_validation import RcaValidationStore
 
 
 class DeepStore:
@@ -88,6 +89,7 @@ class NgDeepService:
         self.catalog = NgCatalog(repository, factory_id, settings)
         self.repository = NgDeepRepository(repository, settings)
         self.store = DeepStore(settings.checkpoint_path.with_suffix(".deep.sqlite3"), settings.confirmation_ttl_seconds)
+        self.validations = RcaValidationStore(settings.checkpoint_path.with_suffix(".rca.sqlite3"))
 
     def save_source(self, result, parameters, filters, user_id):
         self.store.put(result["source_id"], "source", user_id, result["thread_id"],
@@ -175,14 +177,15 @@ reason简述具体工艺联系，明确是待数据验证的假设。推荐只�
         plan_id = str(uuid4())
         context = {"parameters": source["parameters"], "filters": source["filters"], "row": row}
         self.store.put(plan_id, "plan", user_id, request.thread_id,
-                       {"context": context, "revision": catalog["revision"], "target_ids": list(target_by_id), "feature_ids": list(feature_by_id)})
+                       {"context": context, "revision": catalog["revision"], "target_ids": list(target_by_id), "feature_ids": list(feature_by_id),
+                        "recommended_target_id":target_id,"mechanism_hypotheses":reasons})
         return {"status": "need_field_confirm", "thread_id": request.thread_id, "plan_id": plan_id,
                 "ng_name": row["ng_name"], "period": {key: source["parameters"][key] for key in ("start_date", "end_date")},
                 "filters": source["filters"], "row_dimensions": row.get("dimensions", {}),
                 "target_id": target_id, "feature_ids": list(reasons),
                 "targets": [self.public(field, {target_id: recommendation.target.reason}) for field in targets],
                 "features": [self.public(field, reasons) for field in features],
-                "message": "已根据参数中文释义推荐字段；工艺联系为待验证假设。目标数据按shift_date班次日期筛选，最新记录按字典中的end_time排序；分容取工步10，化成取每个产品数值最大的工步，其余工序取最新记录。请确认字段后取数对比。"}
+                "message": "已根据参数中文释义推荐字段，工艺联系为待验证假设。确认后先查看目标字段的总体、设备与白夜班分布，再进行候选筛选、多因素验证和证据报告，并可记录现场验证结果。日期按shift_date筛选、记录按end_time及工序规则选取。"}
 
     def analyze(self, request: DeepAnalyzeRequest, user_id: str):
         return self.run_prepared(self.prepare_analysis(request, user_id))
@@ -197,7 +200,8 @@ reason简述具体工艺联系，明确是待数据验证的假设。推荐只�
         if request.target_id not in plan["target_ids"] or any(key not in plan["feature_ids"] for key in feature_ids):
             raise NgError("所选字段不在本轮候选字典中", 422)
         target = fields[request.target_id]
-        features = [fields[key] for key in feature_ids]
+        hypotheses = plan.get("mechanism_hypotheses", {}) if plan.get("recommended_target_id") == request.target_id else {}
+        features = [{**fields[key],"mechanism_hypothesis":hypotheses.get(key)} for key in feature_ids]
         per_process = {}
         for field in features:
             code = field["process"]["code"]
@@ -205,11 +209,20 @@ reason简述具体工艺联系，明确是待数据验证的假设。推荐只�
             if field["process"]["order"] >= target["process"]["order"] or per_process[code] > 3:
                 raise NgError("仅支持目标工序之前的特征，每个工序最多3个", 422)
         return {"context": plan["context"], "target": target, "features": features, "catalog": catalog,
-                "thread_id": request.thread_id, "plan_id": request.plan_id}
+                "thread_id": request.thread_id, "plan_id": request.plan_id, "owner": user_id}
 
     def run_prepared(self, prepared, progress=None):
         options = {"catalog": prepared["catalog"]}
         if progress is not None:
             options["progress"] = progress
-        return {**self.repository.analyze(prepared["context"], prepared["target"], prepared["features"], **options),
+        result = self.repository.analyze(prepared["context"], prepared["target"], prepared["features"], **options)
+        quality_audit = result.pop("_quality_audit",[])
+        quality_rules = result.pop("_quality_rules",None)
+        if "root_cause" in result:
+            analysis_id = str(uuid4())
+            self.validations.create(analysis_id, prepared["owner"], prepared["thread_id"], result["root_cause"],
+                                    {**prepared["context"], "target_id":prepared["target"]["id"], "catalog_revision":prepared["catalog"]["revision"],
+                                     "measurement_quality_rules":quality_rules},quality_audit=quality_audit)
+            result["analysis_id"] = analysis_id
+        return {**result, "factory_id":self.settings.factory_id,
                 "thread_id": prepared["thread_id"], "plan_id": prepared["plan_id"]}

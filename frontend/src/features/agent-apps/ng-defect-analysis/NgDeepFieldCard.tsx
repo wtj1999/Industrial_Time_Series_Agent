@@ -3,8 +3,8 @@ import { ListChecks } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import type { DeepField, DeepPlan } from './deepTypes';
 
-export function NgDeepFieldCard({ plan, disabled, submitted, onSubmit }: {
-  plan: DeepPlan; disabled: boolean; submitted: boolean;
+export function NgDeepFieldCard({ plan, disabled, submitted, expired = false, onSubmit }: {
+  plan: DeepPlan; disabled: boolean; submitted: boolean; expired?: boolean;
   onSubmit: (targetId: string, featureIds: string[]) => void;
 }) {
   const [targetId, setTargetId] = useState(plan.target_id);
@@ -20,11 +20,11 @@ export function NgDeepFieldCard({ plan, disabled, submitted, onSubmit }: {
     (all[field.process_code] ??= { name: field.process_name, fields: [] }).fields.push(field);
     return all;
   }, {});
-  const locked = disabled || submitted;
+  const locked = disabled || submitted || expired;
 
   return <section className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-soft sm:p-5">
     <h3 className="flex items-center gap-2 text-sm font-semibold text-steel-900"><ListChecks className="h-4 w-4 text-emerald-600" />{plan.ng_name} · 确认分析字段</h3>
-    <p className="mt-2 text-xs leading-5 text-steel-500">{plan.period.start_date} 至 {plan.period.end_date}。{plan.message}</p>
+    <p className="mt-2 text-xs leading-5 text-steel-500">{plan.period.start_date} 至 {plan.period.end_date}</p>
     <p className="mt-1 text-xs leading-5 text-steel-600">沿用已确认筛选{Object.values(plan.filters).flat().length ? `：${Object.values(plan.filters).flat().join('、')}` : '：全部'}{Object.keys(plan.row_dimensions).length > 0 && `；当前行：${Object.values(plan.row_dimensions).map((value) => value ?? '空值').join('、')}`}</p>
     <fieldset disabled={locked} className="mt-4">
       <legend className="text-xs font-semibold text-steel-800">目标字段（选择一个）</legend>
@@ -48,6 +48,6 @@ export function NgDeepFieldCard({ plan, disabled, submitted, onSubmit }: {
       </div>)}
       {visible.length === 0 && <p className="py-3 text-xs text-steel-500">没有匹配的上游字段。</p>}
     </fieldset>
-    <div className="mt-4 flex justify-end"><Button size="sm" disabled={locked || !target || selectedFields.length === 0} onClick={() => onSubmit(targetId, selectedFields.map((field) => field.id))}>{submitted ? '已提交分析' : '提交并取数分析'}</Button></div>
+    <div className="mt-4 flex justify-end"><Button size="sm" disabled={locked || !target || selectedFields.length === 0} onClick={() => onSubmit(targetId, selectedFields.map((field) => field.id))}>{expired ? '确认已过期，请重新解析' : submitted ? '已提交分析' : '提交并取数分析'}</Button></div>
   </section>;
 }

@@ -20,6 +20,7 @@ import {
   type ReactNode,
 } from 'react';
 import * as api from '@/services/api';
+import { listBiSessions, deleteBiSession, BI_HISTORY_EVENT } from '@/services/biSessions';
 import {
   genId,
   genSessionId,
@@ -122,7 +123,7 @@ interface SessionContextValue extends SessionState {
   /** Reset the current task server-side. */
   resetTask: () => Promise<void>;
   /** Delete a past conversation thread (sidebar action). */
-  removeSession: (sessionId: string) => Promise<void>;
+  removeSession: (sessionId: string, source?: 'agent' | 'bi') => Promise<void>;
   /** Refresh the conversation history list. */
   refreshSessions: () => Promise<void>;
   /** Abort the current stream (if any). */
@@ -150,6 +151,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   // Invalidates slower history requests when the user switches threads or
   // starts a new conversation before an earlier request has completed.
   const loadRequestRef = useRef(0);
+  const historyRequestRef = useRef(0);
 
   const pushItem = useCallback((item: ConversationItem) => {
     setItems((prev) => [...prev, item]);
@@ -163,16 +165,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const refreshSessions = useCallback(async () => {
+    const requestId = ++historyRequestRef.current;
     setSessionsLoading(true);
     try {
-      const res = await api.listSessions();
-      setSessions(res.sessions ?? []);
+      const [agent, bi] = await Promise.allSettled([api.listSessions(), listBiSessions()]);
+      if (requestId !== historyRequestRef.current) return;
+      setSessions(previous => [
+        ...(agent.status === 'fulfilled' ? agent.value.sessions.map(item => ({ ...item, source: 'agent' as const })) : previous.filter(item => item.source !== 'bi')),
+        ...(bi.status === 'fulfilled' ? bi.value.sessions : previous.filter(item => item.source === 'bi')),
+      ].sort((a,b) => b.updated_at.localeCompare(a.updated_at)));
     } catch {
       // Silently ignore — the sidebar simply stays empty / stale. The
       // listing endpoint is best-effort; main chat flow doesn't depend
       // on it.
     } finally {
-      setSessionsLoading(false);
+      if (requestId === historyRequestRef.current) setSessionsLoading(false);
     }
   }, []);
 
@@ -180,6 +187,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   // threads as soon as they land in the workspace.
   useEffect(() => {
     void refreshSessions();
+    const refresh = () => void refreshSessions();
+    window.addEventListener(BI_HISTORY_EVENT, refresh);
+    return () => { historyRequestRef.current += 1; window.removeEventListener(BI_HISTORY_EVENT, refresh); };
   }, [refreshSessions]);
 
   const initNewSession = useCallback(
@@ -351,17 +361,21 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const removeSession = useCallback(
-    async (targetSessionId: string) => {
+    async (targetSessionId: string, source: 'agent' | 'bi' = 'agent') => {
       try {
-        await api.deleteSession(targetSessionId);
-        setSessions((prev) => prev.filter((s) => s.session_id !== targetSessionId));
+        historyRequestRef.current += 1;
+        if (source === 'bi') await deleteBiSession(targetSessionId); else await api.deleteSession(targetSessionId);
+        historyRequestRef.current += 1;
+        setSessions((prev) => prev.filter((s) => s.session_id !== targetSessionId || (s.source ?? 'agent') !== source));
         // If the user deleted the currently-open thread, reset to a
         // fresh blank session so they don't keep typing into a tombstone.
-        if (targetSessionId === sessionId) {
+        if (source === 'agent' && targetSessionId === sessionId) {
           initNewSession();
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : '删除对话失败');
+      } finally {
+        setSessionsLoading(false);
       }
     },
     [initNewSession, sessionId],

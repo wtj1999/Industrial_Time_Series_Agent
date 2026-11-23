@@ -29,6 +29,8 @@ EXCLUDED_TABLES = {"jinzhai-phase-3": {
     "dwd_qual_scrap_inter_resis_comp_param_pim": "用户确认不是工序宽表",
 }}
 EXCLUDED_PROCESS_CODES = {"jinzhai-phase-3": {"C1102"}}
+# Confirmed process tables whose names do not follow the usual *_param_pim pattern.
+ADDITIONAL_PROCESS_TABLES = {"jinzhai-phase-3": ("dwd_qual_hot_press_pim",)}
 CONFIRMED_CODE_FIELDS = {"jinzhai-phase-3": {
     "dwd_qual_high_temp_rest1_param_pim": {"314ah": "cell_code", "588ah": "cell_code"},
 }}
@@ -147,16 +149,21 @@ class NgCatalog:
     def refresh(self) -> dict:
         # TABLE_COMMENT and COLUMN_COMMENT expose the comments from the actual DDL.
         # Field discovery has no production-date filter and never reads mes.produce_param.
+        extra_tables = ADDITIONAL_PROCESS_TABLES.get(self.factory_id, ())
+        table_filter = "table_name LIKE %s"
+        values = ["dwd_qual_%_param_pim", *extra_tables]
+        if extra_tables:
+            table_filter += f" OR table_name IN ({','.join(['%s'] * len(extra_tables))})"
         with self.repository.connection() as connection, connection.cursor() as cursor:
-            cursor.execute("""SELECT table_name, table_comment
+            cursor.execute(f"""SELECT table_name, table_comment
 FROM information_schema.tables
-WHERE table_schema = 'dwd' AND table_name LIKE 'dwd_qual_%_param_pim'
-ORDER BY table_name""")
+WHERE table_schema = 'dwd' AND ({table_filter})
+ORDER BY table_name""", values)
             tables = list(cursor.fetchall())
-            cursor.execute("""SELECT table_name, column_name, data_type, column_comment, ordinal_position
+            cursor.execute(f"""SELECT table_name, column_name, data_type, column_comment, ordinal_position
 FROM information_schema.columns
-WHERE table_schema = 'dwd' AND table_name LIKE 'dwd_qual_%_param_pim'
-ORDER BY table_name, ordinal_position""")
+WHERE table_schema = 'dwd' AND ({table_filter})
+ORDER BY table_name, ordinal_position""", values)
             columns = list(cursor.fetchall())
             cursor.execute("""SELECT DISTINCT technics_process_code, technics_process_name
 FROM dim.dim_qual_defect_ni ORDER BY technics_process_code, technics_process_name""")

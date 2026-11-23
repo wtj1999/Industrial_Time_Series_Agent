@@ -4,7 +4,9 @@ import os
 from typing import Any, Literal
 
 import httpx
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Response
+from .session_store import get_bi_sessions, scope
+from .sessions import failed_operation
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from .config import get_settings
@@ -109,7 +111,11 @@ async def query_remote(payload: dict) -> dict:
 
 
 @router.post('/query')
-async def query_control_plan(request: ControlPlanRequest, x_user_id: str = Header(alias='X-User-Id')):
+async def query_control_plan(request: ControlPlanRequest, response: Response, x_user_id: str = Header(alias='X-User-Id')):
+    history = get_bi_sessions()
+    choices = None if request.confirm is None else {'option_ids': request.confirm.option_ids if request.confirm.option_ids is not None else [request.confirm.option_id]}
+    operation = history.begin(x_user_id, request.session_id, scope('control-plan-analysis'), query=request.query or '', selection=choices)
+    response.headers['X-BI-Session-ID'] = operation['session_id']
     # The same client session cannot address another account's remote conversation.
     remote_id = 'cp-' + hashlib.sha256(f'{x_user_id}:{request.session_id}'.encode()).hexdigest()
     payload = request.model_dump(exclude_none=True, exclude={'analysis_query'})
@@ -118,11 +124,17 @@ async def query_control_plan(request: ControlPlanRequest, x_user_id: str = Heade
         # Accept the previous browser's single-choice form during rollout, but
         # always speak the new option_ids-only protocol to the remote service.
         payload['confirm'] = {'option_ids': request.confirm.option_ids if request.confirm.option_ids is not None else [request.confirm.option_id]}
-    raw = await query_remote(payload)
+    try:
+        raw = await query_remote(payload)
+    except Exception as exc:
+        failed_operation(history, operation, exc)
+        raise
     try:
         result = ControlPlanResponse.model_validate(raw).model_dump(exclude_none=True)
     except ValidationError as exc:
-        raise HTTPException(502, 'Control Plan 服务响应缺少必要字段或格式不正确') from exc
+        error = HTTPException(502, 'Control Plan 服务响应缺少必要字段或格式不正确')
+        failed_operation(history, operation, error)
+        raise error from exc
     result['session_id'] = result['thread_id'] = request.session_id
     if 'tenant_id' in raw:
         result['tenant_id'] = raw['tenant_id']
@@ -141,4 +153,13 @@ async def query_control_plan(request: ControlPlanRequest, x_user_id: str = Heade
         # Only the documented confirm payload is used; remote URLs/extra fields
         # never decide where the browser sends authenticated requests.
         confirmation.pop('reply_with', None)
-    return await attach_control_plan_analysis(result, x_user_id, request.analysis_query or request.query or '')
+    try:
+        result = await attach_control_plan_analysis(result, x_user_id, request.analysis_query or request.query or '')
+        if result['status'] == 'error':
+            history.fail(operation, '查询未完成：'+result.get('message', 'Control Plan 查询失败'))
+        else:
+            history.finish(operation, result, control_plan=True)
+        return result
+    except Exception as exc:
+        failed_operation(history, operation, exc)
+        raise

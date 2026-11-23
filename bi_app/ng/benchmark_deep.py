@@ -24,6 +24,7 @@ from .schemas import NgFilters, NgParameters
 def run_benchmark(settings, context, target, features, *, worker_counts=(1, 8), repeat=2, catalog=None):
     repository = NgDeepRepository(NgRepository(settings))
     products, target_timing = repository.targets(context, target)
+    products = [p for p in products if p["_group"] in {"NG", "OK"}]
     trace = resolve_genealogy(repository, products, target, features, catalog)
     runs = []
     for iteration in range(repeat):
@@ -42,6 +43,8 @@ def run_benchmark(settings, context, target, features, *, worker_counts=(1, 8), 
             runs.append(run)
             print(json.dumps({key: value for key, value in run.items() if key != "queries"}), flush=True)
     comparison = repository.analyze(context, target, features, catalog=catalog)
+    comparison.pop("_quality_audit",None)
+    comparison.pop("_quality_rules",None)
     return {"generated_at": datetime.now(timezone.utc).isoformat(),
             "factory_id": settings.factory_id, "period": context["parameters"], "filters": context["filters"],
             "ng_type": context["row"]["ng_type"], "target": {"id": target["id"], "name": target["name"]},

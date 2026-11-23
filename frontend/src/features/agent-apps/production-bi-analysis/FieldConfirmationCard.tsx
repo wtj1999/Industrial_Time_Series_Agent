@@ -18,7 +18,15 @@ interface Props {
 export function FieldConfirmationCard({ confirm, disabled, submitted, expired = false, loadOptions, onSubmit }: Props) {
   const fields = confirm.need_confirm ?? [];
   const [selected, setSelected] = useState<Record<string, string[]>>(() => Object.fromEntries(
-    fields.filter((field) => field.selected_values?.length).map((field) => [field.cls, field.selected_values!]),
+    fields.map((field) => {
+      // Reopened submissions show the saved choices, including an empty selection.
+      if (!submitted && Array.isArray(field.default_checked)) {
+        const options = new Set(field.values);
+        const defaults = [...new Set(field.default_checked)].filter((value) => options.has(value));
+        return [field.cls, defaults];
+      }
+      return [field.cls, field.selected_values ?? []];
+    }),
   ));
   const locked = submitted || disabled || expired;
   const [collapsed, setCollapsed] = useState(false);
@@ -92,7 +100,7 @@ export function FieldConfirmationCard({ confirm, disabled, submitted, expired = 
               {confirm.locked_conditions.map((condition) => <span key={condition} className="rounded-full bg-steel-100 px-2.5 py-1 text-[11px] text-steel-700">{condition}</span>)}
             </div>
           )}
-          {expired && <p className="text-xs text-steel-500">已发起新的查询，请使用最新的筛选卡片。</p>}
+          {expired && <p className="text-xs text-steel-500">这张筛选卡片已失效，请重新发起查询或使用最新的筛选卡片。</p>}
 
           {!!confirm.filter_matches?.length && (
             <div className="space-y-2" aria-label="筛选条件匹配结果">
